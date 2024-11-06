@@ -9,30 +9,18 @@
 
 **Продвинутая веб-панель • Построена на основе Xray Core**
 
-[![](https://img.shields.io/github/v/release/mhsanaei/3x-ui.svg)](https://github.com/MHSanaei/3x-ui/releases)
-[![](https://img.shields.io/github/actions/workflow/status/mhsanaei/3x-ui/release.yml.svg)](#)
-[![GO Version](https://img.shields.io/github/go-mod/go-version/mhsanaei/3x-ui.svg)](#)
-[![Downloads](https://img.shields.io/github/downloads/mhsanaei/3x-ui/total.svg)](#)
+[![](https://img.shields.io/github/v/release/serogaq/3x-ui.svg)](https://github.com/MHSanaei/3x-ui/releases)
+[![](https://img.shields.io/github/actions/workflow/status/serogaq/3x-ui/release.yml.svg)](#)
+[![GO Version](https://img.shields.io/github/go-mod/go-version/serogaq/3x-ui.svg)](#)
+[![Downloads](https://img.shields.io/github/downloads/serogaq/3x-ui/total.svg)](#)
 [![License](https://img.shields.io/badge/license-GPL%20V3-blue.svg?longCache=true)](https://www.gnu.org/licenses/gpl-3.0.en.html)
 
 > **Отказ от ответственности:** Этот проект предназначен только для личного обучения и общения. Пожалуйста, не используйте его в незаконных целях и не применяйте в производственной среде.
 
-**Если этот проект оказался полезным для вас, вы можете оценить его, поставив звёздочку** :star2:
-
-<p align="left">
-  <a href="https://buymeacoffee.com/mhsanaei" target="_blank">
-    <img src="./media/buymeacoffe.png" alt="Image">
-  </a>
-</p>
-
-- USDT (TRC20): `TXncxkvhkDWGts487Pjqq1qT9JmwRUz8CC`
-- MATIC (polygon): `0x41C9548675D044c6Bfb425786C765bc37427256A`
-- LTC (Litecoin): `ltc1q2ach7x6d2zq0n4l0t4zl7d7xe2s6fs7a3vspwv`
-
 ## Установка и обновление
 
 ```
-bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh)
+bash <(curl -Ls https://raw.githubusercontent.com/serogaq/3x-ui/master/install.sh)
 ```
 
 ## Установить старую версию (мы не рекомендуем)
@@ -40,7 +28,7 @@ bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.
 Чтобы установить желаемую версию, используйте следующую команду установки. Например, ver `v1.7.9`:
 
 ```
-VERSION=v1.7.9 && <(curl -Ls "https://raw.githubusercontent.com/mhsanaei/3x-ui/$VERSION/install.sh") $VERSION
+VERSION=v1.7.9 && <(curl -Ls "https://raw.githubusercontent.com/serogaq/3x-ui/$VERSION/install.sh") $VERSION
 ```
 
 ## SSL Сертификат
@@ -187,7 +175,7 @@ systemctl restart x-ui
       --network=host \
       --restart=unless-stopped \
       --name 3x-ui \
-      ghcr.io/mhsanaei/3x-ui:latest
+      ghcr.io/serogaq/3x-ui:latest
    ```
 
 4. **Обновление до последней версии:**
@@ -588,7 +576,3 @@ XUI_BIN_FOLDER="bin" XUI_DB_FOLDER="/etc/x-ui" go build main.go
 
 - [Iran v2ray rules](https://github.com/chocolate4u/Iran-v2ray-rules) (License: **GPL-3.0**): _Enhanced v2ray/xray and v2ray/xray-clients routing rules with built-in Iranian domains and a focus on security and adblocking._
 - [Russia v2ray rules](https://github.com/runetfreedom/russia-v2ray-rules-dat) (License: **GPL-3.0**): _Этот репозиторий содержит автоматически обновляемые правила маршрутизации V2Ray на основе данных о заблокированных доменах и адресах в России._
-
-## Число звёзд со временем
-
-[![Stargazers over time](https://starchart.cc/MHSanaei/3x-ui.svg?variant=adaptive)](https://starchart.cc/MHSanaei/3x-ui)
