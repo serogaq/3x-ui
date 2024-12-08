@@ -19,15 +19,6 @@ func NewCheckMemJob() *CheckMemJob {
 	return new(CheckMemJob)
 }
 
-func (j *CheckMemJob) round(num float64) int {
-    return int(num + math.Copysign(0.5, num))
-}
-
-func (j *CheckMemJob) toFixed(num float64, precision int) float64 {
-    output := math.Pow(10, float64(precision))
-    return float64(j.round(num * output)) / output
-}
-
 // Here run is a interface method of Job interface
 func (j *CheckMemJob) Run() {
 	threshold, _ := j.settingService.GetTgMem()
@@ -39,7 +30,7 @@ func (j *CheckMemJob) Run() {
 	} else {
 		currentMem := memInfo.Used
 		totalMem := memInfo.Total
-		percentMem := int(j.toFixed(currentMem / totalMem * 100, 0))
+		percentMem := int(currentMem / totalMem * 100)
 
 		if percentMem >= int(threshold) && bool(needRestart) == true {
 			msg := j.tgbotService.I18nBot("tgbot.messages.memThreshold", "Threshold=="+strconv.Itoa(threshold))
