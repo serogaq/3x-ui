@@ -283,6 +283,10 @@
 "trafficDiffDesc" = "Get notified about traffic cap when reaching this threshold. (unit: GB)"
 "tgNotifyCpu" = "CPU Load Notification"
 "tgNotifyCpuDesc" = "Get notified if CPU load exceeds this threshold. (unit: %)"
+"tgNotifyMem" = "RAM Load Notification"
+"tgNotifyMemDesc" = "Get notified if RAM load exceeds this threshold. (unit: %)"
+"restartAtMemThreshold" = "Restart Xray when the threshold is reached"
+"restartAtMemThresholdDesc" = "When the RAM utilization reaches the specified percentage, Xray will be restarted"
 "timeZone" = "Time Zone"
 "timeZoneDesc" = "Scheduled tasks will run based on this time zone."
 "subSettings" = "Subscription"
@@ -515,6 +519,7 @@
 
 [tgbot.messages]
 "cpuThreshold" = "🔴 CPU Load {{ .Percent }}% exceeds the threshold of {{ .Threshold }}%"
+"memThreshold" = "🔴 RAM Threshold\r\nThe {{ .Threshold }}% threshold has been reached. Reboot performed"
 "selectUserFailed" = "❌ Error in user selection!"
 "userSaved" = "✅ Telegram User saved."
 "loginSuccess" = "✅ Logged in to the panel successfully.\r\n"

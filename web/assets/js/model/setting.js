@@ -22,6 +22,8 @@ class AllSetting {
         this.tgBotBackup = false;
         this.tgBotLoginNotify = true;
         this.tgCpu = 80;
+        this.tgMem = 80;
+        this.restartAtMemThreshold = false;
         this.tgLang = "en-US";
         this.xrayTemplateConfig = "";
         this.secretEnable = false;

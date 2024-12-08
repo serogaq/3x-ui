@@ -283,6 +283,10 @@
 "trafficDiffDesc" = "达到此阈值时，将收到有关流量耗尽的通知（单位：GB）"
 "tgNotifyCpu" = "CPU 负载通知阈值"
 "tgNotifyCpuDesc" = "CPU 负载超过此阈值时，将收到通知（单位：%）"
+"tgNotifyMem" = "RAM Load Notification"
+"tgNotifyMemDesc" = "Get notified if RAM load exceeds this threshold. (unit: %)"
+"restartAtMemThreshold" = "Restart Xray when the threshold is reached"
+"restartAtMemThresholdDesc" = "When the RAM utilization reaches the specified percentage, Xray will be restarted"
 "timeZone" = "时区"
 "timeZoneDesc" = "定时任务将按照该时区的时间运行"
 "subSettings" = "订阅设置"
@@ -515,6 +519,7 @@
 
 [tgbot.messages]
 "cpuThreshold" = "🔴 CPU 使用率为 {{ .Percent }}%，超过阈值 {{ .Threshold }}%"
+"memThreshold" = "🔴 RAM Threshold\r\nThe {{ .Threshold }}% threshold has been reached. Reboot performed"
 "selectUserFailed" = "❌ 用户选择错误！"
 "userSaved" = "✅ 电报用户已保存。"
 "loginSuccess" = "✅ 成功登录到面板。\r\n"

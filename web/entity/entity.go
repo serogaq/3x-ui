@@ -36,7 +36,9 @@ type AllSetting struct {
 	TgBotBackup                 bool   `json:"tgBotBackup" form:"tgBotBackup"`
 	TgBotLoginNotify            bool   `json:"tgBotLoginNotify" form:"tgBotLoginNotify"`
 	TgCpu                       int    `json:"tgCpu" form:"tgCpu"`
-	TgLang                      string `json:"tgLang" form:"tgLang"`
+	TgMem                       int    `json:"tgMem" form:"tgMem"`
+	RestartAtMemThreshold       bool   `json:"restartAtMemThreshold" form:"restartAtMemThreshold"`
+    TgLang                      string `json:"tgLang" form:"tgLang"`
 	TimeLocation                string `json:"timeLocation" form:"timeLocation"`
 	SecretEnable                bool   `json:"secretEnable" form:"secretEnable"`
 	SubEnable                   bool   `json:"subEnable" form:"subEnable"`
@@ -100,6 +102,10 @@ func (s *AllSetting) CheckValid() error {
 		if err != nil {
 			return common.NewErrorf("cert file <%v> or key file <%v> invalid: %v", s.SubCertFile, s.SubKeyFile, err)
 		}
+	}
+
+	if s.TgMem < 0 || s.TgMem > 100 {
+		return common.NewError("TgMem must be in the range 0-100, passed ", s.TgMem)
 	}
 
 	if !strings.HasPrefix(s.WebBasePath, "/") {
