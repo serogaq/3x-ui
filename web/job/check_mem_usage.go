@@ -2,9 +2,9 @@ package job
 
 import (
 	"strconv"
-	"time"
 
 	"x-ui/web/service"
+	"x-ui/logger"
 
 	"github.com/shirou/gopsutil/v4/mem"
 )
@@ -36,7 +36,7 @@ func (j *CheckMemJob) Run() {
 			msg := j.tgbotService.I18nBot("tgbot.messages.memThreshold", "Threshold=="+strconv.Itoa(threshold))
 			j.tgbotService.SendMsgToTgbotAdmins(msg)
 
-			err := a.serverService.RestartXrayService()
+			err := j.serverService.RestartXrayService()
 			if err != nil {
 				logger.Error("CheckMemJob -- RestartXrayService failed:", err)
 			} else {
