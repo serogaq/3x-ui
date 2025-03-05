@@ -151,7 +151,7 @@ systemctl restart x-ui
 2. 克隆仓库：
 
    ```sh
-   git clone https://github.com/MHSanaei/3x-ui.git
+   git clone https://github.com/serogaq/3x-ui.git
    cd 3x-ui
    ```
 

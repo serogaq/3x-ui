@@ -823,13 +823,11 @@ delete_ports() {
     if [[ $choice -eq 1 ]]; then
         # Deleting by rule numbers
         read -p "Enter the rule numbers you want to delete (1, 2, etc.): " rule_numbers
-
         # Validate the input
         if ! [[ $rule_numbers =~ ^([0-9]+)(,[0-9]+)*$ ]]; then
             echo "Error: Invalid input. Please enter a comma-separated list of rule numbers." >&2
             exit 1
         fi
-
         # Split numbers into an array
         IFS=',' read -ra RULE_NUMBERS <<<"$rule_numbers"
         for rule_number in "${RULE_NUMBERS[@]}"; do
@@ -1793,8 +1791,8 @@ show_menu() {
 │  ${green}24.${plain} Update Geo Files                          │
 │  ${green}25.${plain} Speedtest by Ookla                        │
 │────────────────────────────────────────────────│
-│  ${green}99.${plain} Build Docker Image (tar archive)
-│
+│  ${green}99.${plain} Build Docker Image (tar archive)          │
+│                                                                │
 ╚────────────────────────────────────────────────╝
 "
     show_status

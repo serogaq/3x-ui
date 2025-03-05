@@ -154,7 +154,7 @@ systemctl restart x-ui
 2. **Clone the Project Repository:**
 
    ```sh
-   git clone https://github.com/MHSanaei/3x-ui.git
+   git clone https://github.com/serogaq/3x-ui.git
    cd 3x-ui
    ```
 
