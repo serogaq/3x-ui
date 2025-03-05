@@ -9,7 +9,7 @@
 
 **一个更好的面板 • 基于Xray Core构建**
 
-[![](https://img.shields.io/github/v/release/serogaq/3x-ui.svg)](https://github.com/MHSanaei/3x-ui/releases)
+[![](https://img.shields.io/github/v/release/serogaq/3x-ui.svg)](https://github.com/serogaq/3x-ui/releases)
 [![](https://img.shields.io/github/actions/workflow/status/serogaq/3x-ui/release.yml.svg)](#)
 [![GO Version](https://img.shields.io/github/go-mod/go-version/serogaq/3x-ui.svg)](#)
 [![Downloads](https://img.shields.io/github/downloads/serogaq/3x-ui/total.svg)](#)
@@ -151,7 +151,7 @@ systemctl restart x-ui
 2. 克隆仓库：
 
    ```sh
-   git clone https://github.com/MHSanaei/3x-ui.git
+   git clone https://github.com/serogaq/3x-ui.git
    cd 3x-ui
    ```
 
