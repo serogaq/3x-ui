@@ -1791,8 +1791,8 @@ show_menu() {
 │  ${green}24.${plain} Update Geo Files                          │
 │  ${green}25.${plain} Speedtest by Ookla                        │
 │────────────────────────────────────────────────│
-│  ${green}99.${plain} Build Docker Image (tar archive)                
-│
+│  ${green}99.${plain} Build Docker Image (tar archive)          │
+│                                                                │
 ╚────────────────────────────────────────────────╝
 "
     show_status
