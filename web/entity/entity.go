@@ -38,7 +38,7 @@ type AllSetting struct {
 	TgCpu                       int    `json:"tgCpu" form:"tgCpu"`
 	TgMem                       int    `json:"tgMem" form:"tgMem"`
 	RestartAtMemThreshold       bool   `json:"restartAtMemThreshold" form:"restartAtMemThreshold"`
-    TgLang                      string `json:"tgLang" form:"tgLang"`
+	TgLang                      string `json:"tgLang" form:"tgLang"`
 	TimeLocation                string `json:"timeLocation" form:"timeLocation"`
 	SecretEnable                bool   `json:"secretEnable" form:"secretEnable"`
 	SubEnable                   bool   `json:"subEnable" form:"subEnable"`
