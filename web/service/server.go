@@ -164,8 +164,6 @@ func getXuiLatestVersion() string {
 }
 
 func (s *ServerService) GetStatus(lastStatus *Status) *Status {
-	cache := global.GetCache().Memory()
-
 	now := time.Now()
 	status := &Status{
 		T: now,

@@ -315,8 +315,6 @@
 "tgNotifyCpuDesc" = "Receba notificações se a carga da CPU ultrapassar esse limite. (unidade: %)"
 "tgNotifyMem" = "RAM Load Notification"
 "tgNotifyMemDesc" = "Get notified if RAM load exceeds this threshold. (unit: %)"
-"restartAtMemThreshold" = "Restart Xray when the threshold is reached"
-"restartAtMemThresholdDesc" = "When the RAM utilization reaches the specified percentage, Xray will be restarted"
 "timeZone" = "Fuso Horário"
 "timeZoneDesc" = "As tarefas agendadas serão executadas com base nesse fuso horário."
 "subSettings" = "Assinatura"

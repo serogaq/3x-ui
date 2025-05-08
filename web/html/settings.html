@@ -183,7 +183,7 @@
           type: "field",
           outboundTag: "direct",
           domain: [
-            "geosite:category-ir"
+            "geosite:category-ru"
           ]
         },
         {
@@ -191,7 +191,7 @@
           outboundTag: "direct",
           ip: [
             "geoip:private",
-            "geoip:ir"
+            "geoip:ru"
           ]
         },
       ],
@@ -262,6 +262,7 @@
       },
       async updateAllSetting() {
         this.loading(true);
+        this.allSetting.restartAtMemThreshold = this.allSetting.tgMem > 0;
         const msg = await HttpUtil.post("/panel/setting/update", this.allSetting);
         this.loading(false);
         if (msg.success) {

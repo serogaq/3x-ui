@@ -64,6 +64,13 @@
                 <a-input-number :min="0" :min="100" v-model="allSetting.tgCpu" :style="{ width: '100%' }"></a-switch>
             </template>
         </a-setting-list-item>
+        <a-setting-list-item paddings="small">
+            <template #title>{{ i18n "pages.settings.tgNotifyMem" }}</template>
+            <template #description>{{ i18n "pages.settings.tgNotifyMemDesc" }}</template>
+            <template #control>
+                <a-input-number :min="0" :min="100" v-model="allSetting.tgMem" :style="{ width: '100%' }"></a-switch>
+            </template>
+        </a-setting-list-item>
     </a-collapse-panel>
     <a-collapse-panel key="3" header='{{ i18n "pages.settings.proxyAndServer" }}'>
         <a-setting-list-item paddings="small">

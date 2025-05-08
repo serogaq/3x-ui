@@ -315,8 +315,6 @@
 "tgNotifyCpuDesc" = "CPU yükü bu eşik seviyesini aşarsa bildirim alın. (birim: %)"
 "tgNotifyMem" = "RAM Load Notification"
 "tgNotifyMemDesc" = "Get notified if RAM load exceeds this threshold. (unit: %)"
-"restartAtMemThreshold" = "Restart Xray when the threshold is reached"
-"restartAtMemThresholdDesc" = "When the RAM utilization reaches the specified percentage, Xray will be restarted"
 "timeZone" = "Saat Dilimi"
 "timeZoneDesc" = "Planlanmış görevler bu saat dilimine göre çalışacaktır."
 "subSettings" = "Abonelik"

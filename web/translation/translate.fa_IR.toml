@@ -315,8 +315,6 @@
 "tgNotifyCpuDesc" = "(اگر بار روی پردازنده ازاین آستانه فراتر رفت، برای شما پیام ارسال می‌شود. (واحد: درصد"
 "tgNotifyMem" = "RAM Load Notification"
 "tgNotifyMemDesc" = "Get notified if RAM load exceeds this threshold. (unit: %)"
-"restartAtMemThreshold" = "Restart Xray when the threshold is reached"
-"restartAtMemThresholdDesc" = "When the RAM utilization reaches the specified percentage, Xray will be restarted"
 "timeZone" = "منطقه زمانی"
 "timeZoneDesc" = "وظایف برنامه ریزی شده بر اساس این منطقه‌زمانی اجرا می‌شود"
 "subSettings" = "سابسکریپشن"

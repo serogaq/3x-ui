@@ -315,8 +315,6 @@
 "tgNotifyCpuDesc" = "CPU 负载超过此阈值时，将收到通知（单位：%）"
 "tgNotifyMem" = "RAM Load Notification"
 "tgNotifyMemDesc" = "Get notified if RAM load exceeds this threshold. (unit: %)"
-"restartAtMemThreshold" = "Restart Xray when the threshold is reached"
-"restartAtMemThresholdDesc" = "When the RAM utilization reaches the specified percentage, Xray will be restarted"
 "timeZone" = "时区"
 "timeZoneDesc" = "定时任务将按照该时区的时间运行"
 "subSettings" = "订阅设置"

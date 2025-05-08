@@ -315,8 +315,6 @@
 "tgNotifyCpuDesc" = "Отримувати сповіщення, якщо навантаження ЦП перевищує це порогове значення. (одиниця: %)"
 "tgNotifyMem" = "RAM Load Notification"
 "tgNotifyMemDesc" = "Get notified if RAM load exceeds this threshold. (unit: %)"
-"restartAtMemThreshold" = "Restart Xray when the threshold is reached"
-"restartAtMemThresholdDesc" = "When the RAM utilization reaches the specified percentage, Xray will be restarted"
 "timeZone" = "Часовий пояс"
 "timeZoneDesc" = "Заплановані завдання виконуватимуться на основі цього часового поясу."
 "subSettings" = "Підписка"

@@ -315,8 +315,6 @@
 "tgNotifyCpuDesc" = "Dapatkan notifikasi jika beban CPU melebihi ambang batas ini. (unit: %)"
 "tgNotifyMem" = "RAM Load Notification"
 "tgNotifyMemDesc" = "Get notified if RAM load exceeds this threshold. (unit: %)"
-"restartAtMemThreshold" = "Restart Xray when the threshold is reached"
-"restartAtMemThresholdDesc" = "When the RAM utilization reaches the specified percentage, Xray will be restarted"
 "timeZone" = "Zone Waktu"
 "timeZoneDesc" = "Tugas terjadwal akan berjalan berdasarkan zona waktu ini."
 "subSettings" = "Langganan"
