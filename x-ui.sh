@@ -1761,7 +1761,6 @@ show_menu() {
 │  ${green}25.${plain} Speedtest by Ookla                        │
 │────────────────────────────────────────────────│
 │  ${green}99.${plain} Build Docker Image (tar archive)          │
-│                                                                │
 ╚────────────────────────────────────────────────╝
 "
     show_status
