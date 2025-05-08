@@ -11,6 +11,7 @@ import (
 )
 
 type SUBController struct {
+	subTitle       string
 	subPath        string
 	subJsonPath    string
 	subEncrypt     bool
@@ -32,9 +33,11 @@ func NewSUBController(
 	jsonNoise string,
 	jsonMux string,
 	jsonRules string,
+	subTitle string,
 ) *SUBController {
 	sub := NewSubService(showInfo, rModel)
 	a := &SUBController{
+		subTitle:       subTitle,
 		subPath:        subPath,
 		subJsonPath:    jsonPath,
 		subEncrypt:     encrypt,
@@ -101,7 +104,7 @@ func (a *SUBController) subs(c *gin.Context) {
 		// Add headers
 		c.Writer.Header().Set("Subscription-Userinfo", header)
 		c.Writer.Header().Set("Profile-Update-Interval", a.updateInterval)
-		c.Writer.Header().Set("Profile-Title", profileTitle)
+		c.Writer.Header().Set("Profile-Title", "base64:" + base64.StdEncoding.EncodeToString([]byte(a.subTitle)))
 		c.Writer.Header().Set("Support-Url", supportUrl)
 		c.Writer.Header().Set("Profile-Web-Page-Url", profileWebPageUrl)
 		if announceText != "" {
@@ -157,7 +160,7 @@ func (a *SUBController) subJsons(c *gin.Context) {
 		// Add headers
 		c.Writer.Header().Set("Subscription-Userinfo", header)
 		c.Writer.Header().Set("Profile-Update-Interval", a.updateInterval)
-		c.Writer.Header().Set("Profile-Title", profileTitle)
+		c.Writer.Header().Set("Profile-Title", "base64:" + base64.StdEncoding.EncodeToString([]byte(a.subTitle)))
 		c.Writer.Header().Set("Support-Url", supportUrl)
 		c.Writer.Header().Set("Profile-Web-Page-Url", profileWebPageUrl)
 		if announceText != "" {

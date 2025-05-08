@@ -97,6 +97,8 @@ type Release struct {
 type ServerService struct {
 	xrayService    XrayService
 	inboundService InboundService
+	cachedIPv4     string
+	cachedIPv6     string
 }
 
 func extractValue(body string, key string) string {
@@ -169,6 +171,7 @@ func (s *ServerService) GetStatus(lastStatus *Status) *Status {
 		T: now,
 	}
 
+	// CPU stats
 	percents, err := cpu.Percent(0, false)
 	if err != nil {
 		logger.Warning("get cpu percent failed:", err)
@@ -182,22 +185,17 @@ func (s *ServerService) GetStatus(lastStatus *Status) *Status {
 	}
 
 	status.LogicalPro = runtime.NumCPU()
-	if p != nil && p.IsRunning() {
-		status.AppStats.Uptime = p.GetUptime()
-	} else {
-		status.AppStats.Uptime = 0
-	}
 
 	cpuInfos, err := cpu.Info()
 	if err != nil {
 		logger.Warning("get cpu info failed:", err)
 	} else if len(cpuInfos) > 0 {
-		cpuInfo := cpuInfos[0]
-		status.CpuSpeedMhz = cpuInfo.Mhz // setting CPU speed in MHz
+		status.CpuSpeedMhz = cpuInfos[0].Mhz
 	} else {
 		logger.Warning("could not find cpu info")
 	}
 
+	// Uptime
 	upTime, err := host.Uptime()
 	if err != nil {
 		logger.Warning("get uptime failed:", err)
@@ -205,6 +203,7 @@ func (s *ServerService) GetStatus(lastStatus *Status) *Status {
 		status.Uptime = upTime
 	}
 
+	// Memory stats
 	memInfo, err := mem.VirtualMemory()
 	if err != nil {
 		logger.Warning("get virtual memory failed:", err)
@@ -221,14 +220,16 @@ func (s *ServerService) GetStatus(lastStatus *Status) *Status {
 		status.Swap.Total = swapInfo.Total
 	}
 
-	distInfo, err := disk.Usage("/")
+	// Disk stats
+	diskInfo, err := disk.Usage("/")
 	if err != nil {
-		logger.Warning("get dist usage failed:", err)
+		logger.Warning("get disk usage failed:", err)
 	} else {
-		status.Disk.Current = distInfo.Used
-		status.Disk.Total = distInfo.Total
+		status.Disk.Current = diskInfo.Used
+		status.Disk.Total = diskInfo.Total
 	}
 
+	// Load averages
 	avgState, err := load.Avg()
 	if err != nil {
 		logger.Warning("get load avg failed:", err)
@@ -236,6 +237,7 @@ func (s *ServerService) GetStatus(lastStatus *Status) *Status {
 		status.Loads = []float64{avgState.Load1, avgState.Load5, avgState.Load15}
 	}
 
+	// Network stats
 	ioStats, err := net.IOCounters(false)
 	if err != nil {
 		logger.Warning("get io counters failed:", err)
@@ -256,6 +258,7 @@ func (s *ServerService) GetStatus(lastStatus *Status) *Status {
 		logger.Warning("can not find io counters")
 	}
 
+	// TCP/UDP connections
 	status.TcpCount, err = sys.GetTCPCount()
 	if err != nil {
 		logger.Warning("get tcp connections failed:", err)
@@ -266,28 +269,15 @@ func (s *ServerService) GetStatus(lastStatus *Status) *Status {
 		logger.Warning("get udp connections failed:", err)
 	}
 
-	if data, found := cache.Get("xui_public_ipv4"); found {
-		if ipv4, ok := data.(string); ok {
-			status.PublicIP.IPv4 = string(ipv4)
-		} else {
-			status.PublicIP.IPv4 = "N/A"
-		}
-	} else {
-		status.PublicIP.IPv4 = getPublicIP("https://api.ipify.org")
-		cache.Set("xui_public_ipv4", status.PublicIP.IPv4, 720*time.Hour)
+	// IP fetching with caching
+	if s.cachedIPv4 == "" || s.cachedIPv6 == "" {
+		s.cachedIPv4 = getPublicIP("https://api.ipify.org")
+		s.cachedIPv6 = getPublicIP("https://api6.ipify.org")
 	}
+	status.PublicIP.IPv4 = s.cachedIPv4
+	status.PublicIP.IPv6 = s.cachedIPv6
 
-	if data, found := cache.Get("xui_public_ipv6"); found {
-		if ipv6, ok := data.(string); ok {
-			status.PublicIP.IPv6 = string(ipv6)
-		} else {
-			status.PublicIP.IPv6 = "N/A"
-		}
-	} else {
-		status.PublicIP.IPv6 = getPublicIP("https://api6.ipify.org")
-		cache.Set("xui_public_ipv6", status.PublicIP.IPv6, 720*time.Hour)
-	}
-
+	// Xray status
 	if s.xrayService.IsXrayRunning() {
 		status.Xray.State = Running
 		status.Xray.ErrorMsg = ""
@@ -301,12 +291,11 @@ func (s *ServerService) GetStatus(lastStatus *Status) *Status {
 		status.Xray.ErrorMsg = s.xrayService.GetXrayResult()
 	}
 	status.Xray.Version = s.xrayService.GetXrayVersion()
-
 	status.XUI.LatestVersion = getXuiLatestVersion()
 
+	// Application stats
 	var rtm runtime.MemStats
 	runtime.ReadMemStats(&rtm)
-
 	status.AppStats.Mem = rtm.Sys
 	status.AppStats.Threads = uint32(runtime.NumGoroutine())
 	if p != nil && p.IsRunning() {
@@ -563,7 +552,7 @@ func (s *ServerService) GetErrorLog(count string, grep string) []string {
 	}
 }
 
-func (s *ServerService) GetConfigJson() (interface{}, error) {
+func (s *ServerService) GetConfigJson() (any, error) {
 	config, err := s.xrayService.GetXrayConfig()
 	if err != nil {
 		return nil, err
@@ -573,7 +562,7 @@ func (s *ServerService) GetConfigJson() (interface{}, error) {
 		return nil, err
 	}
 
-	var jsonData interface{}
+	var jsonData any
 	err = json.Unmarshal(contents, &jsonData)
 	if err != nil {
 		return nil, err
@@ -704,7 +693,67 @@ func (s *ServerService) ImportDB(file multipart.File) error {
 	return nil
 }
 
-func (s *ServerService) GetNewX25519Cert() (interface{}, error) {
+func (s *ServerService) UpdateGeofile(fileName string) error {
+    files := []struct {
+        URL      string
+        FileName string
+    }{
+        {"https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geoip.dat", "geoip.dat"},
+        {"https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat", "geosite.dat"},
+        {"https://github.com/chocolate4u/Iran-v2ray-rules/releases/latest/download/geoip.dat", "geoip_IR.dat"},
+        {"https://github.com/chocolate4u/Iran-v2ray-rules/releases/latest/download/geosite.dat", "geosite_IR.dat"},
+        {"https://github.com/runetfreedom/russia-v2ray-rules-dat/releases/latest/download/geoip.dat", "geoip_RU.dat"},
+        {"https://github.com/runetfreedom/russia-v2ray-rules-dat/releases/latest/download/geosite.dat", "geosite_RU.dat"},
+    }
+
+    downloadFile := func(url, destPath string) error {
+        resp, err := http.Get(url)
+        if err != nil {
+            return common.NewErrorf("Failed to download Geofile from %s: %v", url, err)
+        }
+        defer resp.Body.Close()
+
+        file, err := os.Create(destPath)
+        if err != nil {
+            return common.NewErrorf("Failed to create Geofile %s: %v", destPath, err)
+        }
+        defer file.Close()
+
+        _, err = io.Copy(file, resp.Body)
+        if err != nil {
+            return common.NewErrorf("Failed to save Geofile %s: %v", destPath, err)
+        }
+
+        return nil
+    }
+
+    var fileURL string
+    for _, file := range files {
+        if file.FileName == fileName {
+            fileURL = file.URL
+            break
+        }
+    }
+
+    if fileURL == "" {
+        return common.NewErrorf("File '%s' not found in the list of Geofiles", fileName)
+    }
+
+    destPath := fmt.Sprintf("%s/%s", config.GetBinFolderPath(), fileName)
+
+    if err := downloadFile(fileURL, destPath); err != nil {
+        return common.NewErrorf("Error downloading Geofile '%s': %v", fileName, err)
+    }
+
+    err := s.RestartXrayService()
+    if err != nil {
+        return common.NewErrorf("Updated Geofile '%s' but Failed to start Xray: %v", fileName, err)
+    }
+
+    return nil
+}
+
+func (s *ServerService) GetNewX25519Cert() (any, error) {
 	// Run the command
 	cmd := exec.Command(xray.GetBinaryPath(), "x25519")
 	var out bytes.Buffer
@@ -722,7 +771,7 @@ func (s *ServerService) GetNewX25519Cert() (interface{}, error) {
 	privateKey := strings.TrimSpace(privateKeyLine[1])
 	publicKey := strings.TrimSpace(publicKeyLine[1])
 
-	keyPair := map[string]interface{}{
+	keyPair := map[string]any{
 		"privateKey": privateKey,
 		"publicKey":  publicKey,
 	}
