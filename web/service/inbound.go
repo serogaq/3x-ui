@@ -3,6 +3,7 @@ package service
 import (
 	"encoding/json"
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -413,13 +414,13 @@ func (s *InboundService) AddInboundClient(data *model.Inbound) (bool, error) {
 		return false, err
 	}
 
-	var settings map[string]interface{}
+	var settings map[string]any
 	err = json.Unmarshal([]byte(data.Settings), &settings)
 	if err != nil {
 		return false, err
 	}
 
-	interfaceClients := settings["clients"].([]interface{})
+	interfaceClients := settings["clients"].([]any)
 	existEmail, err := s.checkEmailsExistForClients(clients)
 	if err != nil {
 		return false, err
@@ -450,13 +451,13 @@ func (s *InboundService) AddInboundClient(data *model.Inbound) (bool, error) {
 		}
 	}
 
-	var oldSettings map[string]interface{}
+	var oldSettings map[string]any
 	err = json.Unmarshal([]byte(oldInbound.Settings), &oldSettings)
 	if err != nil {
 		return false, err
 	}
 
-	oldClients := oldSettings["clients"].([]interface{})
+	oldClients := oldSettings["clients"].([]any)
 	oldClients = append(oldClients, interfaceClients...)
 
 	oldSettings["clients"] = oldClients
@@ -489,7 +490,7 @@ func (s *InboundService) AddInboundClient(data *model.Inbound) (bool, error) {
 				if oldInbound.Protocol == "shadowsocks" {
 					cipher = oldSettings["method"].(string)
 				}
-				err1 := s.xrayApi.AddUser(string(oldInbound.Protocol), oldInbound.Tag, map[string]interface{}{
+				err1 := s.xrayApi.AddUser(string(oldInbound.Protocol), oldInbound.Tag, map[string]any{
 					"email":    client.Email,
 					"id":       client.ID,
 					"security": client.Security,
@@ -519,7 +520,7 @@ func (s *InboundService) DelInboundClient(inboundId int, clientId string) (bool,
 		logger.Error("Load Old Data Error")
 		return false, err
 	}
-	var settings map[string]interface{}
+	var settings map[string]any
 	err = json.Unmarshal([]byte(oldInbound.Settings), &settings)
 	if err != nil {
 		return false, err
@@ -534,11 +535,11 @@ func (s *InboundService) DelInboundClient(inboundId int, clientId string) (bool,
 		client_key = "email"
 	}
 
-	interfaceClients := settings["clients"].([]interface{})
-	var newClients []interface{}
+	interfaceClients := settings["clients"].([]any)
+	var newClients []any
 	needApiDel := false
 	for _, client := range interfaceClients {
-		c := client.(map[string]interface{})
+		c := client.(map[string]any)
 		c_id := c[client_key].(string)
 		if c_id == clientId {
 			email, _ = c["email"].(string)
@@ -607,13 +608,13 @@ func (s *InboundService) UpdateInboundClient(data *model.Inbound, clientId strin
 		return false, err
 	}
 
-	var settings map[string]interface{}
+	var settings map[string]any
 	err = json.Unmarshal([]byte(data.Settings), &settings)
 	if err != nil {
 		return false, err
 	}
 
-	interfaceClients := settings["clients"].([]interface{})
+	interfaceClients := settings["clients"].([]any)
 
 	oldInbound, err := s.GetInbound(data.Id)
 	if err != nil {
@@ -662,12 +663,12 @@ func (s *InboundService) UpdateInboundClient(data *model.Inbound, clientId strin
 		}
 	}
 
-	var oldSettings map[string]interface{}
+	var oldSettings map[string]any
 	err = json.Unmarshal([]byte(oldInbound.Settings), &oldSettings)
 	if err != nil {
 		return false, err
 	}
-	settingsClients := oldSettings["clients"].([]interface{})
+	settingsClients := oldSettings["clients"].([]any)
 	settingsClients[clientIndex] = interfaceClients[0]
 	oldSettings["clients"] = settingsClients
 
@@ -732,7 +733,7 @@ func (s *InboundService) UpdateInboundClient(data *model.Inbound, clientId strin
 			if oldInbound.Protocol == "shadowsocks" {
 				cipher = oldSettings["method"].(string)
 			}
-			err1 := s.xrayApi.AddUser(string(oldInbound.Protocol), oldInbound.Tag, map[string]interface{}{
+			err1 := s.xrayApi.AddUser(string(oldInbound.Protocol), oldInbound.Tag, map[string]any{
 				"email":    clients[0].Email,
 				"id":       clients[0].ID,
 				"security": clients[0].Security,
@@ -809,7 +810,7 @@ func (s *InboundService) addInboundTraffic(tx *gorm.DB, traffics []*xray.Traffic
 	for _, traffic := range traffics {
 		if traffic.IsInbound {
 			err = tx.Model(&model.Inbound{}).Where("tag = ?", traffic.Tag).
-				Updates(map[string]interface{}{
+				Updates(map[string]any{
 					"up":   gorm.Expr("up + ?", traffic.Up),
 					"down": gorm.Expr("down + ?", traffic.Down),
 				}).Error
@@ -893,13 +894,13 @@ func (s *InboundService) adjustTraffics(tx *gorm.DB, dbClientTraffics []*xray.Cl
 			return nil, err
 		}
 		for inbound_index := range inbounds {
-			settings := map[string]interface{}{}
+			settings := map[string]any{}
 			json.Unmarshal([]byte(inbounds[inbound_index].Settings), &settings)
-			clients, ok := settings["clients"].([]interface{})
+			clients, ok := settings["clients"].([]any)
 			if ok {
-				var newClients []interface{}
+				var newClients []any
 				for client_index := range clients {
-					c := clients[client_index].(map[string]interface{})
+					c := clients[client_index].(map[string]any)
 					for traffic_index := range dbClientTraffics {
 						if dbClientTraffics[traffic_index].ExpiryTime < 0 && c["email"] == dbClientTraffics[traffic_index].Email {
 							oldExpiryTime := c["expiryTime"].(float64)
@@ -909,7 +910,7 @@ func (s *InboundService) adjustTraffics(tx *gorm.DB, dbClientTraffics []*xray.Cl
 							break
 						}
 					}
-					newClients = append(newClients, interface{}(c))
+					newClients = append(newClients, any(c))
 				}
 				settings["clients"] = newClients
 				modifiedSettings, err := json.MarshalIndent(settings, "", "  ")
@@ -951,7 +952,7 @@ func (s *InboundService) autoRenewClients(tx *gorm.DB) (bool, int64, error) {
 	var clientsToAdd []struct {
 		protocol string
 		tag      string
-		client   map[string]interface{}
+		client   map[string]any
 	}
 
 	for _, traffic := range traffics {
@@ -962,11 +963,11 @@ func (s *InboundService) autoRenewClients(tx *gorm.DB) (bool, int64, error) {
 		return false, 0, err
 	}
 	for inbound_index := range inbounds {
-		settings := map[string]interface{}{}
+		settings := map[string]any{}
 		json.Unmarshal([]byte(inbounds[inbound_index].Settings), &settings)
-		clients := settings["clients"].([]interface{})
+		clients := settings["clients"].([]any)
 		for client_index := range clients {
-			c := clients[client_index].(map[string]interface{})
+			c := clients[client_index].(map[string]any)
 			for traffic_index, traffic := range traffics {
 				if traffic.Email == c["email"].(string) {
 					newExpiryTime := traffic.ExpiryTime
@@ -983,14 +984,14 @@ func (s *InboundService) autoRenewClients(tx *gorm.DB) (bool, int64, error) {
 							struct {
 								protocol string
 								tag      string
-								client   map[string]interface{}
+								client   map[string]any
 							}{
 								protocol: string(inbounds[inbound_index].Protocol),
 								tag:      inbounds[inbound_index].Tag,
 								client:   c,
 							})
 					}
-					clients[client_index] = interface{}(c)
+					clients[client_index] = any(c)
 					break
 				}
 			}
@@ -1147,7 +1148,7 @@ func (s *InboundService) AddClientStat(tx *gorm.DB, inboundId int, client *model
 func (s *InboundService) UpdateClientStat(tx *gorm.DB, email string, client *model.Client) error {
 	result := tx.Model(xray.ClientTraffic{}).
 		Where("email = ?", email).
-		Updates(map[string]interface{}{
+		Updates(map[string]any{
 			"enable":      true,
 			"email":       client.Email,
 			"total":       client.TotalGB,
@@ -1258,18 +1259,18 @@ func (s *InboundService) SetClientTelegramUserID(trafficId int, tgId int64) (boo
 		return false, common.NewError("Client Not Found For Email:", clientEmail)
 	}
 
-	var settings map[string]interface{}
+	var settings map[string]any
 	err = json.Unmarshal([]byte(inbound.Settings), &settings)
 	if err != nil {
 		return false, err
 	}
-	clients := settings["clients"].([]interface{})
-	var newClients []interface{}
+	clients := settings["clients"].([]any)
+	var newClients []any
 	for client_index := range clients {
-		c := clients[client_index].(map[string]interface{})
+		c := clients[client_index].(map[string]any)
 		if c["email"] == clientEmail {
 			c["tgId"] = tgId
-			newClients = append(newClients, interface{}(c))
+			newClients = append(newClients, any(c))
 		}
 	}
 	settings["clients"] = newClients
@@ -1343,18 +1344,18 @@ func (s *InboundService) ToggleClientEnableByEmail(clientEmail string) (bool, bo
 		return false, false, common.NewError("Client Not Found For Email:", clientEmail)
 	}
 
-	var settings map[string]interface{}
+	var settings map[string]any
 	err = json.Unmarshal([]byte(inbound.Settings), &settings)
 	if err != nil {
 		return false, false, err
 	}
-	clients := settings["clients"].([]interface{})
-	var newClients []interface{}
+	clients := settings["clients"].([]any)
+	var newClients []any
 	for client_index := range clients {
-		c := clients[client_index].(map[string]interface{})
+		c := clients[client_index].(map[string]any)
 		if c["email"] == clientEmail {
 			c["enable"] = !clientOldEnabled
-			newClients = append(newClients, interface{}(c))
+			newClients = append(newClients, any(c))
 		}
 	}
 	settings["clients"] = newClients
@@ -1405,18 +1406,18 @@ func (s *InboundService) ResetClientIpLimitByEmail(clientEmail string, count int
 		return false, common.NewError("Client Not Found For Email:", clientEmail)
 	}
 
-	var settings map[string]interface{}
+	var settings map[string]any
 	err = json.Unmarshal([]byte(inbound.Settings), &settings)
 	if err != nil {
 		return false, err
 	}
-	clients := settings["clients"].([]interface{})
-	var newClients []interface{}
+	clients := settings["clients"].([]any)
+	var newClients []any
 	for client_index := range clients {
-		c := clients[client_index].(map[string]interface{})
+		c := clients[client_index].(map[string]any)
 		if c["email"] == clientEmail {
 			c["limitIp"] = count
-			newClients = append(newClients, interface{}(c))
+			newClients = append(newClients, any(c))
 		}
 	}
 	settings["clients"] = newClients
@@ -1462,18 +1463,18 @@ func (s *InboundService) ResetClientExpiryTimeByEmail(clientEmail string, expiry
 		return false, common.NewError("Client Not Found For Email:", clientEmail)
 	}
 
-	var settings map[string]interface{}
+	var settings map[string]any
 	err = json.Unmarshal([]byte(inbound.Settings), &settings)
 	if err != nil {
 		return false, err
 	}
-	clients := settings["clients"].([]interface{})
-	var newClients []interface{}
+	clients := settings["clients"].([]any)
+	var newClients []any
 	for client_index := range clients {
-		c := clients[client_index].(map[string]interface{})
+		c := clients[client_index].(map[string]any)
 		if c["email"] == clientEmail {
 			c["expiryTime"] = expiry_time
-			newClients = append(newClients, interface{}(c))
+			newClients = append(newClients, any(c))
 		}
 	}
 	settings["clients"] = newClients
@@ -1522,18 +1523,18 @@ func (s *InboundService) ResetClientTrafficLimitByEmail(clientEmail string, tota
 		return false, common.NewError("Client Not Found For Email:", clientEmail)
 	}
 
-	var settings map[string]interface{}
+	var settings map[string]any
 	err = json.Unmarshal([]byte(inbound.Settings), &settings)
 	if err != nil {
 		return false, err
 	}
-	clients := settings["clients"].([]interface{})
-	var newClients []interface{}
+	clients := settings["clients"].([]any)
+	var newClients []any
 	for client_index := range clients {
-		c := clients[client_index].(map[string]interface{})
+		c := clients[client_index].(map[string]any)
 		if c["email"] == clientEmail {
 			c["totalGB"] = totalGB * 1024 * 1024 * 1024
-			newClients = append(newClients, interface{}(c))
+			newClients = append(newClients, any(c))
 		}
 	}
 	settings["clients"] = newClients
@@ -1551,7 +1552,7 @@ func (s *InboundService) ResetClientTrafficByEmail(clientEmail string) error {
 
 	result := db.Model(xray.ClientTraffic{}).
 		Where("email = ?", clientEmail).
-		Updates(map[string]interface{}{"enable": true, "up": 0, "down": 0})
+		Updates(map[string]any{"enable": true, "up": 0, "down": 0})
 
 	err := result.Error
 	if err != nil {
@@ -1582,14 +1583,14 @@ func (s *InboundService) ResetClientTraffic(id int, clientEmail string) (bool, e
 				s.xrayApi.Init(p.GetAPIPort())
 				cipher := ""
 				if string(inbound.Protocol) == "shadowsocks" {
-					var oldSettings map[string]interface{}
+					var oldSettings map[string]any
 					err = json.Unmarshal([]byte(inbound.Settings), &oldSettings)
 					if err != nil {
 						return false, err
 					}
 					cipher = oldSettings["method"].(string)
 				}
-				err1 := s.xrayApi.AddUser(string(inbound.Protocol), inbound.Tag, map[string]interface{}{
+				err1 := s.xrayApi.AddUser(string(inbound.Protocol), inbound.Tag, map[string]any{
 					"email":    client.Email,
 					"id":       client.ID,
 					"security": client.Security,
@@ -1634,7 +1635,7 @@ func (s *InboundService) ResetAllClientTraffics(id int) error {
 
 	result := db.Model(xray.ClientTraffic{}).
 		Where(whereText, id).
-		Updates(map[string]interface{}{"enable": true, "up": 0, "down": 0})
+		Updates(map[string]any{"enable": true, "up": 0, "down": 0})
 
 	err := result.Error
 	return err
@@ -1645,7 +1646,7 @@ func (s *InboundService) ResetAllTraffics() error {
 
 	result := db.Model(model.Inbound{}).
 		Where("user_id > ?", 0).
-		Updates(map[string]interface{}{"up": 0, "down": 0})
+		Updates(map[string]any{"up": 0, "down": 0})
 
 	err := result.Error
 	return err
@@ -1681,17 +1682,17 @@ func (s *InboundService) DelDepletedClients(id int) (err error) {
 		if err != nil {
 			return err
 		}
-		var oldSettings map[string]interface{}
+		var oldSettings map[string]any
 		err = json.Unmarshal([]byte(oldInbound.Settings), &oldSettings)
 		if err != nil {
 			return err
 		}
 
-		oldClients := oldSettings["clients"].([]interface{})
-		var newClients []interface{}
+		oldClients := oldSettings["clients"].([]any)
+		var newClients []any
 		for _, client := range oldClients {
 			deplete := false
-			c := client.(map[string]interface{})
+			c := client.(map[string]any)
 			for _, email := range emails {
 				if email == c["email"].(string) {
 					deplete = true
@@ -1919,14 +1920,14 @@ func (s *InboundService) MigrationRequirements() {
 		return
 	}
 	for inbound_index := range inbounds {
-		settings := map[string]interface{}{}
+		settings := map[string]any{}
 		json.Unmarshal([]byte(inbounds[inbound_index].Settings), &settings)
-		clients, ok := settings["clients"].([]interface{})
+		clients, ok := settings["clients"].([]any)
 		if ok {
 			// Fix Client configuration problems
-			var newClients []interface{}
+			var newClients []any
 			for client_index := range clients {
-				c := clients[client_index].(map[string]interface{})
+				c := clients[client_index].(map[string]any)
 
 				// Add email='' if it is not exists
 				if _, ok := c["email"]; !ok {
@@ -1935,7 +1936,7 @@ func (s *InboundService) MigrationRequirements() {
 
 				// Convert string tgId to int64
 				if _, ok := c["tgId"]; ok {
-					var tgId interface{} = c["tgId"]
+					var tgId any = c["tgId"]
 					if tgIdStr, ok2 := tgId.(string); ok2 {
 						tgIdInt64, err := strconv.ParseInt(strings.ReplaceAll(tgIdStr, " ", ""), 10, 64)
 						if err == nil {
@@ -1950,7 +1951,7 @@ func (s *InboundService) MigrationRequirements() {
 						c["flow"] = ""
 					}
 				}
-				newClients = append(newClients, interface{}(c))
+				newClients = append(newClients, any(c))
 			}
 			settings["clients"] = newClients
 			modifiedSettings, err := json.MarshalIndent(settings, "", "  ")
@@ -1997,14 +1998,14 @@ func (s *InboundService) MigrationRequirements() {
 	}
 
 	for _, ep := range externalProxy {
-		var reverses interface{}
-		var stream map[string]interface{}
+		var reverses any
+		var stream map[string]any
 		json.Unmarshal(ep.StreamSettings, &stream)
-		if tlsSettings, ok := stream["tlsSettings"].(map[string]interface{}); ok {
-			if settings, ok := tlsSettings["settings"].(map[string]interface{}); ok {
-				if domains, ok := settings["domains"].([]interface{}); ok {
+		if tlsSettings, ok := stream["tlsSettings"].(map[string]any); ok {
+			if settings, ok := tlsSettings["settings"].(map[string]any); ok {
+				if domains, ok := settings["domains"].([]any); ok {
 					for _, domain := range domains {
-						if domainMap, ok := domain.(map[string]interface{}); ok {
+						if domainMap, ok := domain.(map[string]any); ok {
 							domainMap["forceTls"] = "same"
 							domainMap["port"] = ep.Port
 							domainMap["dest"] = domainMap["domain"].(string)
@@ -2036,4 +2037,38 @@ func (s *InboundService) MigrateDB() {
 
 func (s *InboundService) GetOnlineClients() []string {
 	return p.GetOnlineClients()
+}
+
+func (s *InboundService) FilterAndSortClientEmails(emails []string) ([]string, []string, error) {
+	db := database.GetDB()
+
+	// Step 1: Get ClientTraffic records for emails in the input list
+	var clients []xray.ClientTraffic
+	err := db.Where("email IN ?", emails).Find(&clients).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return nil, nil, err
+	}
+
+	// Step 2: Sort clients by (Up + Down) descending
+	sort.Slice(clients, func(i, j int) bool {
+		return (clients[i].Up + clients[i].Down) > (clients[j].Up + clients[j].Down)
+	})
+
+	// Step 3: Extract sorted valid emails and track found ones
+	validEmails := make([]string, 0, len(clients))
+	found := make(map[string]bool)
+	for _, client := range clients {
+		validEmails = append(validEmails, client.Email)
+		found[client.Email] = true
+	}
+
+	// Step 4: Identify emails that were not found in the database
+	extraEmails := make([]string, 0)
+	for _, email := range emails {
+		if !found[email] {
+			extraEmails = append(extraEmails, email)
+		}
+	}
+
+	return validEmails, extraEmails, nil
 }

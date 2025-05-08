@@ -1,20 +1,42 @@
-.idea
-.vscode
-.cache
+# Ignore editor and IDE settings
+.idea/
+.vscode/
+.cache/
 .sync*
 .env
+.env*
+
+# Ignore log files
+*.log
+
+# Ignore temporary files
+tmp/
 *.tar
 *.tar.gz
-*.log
-access.log
-error.log
-tmp
-main
+
+# Ignore build and distribution directories
 db/
 cert/
 backup/
 bin/
 dist/
 release/
+node_modules/
+
+# Ignore compiled binaries
+main
+
+# Ignore script and executable files
 /release.sh
 /x-ui
+
+# Ignore OS specific files
+.DS_Store
+Thumbs.db
+
+# Ignore Go specific files
+*.exe
+*.exe~
+
+# Ignore Docker specific files
+docker-compose.override.yml
