@@ -40,7 +40,8 @@ type AllSetting struct {
 	RestartAtMemThreshold       bool   `json:"restartAtMemThreshold" form:"restartAtMemThreshold"`
 	TgLang                      string `json:"tgLang" form:"tgLang"`
 	TimeLocation                string `json:"timeLocation" form:"timeLocation"`
-	SecretEnable                bool   `json:"secretEnable" form:"secretEnable"`
+	TwoFactorEnable				bool   `json:"twoFactorEnable" form:"twoFactorEnable"`
+	TwoFactorToken				string `json:"twoFactorToken" form:"twoFactorToken"`
 	SubEnable                   bool   `json:"subEnable" form:"subEnable"`
 	SubTitle                    string `json:"subTitle" form:"subTitle"`
 	SubListen                   string `json:"subListen" form:"subListen"`
