@@ -75,8 +75,6 @@ func (a *SUBController) subs(c *gin.Context) {
 			host = c.Request.Host
 		}
 	}
-	var profileTitle string
-	profileTitle = subId
 	var supportUrl string
 	supportUrl = os.Getenv("XUI_SUB_SUPPORT_URL")
 	if supportUrl == "" {
@@ -132,8 +130,6 @@ func (a *SUBController) subJsons(c *gin.Context) {
 			host = c.Request.Host
 		}
 	}
-	var profileTitle string
-	profileTitle = subId
 	var supportUrl string
 	supportUrl = os.Getenv("XUI_SUB_SUPPORT_URL")
 	if supportUrl == "" {
