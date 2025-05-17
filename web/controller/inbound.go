@@ -109,6 +109,10 @@ func (a *InboundController) addInbound(c *gin.Context) {
 
 	needRestart := false
 	inbound, needRestart, err = a.inboundService.AddInbound(inbound)
+	if err != nil {
+		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
+		return
+	}
 	jsonMsgObj(c, I18nWeb(c, "pages.inbounds.toasts.inboundCreateSuccess"), inbound, err)
 	if err == nil && needRestart {
 		a.xrayService.SetToNeedRestart()
@@ -123,6 +127,10 @@ func (a *InboundController) delInbound(c *gin.Context) {
 	}
 	needRestart := true
 	needRestart, err = a.inboundService.DelInbound(id)
+	if err != nil {
+		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
+		return
+	}
 	jsonMsgObj(c, I18nWeb(c, "pages.inbounds.toasts.inboundDeleteSuccess"), id, err)
 	if err == nil && needRestart {
 		a.xrayService.SetToNeedRestart()
@@ -145,6 +153,10 @@ func (a *InboundController) updateInbound(c *gin.Context) {
 	}
 	needRestart := true
 	inbound, needRestart, err = a.inboundService.UpdateInbound(inbound)
+	if err != nil {
+		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
+		return
+	}
 	jsonMsgObj(c, I18nWeb(c, "pages.inbounds.toasts.inboundUpdateSuccess"), inbound, err)
 	if err == nil && needRestart {
 		a.xrayService.SetToNeedRestart()

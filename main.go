@@ -14,11 +14,12 @@ import (
 	"x-ui/caching"
 	"x-ui/logger"
 	"x-ui/sub"
+	"x-ui/util/crypto"
 	"x-ui/web"
 	"x-ui/web/global"
 	"x-ui/web/service"
-	"x-ui/util/crypto"
 
+	"github.com/joho/godotenv"
 	"github.com/op/go-logging"
 )
 
@@ -39,6 +40,8 @@ func runWebServer() {
 	default:
 		log.Fatalf("Unknown log level: %v", config.GetLogLevel())
 	}
+
+	godotenv.Load()
 
 	err := database.InitDB(config.GetDBPath())
 	if err != nil {
