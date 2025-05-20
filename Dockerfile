@@ -126,8 +126,6 @@ EOF
 sed -i "1s/^/[INCLUDES]\n\nbefore = iptables-common.conf\n\n/" /etc/fail2ban/action.d/iptables.conf
 EOT
 
-RUN mkdir -p /etc/x-ui && touch /etc/x-ui/announce.txt
-
 RUN chmod +x \
   /app/DockerEntrypoint.sh \
   /app/x-ui \
