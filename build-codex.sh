@@ -20,3 +20,8 @@ cp xui-build x-ui/
 cp x-ui.service x-ui/
 cp x-ui.sh x-ui/
 mv x-ui/xui-build x-ui/x-ui
+chmod +x x-ui/x-ui
+
+cd x-ui
+./x-ui run > /dev/null 2>&1 &
+sleep 3 && echo "Http Status Code: $(curl -s -o /dev/null -w %{http_code} http://localhost:2053)"

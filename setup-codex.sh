@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-DEBIAN_FRONTEND=noninteractive
 TARGETARCH=${TARGETARCH:-$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')}
 BUILD_WITH_ANTIZAPRET=${BUILD_WITH_ANTIZAPRET:-0}
+export DEBIAN_FRONTEND=noninteractive
 
-apt-get update
+apt update
+apt install curl wget unzip
 
 if [ "$TARGETARCH" == "arm64" ]; then
   apt install gcc-aarch64-linux-gnu
@@ -13,8 +14,7 @@ fi
 
 go mod download
 
-mkdir x-ui
-mkdir x-ui/bin
+mkdir -p x-ui/bin
 cd x-ui/bin
 
 # Download dependencies
