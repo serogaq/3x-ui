@@ -23,5 +23,5 @@ mv x-ui/xui-build x-ui/x-ui
 chmod +x x-ui/x-ui
 
 cd x-ui
-./x-ui run > /dev/null 2>&1 &
-sleep 3 && echo "Http Status Code: $(curl -s -o /dev/null -w %{http_code} http://localhost:2053)"
+touch x-ui.log && ./x-ui run > x-ui.log 2>&1 &
+sleep 2 && echo "Http Status Code: $(curl -s -o /dev/null -w %{http_code} http://localhost:2053)" && cat x-ui.log
