@@ -343,6 +343,8 @@
 "subEnableDesc" = "Abonelik hizmetini etkinleştirir."
 "subTitle" = "Abonelik Başlığı"
 "subTitleDesc" = "VPN istemcisinde gösterilen başlık"
+"subAnnounce" = "Announce"
+"subAnnounceDesc" = "Announce başlığında gösterilen metin"
 "subListen" = "Dinleme IP"
 "subListenDesc" = "Abonelik hizmeti için IP adresi. (tüm IP'leri dinlemek için boş bırakın)"
 "subPort" = "Dinleme Portu"

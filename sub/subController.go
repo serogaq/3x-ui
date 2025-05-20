@@ -3,15 +3,15 @@ package sub
 import (
 	"encoding/base64"
 	"net"
-	"strings"
-	"io/ioutil"
 	"os"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
 
 type SUBController struct {
 	subTitle       string
+	subAnnounce    string
 	subPath        string
 	subJsonPath    string
 	subEncrypt     bool
@@ -34,10 +34,12 @@ func NewSUBController(
 	jsonMux string,
 	jsonRules string,
 	subTitle string,
+	subAnnounce string,
 ) *SUBController {
 	sub := NewSubService(showInfo, rModel)
 	a := &SUBController{
 		subTitle:       subTitle,
+		subAnnounce:    subAnnounce,
 		subPath:        subPath,
 		subJsonPath:    jsonPath,
 		subEncrypt:     encrypt,
@@ -85,8 +87,7 @@ func (a *SUBController) subs(c *gin.Context) {
 	if profileWebPageUrl == "" {
 		profileWebPageUrl = os.Getenv("XUI_SUB_DOMAIN")
 	}
-	var announceText string
-	announceText = getAnnounceText()
+	announceText := a.subAnnounce
 	subs, header, err := a.subService.GetSubs(subId, host)
 	if err != nil || len(subs) == 0 {
 		c.String(400, "Error!")
@@ -99,7 +100,7 @@ func (a *SUBController) subs(c *gin.Context) {
 		// Add headers
 		c.Writer.Header().Set("Subscription-Userinfo", header)
 		c.Writer.Header().Set("Profile-Update-Interval", a.updateInterval)
-		c.Writer.Header().Set("Profile-Title", "base64:" + base64.StdEncoding.EncodeToString([]byte(a.subTitle)))
+		c.Writer.Header().Set("Profile-Title", "base64:"+base64.StdEncoding.EncodeToString([]byte(a.subTitle)))
 		c.Writer.Header().Set("Support-Url", supportUrl)
 		c.Writer.Header().Set("Profile-Web-Page-Url", profileWebPageUrl)
 		if announceText != "" {
@@ -140,8 +141,7 @@ func (a *SUBController) subJsons(c *gin.Context) {
 	if profileWebPageUrl == "" {
 		profileWebPageUrl = os.Getenv("XUI_SUB_DOMAIN")
 	}
-	var announceText string
-	announceText = getAnnounceText()
+	announceText := a.subAnnounce
 	jsonSub, header, err := a.subJsonService.GetJson(subId, host)
 	if err != nil || len(jsonSub) == 0 {
 		c.String(400, "Error!")
@@ -150,7 +150,7 @@ func (a *SUBController) subJsons(c *gin.Context) {
 		// Add headers
 		c.Writer.Header().Set("Subscription-Userinfo", header)
 		c.Writer.Header().Set("Profile-Update-Interval", a.updateInterval)
-		c.Writer.Header().Set("Profile-Title", "base64:" + base64.StdEncoding.EncodeToString([]byte(a.subTitle)))
+		c.Writer.Header().Set("Profile-Title", "base64:"+base64.StdEncoding.EncodeToString([]byte(a.subTitle)))
 		c.Writer.Header().Set("Support-Url", supportUrl)
 		c.Writer.Header().Set("Profile-Web-Page-Url", profileWebPageUrl)
 		if announceText != "" {
@@ -159,21 +159,6 @@ func (a *SUBController) subJsons(c *gin.Context) {
 
 		c.String(200, jsonSub)
 	}
-}
-
-func getAnnounceText() (string) {
-	announceFilePath := "/etc/x-ui/announce.txt"
-	_, err := os.Stat(announceFilePath)
-    if os.IsNotExist(err) {
-        return ""
-    }
-
-    content, err := ioutil.ReadFile(announceFilePath)
-    if err != nil {
-        return ""
-    }
-
-    return string(content)
 }
 
 func getHostFromXFH(s string) (string, error) {
