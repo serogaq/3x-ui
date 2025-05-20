@@ -345,6 +345,8 @@
 "subEnableDesc" = "啟用訂閱服務功能"
 "subTitle" = "訂閱標題"
 "subTitleDesc" = "在VPN客戶端中顯示的標題"
+"subAnnounce" = "訂閱公告"
+"subAnnounceDesc" = "在VPN客戶端中顯示的公告"
 "subListen" = "監聽 IP"
 "subListenDesc" = "訂閱服務監聽的 IP 地址（留空表示監聽所有 IP）"
 "subPort" = "監聽埠"

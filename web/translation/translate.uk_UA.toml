@@ -343,6 +343,8 @@
 "subEnableDesc" = "Вмикає службу підписки."
 "subTitle" = "Назва Підписки"
 "subTitleDesc" = "Назва, яка відображається у VPN-клієнті"
+"subAnnounce" = "Announce"
+"subAnnounceDesc" = "Текст, що відображається в заголовку Announce"
 "subListen" = "Слухати IP"
 "subListenDesc" = "IP-адреса для служби підписки. (залиште порожнім, щоб слухати всі IP-адреси)"
 "subPort" = "Слухати порт"

@@ -343,6 +343,8 @@
 "subEnableDesc" = "Mengaktifkan layanan langganan."
 "subTitle" = "Judul Langganan"
 "subTitleDesc" = "Judul yang ditampilkan di klien VPN"
+"subAnnounce" = "Announce"
+"subAnnounceDesc" = "Teks yang ditampilkan di header Announce"
 "subListen" = "IP Pendengar"
 "subListenDesc" = "Alamat IP untuk layanan langganan. (biarkan kosong untuk mendengarkan semua IP)"
 "subPort" = "Port Pendengar"

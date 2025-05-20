@@ -343,6 +343,8 @@
 "subEnableDesc" = "Tính năng gói đăng ký với cấu hình riêng"
 "subTitle" = "Tiêu đề Đăng ký"
 "subTitleDesc" = "Tiêu đề hiển thị trong ứng dụng VPN"
+"subAnnounce" = "Announce"
+"subAnnounceDesc" = "Nội dung hiển thị trong header Announce"
 "subListen" = "Listening IP"
 "subListenDesc" = "Mặc định để trống để nghe tất cả các IP"
 "subPort" = "Cổng gói đăng ký"

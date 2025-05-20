@@ -343,6 +343,8 @@
 "subEnableDesc" = "Función de suscripción con configuración separada."
 "subTitle" = "Título de la Suscripción"
 "subTitleDesc" = "Título mostrado en el cliente de VPN"
+"subAnnounce" = "Announce"
+"subAnnounceDesc" = "Texto mostrado en la cabecera Announce"
 "subListen" = "Listening IP"
 "subListenDesc" = "Dejar en blanco por defecto para monitorear todas las IPs."
 "subPort" = "Puerto de Suscripción"

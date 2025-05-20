@@ -343,6 +343,8 @@
 "subEnableDesc" = "サブスクリプションサービス機能を有効にする"
 "subTitle" = "サブスクリプションタイトル"
 "subTitleDesc" = "VPNクライアントに表示されるタイトル"
+"subAnnounce" = "Announce"
+"subAnnounceDesc" = "Announceヘッダーに表示されるテキスト"
 "subListen" = "監視IP"
 "subListenDesc" = "サブスクリプションサービスが監視するIPアドレス（空白にするとすべてのIPを監視）"
 "subPort" = "監視ポート"

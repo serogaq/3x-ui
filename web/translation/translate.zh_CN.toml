@@ -343,6 +343,8 @@
 "subEnableDesc" = "启用订阅服务功能"
 "subTitle" = "订阅标题"
 "subTitleDesc" = "在VPN客户端中显示的标题"
+"subAnnounce" = "订阅公告"
+"subAnnounceDesc" = "在VPN客户端中显示的公告"
 "subListen" = "监听 IP"
 "subListenDesc" = "订阅服务监听的 IP 地址（留空表示监听所有 IP）"
 "subPort" = "监听端口"

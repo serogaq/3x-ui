@@ -343,6 +343,8 @@
 "subEnableDesc" = "سرویس سابسکریپشن‌ را فعال‌می‌کند"
 "subTitle" = "عنوان اشتراک"
 "subTitleDesc" = "عنوان نمایش داده شده در کلاینت VPN"
+"subAnnounce" = "Announce"
+"subAnnounceDesc" = "متن نمایش داده شده در هدر Announce"
 "subListen" = "آدرس آی‌پی"
 "subListenDesc" = "آدرس آی‌پی برای سرویس سابسکریپشن. برای گوش دادن به‌تمام آی‌پی‌ها خالی‌بگذارید"
 "subPort" = "پورت"
