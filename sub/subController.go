@@ -3,19 +3,20 @@ package sub
 import (
 	"encoding/base64"
 	"net"
-	"os"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 )
 
 type SUBController struct {
-	subTitle       string
-	subAnnounce    string
-	subPath        string
-	subJsonPath    string
-	subEncrypt     bool
-	updateInterval string
+	subTitle             string
+	subAnnounce          string
+	subSupportUrl        string
+	subProfileWebPageUrl string
+	subPath              string
+	subJsonPath          string
+	subEncrypt           bool
+	updateInterval       string
 
 	subService     *SubService
 	subJsonService *SubJsonService
@@ -35,15 +36,19 @@ func NewSUBController(
 	jsonRules string,
 	subTitle string,
 	subAnnounce string,
+	subSupportUrl string,
+	subProfileWebPageUrl string,
 ) *SUBController {
 	sub := NewSubService(showInfo, rModel)
 	a := &SUBController{
-		subTitle:       subTitle,
-		subAnnounce:    subAnnounce,
-		subPath:        subPath,
-		subJsonPath:    jsonPath,
-		subEncrypt:     encrypt,
-		updateInterval: update,
+		subTitle:             subTitle,
+		subAnnounce:          subAnnounce,
+		subSupportUrl:        subSupportUrl,
+		subProfileWebPageUrl: subProfileWebPageUrl,
+		subPath:              subPath,
+		subJsonPath:          jsonPath,
+		subEncrypt:           encrypt,
+		updateInterval:       update,
 
 		subService:     sub,
 		subJsonService: NewSubJsonService(jsonFragment, jsonNoise, jsonMux, jsonRules, sub),
@@ -77,16 +82,8 @@ func (a *SUBController) subs(c *gin.Context) {
 			host = c.Request.Host
 		}
 	}
-	var supportUrl string
-	supportUrl = os.Getenv("XUI_SUB_SUPPORT_URL")
-	if supportUrl == "" {
-		supportUrl = os.Getenv("XUI_SUB_DOMAIN")
-	}
-	var profileWebPageUrl string
-	profileWebPageUrl = os.Getenv("XUI_SUB_PROFILE_WEB_PAGE_URL")
-	if profileWebPageUrl == "" {
-		profileWebPageUrl = os.Getenv("XUI_SUB_DOMAIN")
-	}
+	supportUrl := a.subSupportUrl
+	profileWebPageUrl := a.subProfileWebPageUrl
 	announceText := a.subAnnounce
 	subs, header, err := a.subService.GetSubs(subId, host)
 	if err != nil || len(subs) == 0 {
@@ -101,8 +98,12 @@ func (a *SUBController) subs(c *gin.Context) {
 		c.Writer.Header().Set("Subscription-Userinfo", header)
 		c.Writer.Header().Set("Profile-Update-Interval", a.updateInterval)
 		c.Writer.Header().Set("Profile-Title", "base64:"+base64.StdEncoding.EncodeToString([]byte(a.subTitle)))
-		c.Writer.Header().Set("Support-Url", supportUrl)
-		c.Writer.Header().Set("Profile-Web-Page-Url", profileWebPageUrl)
+		if supportUrl != "" {
+			c.Writer.Header().Set("Support-Url", supportUrl)
+		}
+		if profileWebPageUrl != "" {
+			c.Writer.Header().Set("Profile-Web-Page-Url", profileWebPageUrl)
+		}
 		if announceText != "" {
 			c.Writer.Header().Set("Announce", announceText)
 		}
@@ -131,16 +132,8 @@ func (a *SUBController) subJsons(c *gin.Context) {
 			host = c.Request.Host
 		}
 	}
-	var supportUrl string
-	supportUrl = os.Getenv("XUI_SUB_SUPPORT_URL")
-	if supportUrl == "" {
-		supportUrl = os.Getenv("XUI_SUB_DOMAIN")
-	}
-	var profileWebPageUrl string
-	profileWebPageUrl = os.Getenv("XUI_SUB_PROFILE_WEB_PAGE_URL")
-	if profileWebPageUrl == "" {
-		profileWebPageUrl = os.Getenv("XUI_SUB_DOMAIN")
-	}
+	supportUrl := a.subSupportUrl
+	profileWebPageUrl := a.subProfileWebPageUrl
 	announceText := a.subAnnounce
 	jsonSub, header, err := a.subJsonService.GetJson(subId, host)
 	if err != nil || len(jsonSub) == 0 {
@@ -151,8 +144,12 @@ func (a *SUBController) subJsons(c *gin.Context) {
 		c.Writer.Header().Set("Subscription-Userinfo", header)
 		c.Writer.Header().Set("Profile-Update-Interval", a.updateInterval)
 		c.Writer.Header().Set("Profile-Title", "base64:"+base64.StdEncoding.EncodeToString([]byte(a.subTitle)))
-		c.Writer.Header().Set("Support-Url", supportUrl)
-		c.Writer.Header().Set("Profile-Web-Page-Url", profileWebPageUrl)
+		if supportUrl != "" {
+			c.Writer.Header().Set("Support-Url", supportUrl)
+		}
+		if profileWebPageUrl != "" {
+			c.Writer.Header().Set("Profile-Web-Page-Url", profileWebPageUrl)
+		}
 		if announceText != "" {
 			c.Writer.Header().Set("Announce", announceText)
 		}

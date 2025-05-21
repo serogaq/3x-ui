@@ -23,6 +23,20 @@
             </template>
         </a-setting-list-item>
         <a-setting-list-item paddings="small">
+            <template #title>{{ i18n "pages.settings.subSupportUrl"}}</template>
+            <template #description>{{ i18n "pages.settings.subSupportUrlDesc"}}</template>
+            <template #control>
+                <a-input type="text" v-model="allSetting.subSupportUrl"></a-input>
+            </template>
+        </a-setting-list-item>
+        <a-setting-list-item paddings="small">
+            <template #title>{{ i18n "pages.settings.subProfileWebPageUrl"}}</template>
+            <template #description>{{ i18n "pages.settings.subProfileWebPageUrlDesc"}}</template>
+            <template #control>
+                <a-input type="text" v-model="allSetting.subProfileWebPageUrl"></a-input>
+            </template>
+        </a-setting-list-item>
+        <a-setting-list-item paddings="small">
             <template #title>{{ i18n "pages.settings.subListen"}}</template>
             <template #description>{{ i18n "pages.settings.subListenDesc"}}</template>
             <template #control>
