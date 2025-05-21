@@ -24,9 +24,9 @@ import (
 )
 
 func runWebServer() {
-	custom := config.GetCustomVersion()
-	if custom != "" {
-		log.Printf("Starting %v %v (%v)", config.GetName(), config.GetVersion(), custom)
+	custom_version := config.GetCustomVersion()
+	if custom_version != "" {
+		log.Printf("Starting %v %v (%v)", config.GetName(), config.GetVersion(), custom_version)
 	} else {
 		log.Printf("Starting %v %v", config.GetName(), config.GetVersion())
 	}
