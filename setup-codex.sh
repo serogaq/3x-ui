@@ -5,8 +5,8 @@ TARGETARCH=${TARGETARCH:-$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')}
 BUILD_WITH_ANTIZAPRET=${BUILD_WITH_ANTIZAPRET:-0}
 export DEBIAN_FRONTEND=noninteractive
 
-apt update
-apt install curl wget unzip procps chromium-browser
+apt update 
+apt install --assume-yes curl wget unzip procps chromium-browser
 
 if [ "$TARGETARCH" == "arm64" ]; then
   apt install gcc-aarch64-linux-gnu
