@@ -6,7 +6,7 @@ BUILD_WITH_ANTIZAPRET=${BUILD_WITH_ANTIZAPRET:-0}
 export DEBIAN_FRONTEND=noninteractive
 
 apt update
-apt install curl wget unzip procps chromium
+apt install curl wget unzip procps chromium-browser
 
 if [ "$TARGETARCH" == "arm64" ]; then
   apt install gcc-aarch64-linux-gnu
