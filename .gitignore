@@ -11,6 +11,7 @@
 tmp/
 *.tar
 *.tar.gz
+postman_api_collection.json
 
 # Ignore build and distribution directories
 db/
