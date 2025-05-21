@@ -6,11 +6,7 @@ BUILD_WITH_ANTIZAPRET=${BUILD_WITH_ANTIZAPRET:-0}
 export DEBIAN_FRONTEND=noninteractive
 
 apt update 
-apt install --assume-yes curl wget unzip procps software-properties-common python3-launchpadlib
-
-add-apt-repository ppa:xtradeb/apps -y
-apt update
-apt install --assume-yes chromium
+apt install --assume-yes curl wget unzip procps file hexdump
 
 if [ "$TARGETARCH" == "arm64" ]; then
   apt install gcc-aarch64-linux-gnu
