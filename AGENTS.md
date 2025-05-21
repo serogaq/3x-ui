@@ -35,7 +35,7 @@ When OpenAI Codex helps create a PR, please ensure it:
 
 ## Postman-collection with api documentation for OpenAI Codex
 
-- OpenAI Codex should familiarize itself with the api documentation in the form of a postman collection. It is located in the `postman_api_collection.json` file.
+- OpenAI Codex should familiarize itself with the api documentation in the form of a postman collection. It is located in the `postman_api_collection.json` file
 
 ## Programmatic Checks for OpenAI Codex
 
