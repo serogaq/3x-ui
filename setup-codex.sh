@@ -6,7 +6,7 @@ BUILD_WITH_ANTIZAPRET=${BUILD_WITH_ANTIZAPRET:-0}
 export DEBIAN_FRONTEND=noninteractive
 
 apt update 
-apt install --assume-yes curl wget unzip procps file hexdump busybox
+apt install --assume-yes curl wget unzip procps file bsdmainutils busybox
 
 if [ "$TARGETARCH" == "arm64" ]; then
   apt install gcc-aarch64-linux-gnu
