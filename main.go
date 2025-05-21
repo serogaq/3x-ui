@@ -9,9 +9,9 @@ import (
 	"syscall"
 	_ "unsafe"
 
+	"x-ui/caching"
 	"x-ui/config"
 	"x-ui/database"
-	"x-ui/caching"
 	"x-ui/logger"
 	"x-ui/sub"
 	"x-ui/util/crypto"
@@ -24,7 +24,12 @@ import (
 )
 
 func runWebServer() {
-	log.Printf("Starting %v %v", config.GetName(), config.GetVersion())
+	custom_version := config.GetCustomVersion()
+	if custom_version != "" {
+		log.Printf("Starting %v %v (%v)", config.GetName(), config.GetVersion(), custom_version)
+	} else {
+		log.Printf("Starting %v %v", config.GetName(), config.GetVersion())
+	}
 
 	switch config.GetLogLevel() {
 	case config.Debug:
