@@ -45,6 +45,8 @@ type AllSetting struct {
 	SubEnable                   bool   `json:"subEnable" form:"subEnable"`
 	SubTitle                    string `json:"subTitle" form:"subTitle"`
 	SubAnnounce                 string `json:"subAnnounce" form:"subAnnounce"`
+	SubSupportUrl               string `json:"subSupportUrl" form:"subSupportUrl"`
+	SubProfileWebPageUrl        string `json:"subProfileWebPageUrl" form:"subProfileWebPageUrl"`
 	SubListen                   string `json:"subListen" form:"subListen"`
 	SubPort                     int    `json:"subPort" form:"subPort"`
 	SubPath                     string `json:"subPath" form:"subPath"`

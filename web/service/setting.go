@@ -55,6 +55,8 @@ var defaultValueMap = map[string]string{
 	"subEnable":                   "false",
 	"subTitle":                    "",
 	"subAnnounce":                 "",
+	"subSupportUrl":               "",
+	"subProfileWebPageUrl":        "",
 	"subListen":                   "",
 	"subPort":                     "2096",
 	"subPath":                     "/sub/",
@@ -438,6 +440,14 @@ func (s *SettingService) GetSubAnnounce() (string, error) {
 	return s.getString("subAnnounce")
 }
 
+func (s *SettingService) GetSubSupportUrl() (string, error) {
+	return s.getString("subSupportUrl")
+}
+
+func (s *SettingService) GetSubProfileWebPageUrl() (string, error) {
+	return s.getString("subProfileWebPageUrl")
+}
+
 func (s *SettingService) GetSubListen() (string, error) {
 	return s.getString("subListen")
 }
@@ -575,20 +585,22 @@ func (s *SettingService) GetDefaultXrayConfig() (any, error) {
 func (s *SettingService) GetDefaultSettings(host string) (any, error) {
 	type settingFunc func() (any, error)
 	settings := map[string]settingFunc{
-		"expireDiff":    func() (any, error) { return s.GetExpireDiff() },
-		"trafficDiff":   func() (any, error) { return s.GetTrafficDiff() },
-		"pageSize":      func() (any, error) { return s.GetPageSize() },
-		"defaultCert":   func() (any, error) { return s.GetCertFile() },
-		"defaultKey":    func() (any, error) { return s.GetKeyFile() },
-		"tgBotEnable":   func() (any, error) { return s.GetTgbotEnabled() },
-		"subEnable":     func() (any, error) { return s.GetSubEnable() },
-		"subTitle":      func() (any, error) { return s.GetSubTitle() },
-		"subAnnounce":   func() (any, error) { return s.GetSubAnnounce() },
-		"subURI":        func() (any, error) { return s.GetSubURI() },
-		"subJsonURI":    func() (any, error) { return s.GetSubJsonURI() },
-		"remarkModel":   func() (any, error) { return s.GetRemarkModel() },
-		"datepicker":    func() (any, error) { return s.GetDatepicker() },
-		"ipLimitEnable": func() (any, error) { return s.GetIpLimitEnable() },
+		"expireDiff":           func() (any, error) { return s.GetExpireDiff() },
+		"trafficDiff":          func() (any, error) { return s.GetTrafficDiff() },
+		"pageSize":             func() (any, error) { return s.GetPageSize() },
+		"defaultCert":          func() (any, error) { return s.GetCertFile() },
+		"defaultKey":           func() (any, error) { return s.GetKeyFile() },
+		"tgBotEnable":          func() (any, error) { return s.GetTgbotEnabled() },
+		"subEnable":            func() (any, error) { return s.GetSubEnable() },
+		"subTitle":             func() (any, error) { return s.GetSubTitle() },
+		"subAnnounce":          func() (any, error) { return s.GetSubAnnounce() },
+		"subSupportUrl":        func() (any, error) { return s.GetSubSupportUrl() },
+		"subProfileWebPageUrl": func() (any, error) { return s.GetSubProfileWebPageUrl() },
+		"subURI":               func() (any, error) { return s.GetSubURI() },
+		"subJsonURI":           func() (any, error) { return s.GetSubJsonURI() },
+		"remarkModel":          func() (any, error) { return s.GetRemarkModel() },
+		"datepicker":           func() (any, error) { return s.GetDatepicker() },
+		"ipLimitEnable":        func() (any, error) { return s.GetIpLimitEnable() },
 	}
 
 	result := make(map[string]any)
@@ -605,6 +617,8 @@ func (s *SettingService) GetDefaultSettings(host string) (any, error) {
 		subURI := ""
 		subTitle, _ := s.GetSubTitle()
 		subAnnounce, _ := s.GetSubAnnounce()
+		subSupportUrl, _ := s.GetSubSupportUrl()
+		subProfileWebPageUrl, _ := s.GetSubProfileWebPageUrl()
 		subPort, _ := s.GetSubPort()
 		subPath, _ := s.GetSubPath()
 		subJsonPath, _ := s.GetSubJsonPath()
@@ -636,6 +650,12 @@ func (s *SettingService) GetDefaultSettings(host string) (any, error) {
 		}
 		if result["subAnnounce"].(string) == "" {
 			result["subAnnounce"] = subAnnounce
+		}
+		if result["subSupportUrl"].(string) == "" {
+			result["subSupportUrl"] = subSupportUrl
+		}
+		if result["subProfileWebPageUrl"].(string) == "" {
+			result["subProfileWebPageUrl"] = subProfileWebPageUrl
 		}
 		if result["subJsonURI"].(string) == "" {
 			result["subJsonURI"] = subURI + subJsonPath
