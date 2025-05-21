@@ -75,7 +75,7 @@ func GetLogFolder() string {
 }
 
 func GetCustomVersion() string {
-	b, err := os.ReadFile("config/custom_version")
+	b, err := os.ReadFile("../config/custom_version")
 	if err == nil {
 		v := strings.TrimSpace(string(b))
 		if v != "" {
