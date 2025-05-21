@@ -73,3 +73,24 @@ func GetLogFolder() string {
 	}
 	return logFolderPath
 }
+
+// GetCustomVersion reads an optional custom version from
+// `config/custom_version` located either in the working directory or its
+// parent directory. It returns an empty string when the file is absent
+// or empty.
+func GetCustomVersion() string {
+	paths := []string{
+		"config/custom_version",
+		"../config/custom_version",
+	}
+	for _, p := range paths {
+		b, err := os.ReadFile(p)
+		if err == nil {
+			v := strings.TrimSpace(string(b))
+			if v != "" {
+				return v
+			}
+		}
+	}
+	return ""
+}
