@@ -30,6 +30,7 @@ class AllSetting {
         this.xrayTemplateConfig = "";
         this.subEnable = false;
         this.subTitle = "";
+        this.subAnnounce = "";
         this.subListen = "";
         this.subPort = 2096;
         this.subPath = "/sub/";
