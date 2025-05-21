@@ -6,10 +6,11 @@ BUILD_WITH_ANTIZAPRET=${BUILD_WITH_ANTIZAPRET:-0}
 export DEBIAN_FRONTEND=noninteractive
 
 apt update 
-apt install --assume-yes curl wget unzip procps
+apt install --assume-yes curl wget unzip procps software-properties-common python3-launchpadlib
 
-wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-apt install ./google-chrome-stable_current_amd64.deb
+add-apt-repository ppa:xtradeb/apps -y
+apt update
+apt install --assume-yes chromium
 
 if [ "$TARGETARCH" == "arm64" ]; then
   apt install gcc-aarch64-linux-gnu
