@@ -12,12 +12,18 @@ if [ "$TARGETARCH" == "arm64" ]; then
   apt install gcc-aarch64-linux-gnu
 fi
 
+export_postman_collection() {
+  local id="$1"
+  local out="$2"
+  local url="https://www.postman.com/collections/${id}?format=2.1"
+  curl -sSL "$url" -o "$out"
+}
+
 go mod download
 
 mkdir -p x-ui/bin
 cd x-ui/bin
 
-# Download dependencies
 Xray_URL="https://github.com/XTLS/Xray-core/releases/download/v25.5.16/"
 if [ "$TARGETARCH" == "amd64" ]; then
   wget -q ${Xray_URL}Xray-linux-64.zip
@@ -36,4 +42,7 @@ wget -q -O geosite_IR.dat https://github.com/chocolate4u/Iran-v2ray-rules/releas
 wget -q -O geoip_RU.dat https://github.com/runetfreedom/russia-v2ray-rules-dat/releases/latest/download/geoip.dat
 wget -q -O geosite_RU.dat https://github.com/runetfreedom/russia-v2ray-rules-dat/releases/latest/download/geosite.dat
 mv xray xray-linux-$TARGETARCH
+
 cd ../..
+
+export_postman_collection "5146551-dda3cab3-0e33-485f-96f9-d4262f437ac5" "postman_api_collection.json"
