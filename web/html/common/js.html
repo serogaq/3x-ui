@@ -10,5 +10,6 @@
 <script>
     const basePath = '{{ .base_path }}';
     axios.defaults.baseURL = basePath;
+    console.log({cur_ver: '{{ .cur_ver }}', custom_version: '{{ .custom_version }}'});
 </script>
 {{end}}
