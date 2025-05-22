@@ -521,9 +521,17 @@
           return alerts
         }
       }
-    },
-    async mounted() {
-      await this.getAllSetting();
+      },
+      watch: {
+        allSetting: {
+          handler() {
+            this.saveBtnDisable = this.oldAllSetting.equals(this.allSetting);
+          },
+          deep: true
+        }
+      },
+      async mounted() {
+        await this.getAllSetting();
 
       while (true) {
         await PromiseUtil.sleep(1000);
