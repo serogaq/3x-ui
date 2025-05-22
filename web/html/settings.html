@@ -142,7 +142,7 @@
       user: {},
       lang: LanguageManager.getLanguage(),
       remarkModels: { i: 'Inbound', e: 'Email', o: 'Other' },
-      remarkSeparators: [' ', '-', '_', '@', ':', '~', '|', ',', '.', '/'],
+      remarkSeparators: [' ', '-', '_', '@', ':', '~', '|', ',', '.', '/', '*'],
       datepickerList: [{ name: 'Gregorian (Standard)', value: 'gregorian' }, { name: 'Jalalian (شمسی)', value: 'jalalian' }],
       remarkSample: '',
       defaultFragment: {
@@ -520,15 +520,18 @@
           }
           return alerts
         }
+      },
+    },
+    watch: {
+      allSetting: {
+        handler() {
+          this.saveBtnDisable = this.oldAllSetting.equals(this.allSetting);
+        },
+        deep: true
       }
     },
     async mounted() {
       await this.getAllSetting();
-
-      while (true) {
-        await PromiseUtil.sleep(1000);
-        this.saveBtnDisable = this.oldAllSetting.equals(this.allSetting);
-      }
     }
   });
 </script>
