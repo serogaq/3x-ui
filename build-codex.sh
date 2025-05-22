@@ -8,6 +8,8 @@ export DEBIAN_FRONTEND=noninteractive
 
 cd $WORK_DIR
 
+test -f config/custom_version || touch config/custom_version
+
 export CGO_ENABLED=1
 export GOOS=linux
 export GOARCH=$TARGETARCH

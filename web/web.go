@@ -225,7 +225,6 @@ func (s *Server) initRouter() (*gin.Engine, error) {
 }
 
 func (s *Server) startTask() {
-	s.server.ResetDailyTraffic()
 	err := s.xrayService.RestartXray(true)
 	if err != nil {
 		logger.Warning("start xray failed:", err)

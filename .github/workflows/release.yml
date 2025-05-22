@@ -86,6 +86,9 @@ jobs:
             export GOARCH=s390x
             export CC=s390x-linux-gnu-gcc
           fi
+
+          test -f config/custom_version || touch config/custom_version
+
           go build -ldflags "-w -s" -o xui-release -v main.go
           
           mkdir x-ui
