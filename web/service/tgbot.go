@@ -1977,6 +1977,7 @@ func (t *Tgbot) prepareServerUsageInfo() string {
 	info += t.I18nBot("tgbot.messages.tcpCount", "Count=="+strconv.Itoa(t.lastStatus.TcpCount))
 	info += t.I18nBot("tgbot.messages.udpCount", "Count=="+strconv.Itoa(t.lastStatus.UdpCount))
 	info += t.I18nBot("tgbot.messages.traffic", "Total=="+common.FormatTraffic(int64(t.lastStatus.NetTraffic.Sent+t.lastStatus.NetTraffic.Recv)), "Upload=="+common.FormatTraffic(int64(t.lastStatus.NetTraffic.Sent)), "Download=="+common.FormatTraffic(int64(t.lastStatus.NetTraffic.Recv)))
+	info += t.I18nBot("tgbot.messages.traffic24h", "Total=="+common.FormatTraffic(int64(t.lastStatus.NetDaily.Sent+t.lastStatus.NetDaily.Recv)), "Upload=="+common.FormatTraffic(int64(t.lastStatus.NetDaily.Sent)), "Download=="+common.FormatTraffic(int64(t.lastStatus.NetDaily.Recv)))
 	info += t.I18nBot("tgbot.messages.xrayStatus", "State=="+fmt.Sprint(t.lastStatus.Xray.State))
 	return info
 }

@@ -10,6 +10,9 @@ import (
 //go:embed version
 var version string
 
+//go:embed custom_version
+var custom_version string
+
 //go:embed name
 var name string
 
@@ -25,6 +28,10 @@ const (
 
 func GetVersion() string {
 	return strings.TrimSpace(version)
+}
+
+func GetCustomVersion() string {
+	return strings.TrimSpace(custom_version)
 }
 
 func GetName() string {
@@ -72,15 +79,4 @@ func GetLogFolder() string {
 		logFolderPath = "/var/log"
 	}
 	return logFolderPath
-}
-
-func GetCustomVersion() string {
-	b, err := os.ReadFile("../config/custom_version")
-	if err == nil {
-		v := strings.TrimSpace(string(b))
-		if v != "" {
-			return v
-		}
-	}
-	return ""
 }

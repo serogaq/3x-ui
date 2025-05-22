@@ -70,6 +70,10 @@ func (a *ServerController) startTask() {
 	})
 }
 
+func (a *ServerController) ResetDailyTraffic() {
+	a.serverService.ResetDailyTraffic()
+}
+
 func (a *ServerController) status(c *gin.Context) {
 	a.lastGetStatusTime = time.Now()
 

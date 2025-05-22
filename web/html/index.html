@@ -290,14 +290,14 @@
                   <a-card title='{{ i18n "pages.index.totalData" }}' hoverable>
                     <a-row :gutter="isMobile ? [8,8] : 0">
                       <a-col :span="12">
-                        <a-custom-statistic title='{{ i18n "pages.index.sent" }}' :value="SizeFormatter.sizeFormat(status.netTraffic.sent)">
+                        <a-custom-statistic title='{{ i18n "pages.index.sent24h" }}' :value="SizeFormatter.sizeFormat(status.netTraffic.sent) + ' / ' + SizeFormatter.sizeFormat(status.netDaily.sent)">
                           <template #prefix>
                             <a-icon type="cloud-upload" />
                           </template>
                         </a-custom-statistic>
                       </a-col>
                       <a-col :span="12">
-                        <a-custom-statistic title='{{ i18n "pages.index.received" }}' :value="SizeFormatter.sizeFormat(status.netTraffic.recv)">
+                        <a-custom-statistic title='{{ i18n "pages.index.received24h" }}' :value="SizeFormatter.sizeFormat(status.netTraffic.recv) + ' / ' + SizeFormatter.sizeFormat(status.netDaily.recv)">
                           <template #prefix>
                             <a-icon type="cloud-download" />
                           </template>
@@ -578,6 +578,7 @@
             this.mem = new CurTotal(0, 0);
             this.netIO = { up: 0, down: 0 };
             this.netTraffic = { sent: 0, recv: 0 };
+            this.netDaily = { sent: 0, recv: 0 };
             this.publicIP = { ipv4: 0, ipv6: 0 };
             this.swap = new CurTotal(0, 0);
             this.tcpCount = 0;
@@ -586,9 +587,9 @@
             this.appUptime = 0;
             this.appStats = {threads: 0, mem: 0, uptime: 0};
 
-            this.xray = { state: 'stop', stateMsg: "", errorMsg: "", version: "", color: "" };
+            this.xray = { state: 'stop', stateMsg: '', errorMsg: '', version: '', color: '' };
 
-            this.xui = { latestVersion: "" };
+            this.xui = { latestVersion: '' };
 
             if (data == null) {
               return;
@@ -604,6 +605,7 @@
             this.mem = new CurTotal(data.mem.current, data.mem.total);
             this.netIO = data.netIO;
             this.netTraffic = data.netTraffic;
+            this.netDaily = data.netDaily;
             this.publicIP = data.publicIP;
             this.swap = new CurTotal(data.swap.current, data.swap.total);
             this.tcpCount = data.tcpCount;

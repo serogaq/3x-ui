@@ -14,6 +14,8 @@ RUN apk --no-cache --update add \
 
 COPY . .
 
+RUN test -f config/custom_version || touch config/custom_version
+
 ENV CGO_ENABLED=1
 ENV CGO_CFLAGS="-D_LARGEFILE64_SOURCE"
 RUN go build -ldflags "-w -s" -o build/x-ui main.go

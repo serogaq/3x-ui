@@ -11,19 +11,19 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"regexp"
 	"runtime"
 	"strconv"
 	"strings"
 	"time"
-	"regexp"
 
 	"x-ui/config"
 	"x-ui/database"
 	"x-ui/logger"
 	"x-ui/util/common"
 	"x-ui/util/sys"
-	"x-ui/xray"
 	"x-ui/web/global"
+	"x-ui/xray"
 
 	"github.com/shirou/gopsutil/v4/cpu"
 	"github.com/shirou/gopsutil/v4/disk"
@@ -79,6 +79,10 @@ type Status struct {
 		Sent uint64 `json:"sent"`
 		Recv uint64 `json:"recv"`
 	} `json:"netTraffic"`
+	NetDaily struct {
+		Sent uint64 `json:"sent"`
+		Recv uint64 `json:"recv"`
+	} `json:"netDaily"`
 	PublicIP struct {
 		IPv4 string `json:"ipv4"`
 		IPv6 string `json:"ipv6"`
@@ -99,14 +103,26 @@ type ServerService struct {
 	inboundService InboundService
 	cachedIPv4     string
 	cachedIPv6     string
+	dailyBaseSent  uint64
+	dailyBaseRecv  uint64
+	lastDailyReset time.Time
+}
+
+func (s *ServerService) ResetDailyTraffic() {
+	ioStats, err := net.IOCounters(false)
+	if err == nil && len(ioStats) > 0 {
+		s.dailyBaseSent = ioStats[0].BytesSent
+		s.dailyBaseRecv = ioStats[0].BytesRecv
+	}
+	s.lastDailyReset = time.Now().In(time.Local).Truncate(24 * time.Hour)
 }
 
 func extractValue(body string, key string) string {
-    keystr := "\"" + key + "\":[^,;\\]}]*"
-    r, _ := regexp.Compile(keystr)
-    match := r.FindString(body)
-    keyValMatch := strings.Split(match, ":")
-    return strings.TrimSpace(strings.ReplaceAll(keyValMatch[1], "\"", ""))
+	keystr := "\"" + key + "\":[^,;\\]}]*"
+	r, _ := regexp.Compile(keystr)
+	match := r.FindString(body)
+	keyValMatch := strings.Split(match, ":")
+	return strings.TrimSpace(strings.ReplaceAll(keyValMatch[1], "\"", ""))
 }
 
 func getPublicIP(url string) string {
@@ -145,13 +161,13 @@ func getXuiLatestVersion() string {
 		}
 	} else {
 		url := "https://api.github.com/repos/MHSanaei/3x-ui/releases/latest"
-		
+
 		resp, err := http.Get(url)
 		if err != nil {
 			return ""
 		}
 		defer resp.Body.Close()
-		
+
 		json, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return ""
@@ -243,6 +259,21 @@ func (s *ServerService) GetStatus(lastStatus *Status) *Status {
 		ioStat := ioStats[0]
 		status.NetTraffic.Sent = ioStat.BytesSent
 		status.NetTraffic.Recv = ioStat.BytesRecv
+
+		// daily traffic
+		if s.lastDailyReset.IsZero() {
+			s.dailyBaseSent = ioStat.BytesSent
+			s.dailyBaseRecv = ioStat.BytesRecv
+			s.lastDailyReset = now.In(time.Local).Truncate(24 * time.Hour)
+		}
+		currentDay := now.In(time.Local).Truncate(24 * time.Hour)
+		if currentDay.After(s.lastDailyReset) {
+			s.dailyBaseSent = ioStat.BytesSent
+			s.dailyBaseRecv = ioStat.BytesRecv
+			s.lastDailyReset = currentDay
+		}
+		status.NetDaily.Sent = ioStat.BytesSent - s.dailyBaseSent
+		status.NetDaily.Recv = ioStat.BytesRecv - s.dailyBaseRecv
 
 		if lastStatus != nil {
 			duration := now.Sub(lastStatus.T)
@@ -505,9 +536,9 @@ func (s *ServerService) GetAccessLog(count string, grep string) []string {
 		var cmdArgs []string
 		if grep != "" {
 			cmdArgs = []string{"bash", "-c", fmt.Sprintf("tail -n %s %s | grep '%s' | sort -r", count, accessLogPath, grep)}
-    	} else {
-    		cmdArgs = []string{"bash", "-c", fmt.Sprintf("tail -n %s %s | sort -r", count, accessLogPath)}
-    	}
+		} else {
+			cmdArgs = []string{"bash", "-c", fmt.Sprintf("tail -n %s %s | sort -r", count, accessLogPath)}
+		}
 		cmd := exec.Command(cmdArgs[0], cmdArgs[1:]...)
 		var out bytes.Buffer
 		cmd.Stdout = &out
@@ -531,9 +562,9 @@ func (s *ServerService) GetErrorLog(count string, grep string) []string {
 		var cmdArgs []string
 		if grep != "" {
 			cmdArgs = []string{"bash", "-c", fmt.Sprintf("tail -n %s %s | grep '%s' | sort -r", count, errorLogPath, grep)}
-    	} else {
-    		cmdArgs = []string{"bash", "-c", fmt.Sprintf("tail -n %s %s | sort -r", count, errorLogPath)}
-    	}
+		} else {
+			cmdArgs = []string{"bash", "-c", fmt.Sprintf("tail -n %s %s | sort -r", count, errorLogPath)}
+		}
 		cmd := exec.Command(cmdArgs[0], cmdArgs[1:]...)
 		var out bytes.Buffer
 		cmd.Stdout = &out
