@@ -290,14 +290,14 @@
                   <a-card title='{{ i18n "pages.index.totalData" }}' hoverable>
                     <a-row :gutter="isMobile ? [8,8] : 0">
                       <a-col :span="12">
-                        <a-custom-statistic title='{{ i18n "pages.index.sent" }}' :value="SizeFormatter.sizeFormat(status.netTraffic.sent)">
+                        <a-custom-statistic title='{{ i18n "pages.index.sent24h" }}' :value="SizeFormatter.sizeFormat(status.netTraffic.sent) + ' / ' + SizeFormatter.sizeFormat(status.netDaily.sent)">
                           <template #prefix>
                             <a-icon type="cloud-upload" />
                           </template>
                         </a-custom-statistic>
                       </a-col>
                       <a-col :span="12">
-                        <a-custom-statistic title='{{ i18n "pages.index.received" }}' :value="SizeFormatter.sizeFormat(status.netTraffic.recv)">
+                        <a-custom-statistic title='{{ i18n "pages.index.received24h" }}' :value="SizeFormatter.sizeFormat(status.netTraffic.recv) + ' / ' + SizeFormatter.sizeFormat(status.netDaily.recv)">
                           <template #prefix>
                             <a-icon type="cloud-download" />
                           </template>

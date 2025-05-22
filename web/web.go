@@ -225,6 +225,7 @@ func (s *Server) initRouter() (*gin.Engine, error) {
 }
 
 func (s *Server) startTask() {
+	s.server.ResetDailyTraffic()
 	err := s.xrayService.RestartXray(true)
 	if err != nil {
 		logger.Warning("start xray failed:", err)
@@ -253,6 +254,8 @@ func (s *Server) startTask() {
 
 	// check client ips from log file every day
 	s.cron.AddJob("@daily", job.NewClearLogsJob())
+	// reset daily traffic counters at midnight
+	s.cron.AddJob("0 0 0 * * *", job.NewResetDailyTrafficJob())
 
 	// Make a traffic condition every day, 8:30
 	var entry cron.EntryID
@@ -305,6 +308,7 @@ func (s *Server) Start() (err error) {
 	if err != nil {
 		return err
 	}
+	time.Local = loc
 	s.cron = cron.New(cron.WithLocation(loc), cron.WithSeconds())
 	s.cron.Start()
 
