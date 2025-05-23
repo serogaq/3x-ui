@@ -1,6 +1,7 @@
 package job
 
 import (
+	"x-ui/logger"
 	"x-ui/web/service"
 )
 
@@ -12,8 +13,10 @@ const (
 )
 
 type StatsNotifyJob struct {
-	xrayService  service.XrayService
-	tgbotService service.Tgbot
+	xrayService    service.XrayService
+	tgbotService   service.Tgbot
+	settingService service.SettingService
+	serverService  service.ServerService
 }
 
 func NewStatsNotifyJob() *StatsNotifyJob {
@@ -25,5 +28,19 @@ func (j *StatsNotifyJob) Run() {
 	if !j.xrayService.IsXrayRunning() {
 		return
 	}
-	j.tgbotService.SendReport()
+
+	if !j.tgbotService.IsRunning() {
+		logger.Warning("StatsNotifyJob: telegram bot is not running")
+	} else {
+		j.tgbotService.SendReport()
+	}
+
+	runtime, err := j.settingService.GetTgbotRuntime()
+	if err != nil {
+		logger.Warning("StatsNotifyJob: get runtime failed", err)
+	}
+
+	if err == nil && runtime == "@daily" {
+		j.serverService.ResetDailyTraffic()
+	}
 }
