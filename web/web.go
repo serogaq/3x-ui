@@ -253,8 +253,8 @@ func (s *Server) startTask() {
 
 	// check client ips from log file every day
 	s.cron.AddJob("@daily", job.NewClearLogsJob())
-	// reset daily traffic counters at midnight
-	s.cron.AddJob("0 0 0 * * *", job.NewResetDailyTrafficJob())
+
+	resetByNotify := false
 
 	// Make a traffic condition every day, 8:30
 	var entry cron.EntryID
@@ -270,6 +270,10 @@ func (s *Server) startTask() {
 		if err != nil {
 			logger.Warning("Add NewStatsNotifyJob error", err)
 			return
+		}
+
+		if runtime == "@daily" {
+			resetByNotify = true
 		}
 
 		// check for Telegram bot callback query hash storage reset
@@ -292,6 +296,11 @@ func (s *Server) startTask() {
 		}
 	} else {
 		s.cron.Remove(entry)
+	}
+
+	if !resetByNotify {
+		// reset daily traffic counters at midnight
+		s.cron.AddJob("0 0 0 * * *", job.NewResetDailyTrafficJob())
 	}
 }
 
