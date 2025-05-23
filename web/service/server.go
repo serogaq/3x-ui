@@ -101,6 +101,7 @@ type Release struct {
 type ServerService struct {
 	xrayService    XrayService
 	inboundService InboundService
+	settingService SettingService
 	cachedIPv4     string
 	cachedIPv6     string
 	dailyBaseSent  uint64
@@ -115,6 +116,9 @@ func (s *ServerService) ResetDailyTraffic() {
 		s.dailyBaseRecv = ioStats[0].BytesRecv
 	}
 	s.lastDailyReset = time.Now().In(time.Local).Truncate(24 * time.Hour)
+	s.settingService.SetDailyBaseSent(s.dailyBaseSent)
+	s.settingService.SetDailyBaseRecv(s.dailyBaseRecv)
+	s.settingService.SetLastDailyReset(s.lastDailyReset.Unix())
 }
 
 func extractValue(body string, key string) string {
@@ -262,15 +266,30 @@ func (s *ServerService) GetStatus(lastStatus *Status) *Status {
 
 		// daily traffic
 		if s.lastDailyReset.IsZero() {
-			s.dailyBaseSent = ioStat.BytesSent
-			s.dailyBaseRecv = ioStat.BytesRecv
-			s.lastDailyReset = now.In(time.Local).Truncate(24 * time.Hour)
+			baseSent, err1 := s.settingService.GetDailyBaseSent()
+			baseRecv, err2 := s.settingService.GetDailyBaseRecv()
+			lastReset, err3 := s.settingService.GetLastDailyReset()
+			if err1 == nil && err2 == nil && err3 == nil && lastReset > 0 {
+				s.dailyBaseSent = baseSent
+				s.dailyBaseRecv = baseRecv
+				s.lastDailyReset = time.Unix(lastReset, 0)
+			} else {
+				s.dailyBaseSent = ioStat.BytesSent
+				s.dailyBaseRecv = ioStat.BytesRecv
+				s.lastDailyReset = now.In(time.Local).Truncate(24 * time.Hour)
+				s.settingService.SetDailyBaseSent(s.dailyBaseSent)
+				s.settingService.SetDailyBaseRecv(s.dailyBaseRecv)
+				s.settingService.SetLastDailyReset(s.lastDailyReset.Unix())
+			}
 		}
 		currentDay := now.In(time.Local).Truncate(24 * time.Hour)
 		if currentDay.After(s.lastDailyReset) {
 			s.dailyBaseSent = ioStat.BytesSent
 			s.dailyBaseRecv = ioStat.BytesRecv
 			s.lastDailyReset = currentDay
+			s.settingService.SetDailyBaseSent(s.dailyBaseSent)
+			s.settingService.SetDailyBaseRecv(s.dailyBaseRecv)
+			s.settingService.SetLastDailyReset(s.lastDailyReset.Unix())
 		}
 		status.NetDaily.Sent = ioStat.BytesSent - s.dailyBaseSent
 		status.NetDaily.Recv = ioStat.BytesRecv - s.dailyBaseRecv
