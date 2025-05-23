@@ -14,6 +14,7 @@ const (
 
 type StatsNotifyJob struct {
 	xrayService    service.XrayService
+	tgbotService   service.Tgbot
 	settingService service.SettingService
 	serverService  service.ServerService
 }
