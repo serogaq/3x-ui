@@ -711,6 +711,7 @@
 "change_comment" = "⚙️💬 コメント"
 "ResetAllTraffics" = "すべてのトラフィックをリセット"
 "SortedTrafficUsageReport" = "ソートされたトラフィック使用レポート"
+"subLink" = "🔗 Subscription Link"
 
 
 [tgbot.answers]
@@ -729,6 +730,7 @@
 "clearIpSuccess" = "✅ {{ .Email }}：IPが正常にクリアされました。"
 "getIpLog" = "✅ {{ .Email }}：IPログの取得。"
 "getUserInfo" = "✅ {{ .Email }}：Telegramユーザー情報の取得。"
+"getSubLink" = "✅ {{ .Email }}: Get Subscription Link."
 "removedTGUserSuccess" = "✅ {{ .Email }}：Telegramユーザーが正常に削除されました。"
 "enableSuccess" = "✅ {{ .Email }}：正常に有効化されました。"
 "disableSuccess" = "✅ {{ .Email }}：正常に無効化されました。"

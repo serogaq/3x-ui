@@ -711,6 +711,7 @@
 "change_comment" = "⚙️💬 Bình Luận"
 "ResetAllTraffics" = "Đặt lại tất cả lưu lượng"
 "SortedTrafficUsageReport" = "Báo cáo sử dụng lưu lượng đã sắp xếp"
+"subLink" = "🔗 Subscription Link"
 
 
 [tgbot.answers]
@@ -729,6 +730,7 @@
 "clearIpSuccess" = "✅ {{ .Email }} : IP Đã Được Xóa Thành Công."
 "getIpLog" = "✅ {{ .Email }} : Lấy nhật ký IP Thành Công."
 "getUserInfo" = "✅ {{ .Email }} : Lấy Thông Tin Người Dùng Telegram Thành Công."
+"getSubLink" = "✅ {{ .Email }}: Get Subscription Link."
 "removedTGUserSuccess" = "✅ {{ .Email }} : Người Dùng Telegram Đã Được Xóa Thành Công."
 "enableSuccess" = "✅ {{ .Email }} : Đã Bật Thành Công."
 "disableSuccess" = "✅ {{ .Email }} : Đã Tắt Thành Công."

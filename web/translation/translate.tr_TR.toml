@@ -711,6 +711,7 @@
 "change_comment" = "⚙️💬 Yorum"
 "ResetAllTraffics" = "Tüm Trafikleri Sıfırla"
 "SortedTrafficUsageReport" = "Sıralı Trafik Kullanım Raporu"
+"subLink" = "🔗 Subscription Link"
 
 
 [tgbot.answers]
@@ -729,6 +730,7 @@
 "clearIpSuccess" = "✅ {{ .Email }}: IP'ler başarıyla temizlendi."
 "getIpLog" = "✅ {{ .Email }}: IP Günlüğü alındı."
 "getUserInfo" = "✅ {{ .Email }}: Telegram Kullanıcı Bilgisi alındı."
+"getSubLink" = "✅ {{ .Email }}: Get Subscription Link."
 "removedTGUserSuccess" = "✅ {{ .Email }}: Telegram Kullanıcısı başarıyla kaldırıldı."
 "enableSuccess" = "✅ {{ .Email }}: Başarıyla etkinleştirildi."
 "disableSuccess" = "✅ {{ .Email }}: Başarıyla devre dışı bırakıldı."
