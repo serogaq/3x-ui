@@ -29,11 +29,7 @@ func (j *StatsNotifyJob) Run() {
 		return
 	}
 
-	if !j.tgbotService.IsRunning() {
-		logger.Warning("StatsNotifyJob: telegram bot is not running")
-	} else {
-		j.tgbotService.SendReport()
-	}
+	j.tgbotService.SendReport()
 
 	runtime, err := j.settingService.GetTgbotRuntime()
 	if err != nil {
