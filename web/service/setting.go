@@ -77,6 +77,9 @@ var defaultValueMap = map[string]string{
 	"warp":                        "",
 	"externalTrafficInformEnable": "false",
 	"externalTrafficInformURI":    "",
+	"dailyBaseSent":               "0",
+	"dailyBaseRecv":               "0",
+	"lastDailyReset":              "0",
 }
 
 type SettingService struct{}
@@ -542,6 +545,46 @@ func (s *SettingService) GetExternalTrafficInformURI() (string, error) {
 
 func (s *SettingService) SetExternalTrafficInformURI(InformURI string) error {
 	return s.setString("externalTrafficInformURI", InformURI)
+}
+
+func (s *SettingService) GetDailyBaseSent() (uint64, error) {
+	str, err := s.getString("dailyBaseSent")
+	if err != nil {
+		return 0, err
+	}
+	return strconv.ParseUint(str, 10, 64)
+}
+
+func (s *SettingService) SetDailyBaseSent(value uint64) error {
+	return s.setString("dailyBaseSent", strconv.FormatUint(value, 10))
+}
+
+func (s *SettingService) GetDailyBaseRecv() (uint64, error) {
+	str, err := s.getString("dailyBaseRecv")
+	if err != nil {
+		return 0, err
+	}
+	return strconv.ParseUint(str, 10, 64)
+}
+
+func (s *SettingService) SetDailyBaseRecv(value uint64) error {
+	return s.setString("dailyBaseRecv", strconv.FormatUint(value, 10))
+}
+
+func (s *SettingService) GetLastDailyReset() (int64, error) {
+	str, err := s.getString("lastDailyReset")
+	if err != nil {
+		return 0, err
+	}
+	v, err := strconv.ParseInt(str, 10, 64)
+	if err != nil {
+		return 0, err
+	}
+	return v, nil
+}
+
+func (s *SettingService) SetLastDailyReset(ts int64) error {
+	return s.setString("lastDailyReset", strconv.FormatInt(ts, 10))
 }
 
 func (s *SettingService) GetIpLimitEnable() (bool, error) {
