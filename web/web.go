@@ -254,6 +254,9 @@ func (s *Server) startTask() {
 	// check client ips from log file every day
 	s.cron.AddJob("@daily", job.NewClearLogsJob())
 
+	// persist net traffic every 5 minutes
+	s.cron.AddJob("@every 5m", job.NewSaveNetTrafficJob())
+
 	resetByNotify := false
 
 	// Make a traffic condition every day, 8:30
