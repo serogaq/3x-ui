@@ -47,7 +47,7 @@ jobs:
         id: meta
         env:
           COMMENT_URL: ${{ steps.dep_comment.outputs.url }}
-          DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
+          DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest
         with:
           images: |
             ghcr.io/serogaq/3x-ui
