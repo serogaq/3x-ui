@@ -712,6 +712,7 @@
 "ResetAllTraffics" = "Reset Semua Lalu Lintas"
 "SortedTrafficUsageReport" = "Laporan Penggunaan Lalu Lintas yang Terurut"
 "subLink" = "🔗 Subscription Link"
+"subJsonLink" = "🔗 JSON Link"
 
 
 [tgbot.answers]
