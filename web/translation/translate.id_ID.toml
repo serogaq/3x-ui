@@ -711,6 +711,7 @@
 "change_comment" = "⚙️💬 Komentar"
 "ResetAllTraffics" = "Reset Semua Lalu Lintas"
 "SortedTrafficUsageReport" = "Laporan Penggunaan Lalu Lintas yang Terurut"
+"subLink" = "🔗 Subscription Link"
 
 
 [tgbot.answers]
@@ -729,6 +730,7 @@
 "clearIpSuccess" = "✅ {{ .Email }}: IP dihapus dengan berhasil."
 "getIpLog" = "✅ {{ .Email }}: Dapatkan Log IP."
 "getUserInfo" = "✅ {{ .Email }}: Dapatkan Info Pengguna Telegram."
+"getSubLink" = "✅ {{ .Email }}: Get Subscription Link."
 "removedTGUserSuccess" = "✅ {{ .Email }}: Pengguna Telegram dihapus dengan berhasil."
 "enableSuccess" = "✅ {{ .Email }}: Diaktifkan dengan berhasil."
 "disableSuccess" = "✅ {{ .Email }}: Dinonaktifkan dengan berhasil."

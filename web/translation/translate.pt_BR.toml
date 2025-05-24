@@ -711,6 +711,7 @@
 "change_comment" = "⚙️💬 Comentário"
 "ResetAllTraffics" = "Redefinir Todo o Tráfego"
 "SortedTrafficUsageReport" = "Relatório de Uso de Tráfego Ordenado"
+"subLink" = "🔗 Subscription Link"
 
 
 [tgbot.answers]
@@ -729,6 +730,7 @@
 "clearIpSuccess" = "✅ {{ .Email }}: IPs limpos com sucesso."
 "getIpLog" = "✅ {{ .Email }}: Obter log de IP."
 "getUserInfo" = "✅ {{ .Email }}: Obter informações do usuário do Telegram."
+"getSubLink" = "✅ {{ .Email }}: Get Subscription Link."
 "removedTGUserSuccess" = "✅ {{ .Email }}: Usuário do Telegram removido com sucesso."
 "enableSuccess" = "✅ {{ .Email }}: Ativado com sucesso."
 "disableSuccess" = "✅ {{ .Email }}: Desativado com sucesso."

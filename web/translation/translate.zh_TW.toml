@@ -713,6 +713,7 @@
 "change_comment" = "⚙️💬 評論"
 "ResetAllTraffics" = "重設所有流量"
 "SortedTrafficUsageReport" = "排序過的流量使用報告"
+"subLink" = "🔗 Subscription Link"
 
 
 [tgbot.answers]
@@ -731,6 +732,7 @@
 "clearIpSuccess" = "✅ {{ .Email }}：IP 已成功清除。"
 "getIpLog" = "✅ {{ .Email }}：獲取 IP 日誌。"
 "getUserInfo" = "✅ {{ .Email }}：獲取 Telegram 使用者資訊。"
+"getSubLink" = "✅ {{ .Email }}: Get Subscription Link."
 "removedTGUserSuccess" = "✅ {{ .Email }}：Telegram 使用者已成功移除。"
 "enableSuccess" = "✅ {{ .Email }}：已成功啟用。"
 "disableSuccess" = "✅ {{ .Email }}：已成功禁用。"

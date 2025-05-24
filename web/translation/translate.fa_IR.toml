@@ -711,6 +711,7 @@
 "change_comment" = "⚙️💬 نظر"
 "ResetAllTraffics" = "بازنشانی همه ترافیک‌ها"
 "SortedTrafficUsageReport" = "گزارش استفاده از ترافیک مرتب‌شده"
+"subLink" = "🔗 Subscription Link"
 
 
 [tgbot.answers]
@@ -729,6 +730,7 @@
 "clearIpSuccess" = "✅ {{ .Email }} : آدرس‌ها با موفقیت پاک‌سازی شدند."
 "getIpLog" = "✅ {{ .Email }} : دریافت لاگ آدرس‌های IP."
 "getUserInfo" = "✅ {{ .Email }} : دریافت اطلاعات کاربر تلگرام."
+"getSubLink" = "✅ {{ .Email }}: Get Subscription Link."
 "removedTGUserSuccess" = "✅ {{ .Email }} : کاربر تلگرام با موفقیت حذف شد."
 "enableSuccess" = "✅ {{ .Email }} : با موفقیت فعال شد."
 "disableSuccess" = "✅ {{ .Email }} : با موفقیت غیرفعال شد."

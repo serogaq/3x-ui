@@ -1167,6 +1167,9 @@ func (t *Tgbot) answerCallback(callbackQuery *telego.CallbackQuery, isAdmin bool
 			case "ip_log":
 				t.sendCallbackAnswerTgBot(callbackQuery.ID, t.I18nBot("tgbot.answers.getIpLog", "Email=="+email))
 				t.searchClientIps(chatId, email)
+			case "sub_link":
+				t.sendCallbackAnswerTgBot(callbackQuery.ID, t.I18nBot("tgbot.answers.getSubLink", "Email=="+email))
+				t.clientSubscriptionLink(chatId, email)
 			case "tg_user":
 				t.sendCallbackAnswerTgBot(callbackQuery.ID, t.I18nBot("tgbot.answers.getUserInfo", "Email=="+email))
 				t.clientTelegramUserInfo(chatId, email)
@@ -2355,6 +2358,32 @@ func (t *Tgbot) clientTelegramUserInfo(chatId int64, email string, messageID ...
 	}
 }
 
+func (t *Tgbot) clientSubscriptionLink(chatId int64, email string) {
+	_, client, err := t.inboundService.GetClientByEmail(email)
+	if err != nil {
+		logger.Warning(err)
+		t.SendMsgToTgbot(chatId, t.I18nBot("tgbot.wentWrong"))
+		return
+	}
+	if client == nil || client.SubID == "" {
+		t.SendMsgToTgbot(chatId, t.I18nBot("tgbot.noResult"))
+		return
+	}
+	subURI, err := t.settingService.GetSubURI()
+	if err != nil {
+		logger.Warning(err)
+		t.SendMsgToTgbot(chatId, t.I18nBot("tgbot.wentWrong"))
+		return
+	}
+	link := subURI + client.SubID
+
+	output := ""
+	output += t.I18nBot("tgbot.messages.email", "Email=="+email)
+	output += fmt.Sprintf("%s: %s", t.I18nBot("tgbot.buttons.subLink"), link)
+
+	t.SendMsgToTgbot(chatId, output)
+}
+
 func (t *Tgbot) searchClient(chatId int64, email string, messageID ...int) {
 	traffic, err := t.inboundService.GetClientTrafficByEmail(email)
 	if err != nil {
@@ -2385,6 +2414,9 @@ func (t *Tgbot) searchClient(chatId int64, email string, messageID ...int) {
 		tu.InlineKeyboardRow(
 			tu.InlineKeyboardButton(t.I18nBot("tgbot.buttons.ipLog")).WithCallbackData(t.encodeQuery("ip_log "+email)),
 			tu.InlineKeyboardButton(t.I18nBot("tgbot.buttons.ipLimit")).WithCallbackData(t.encodeQuery("ip_limit "+email)),
+		),
+		tu.InlineKeyboardRow(
+			tu.InlineKeyboardButton(t.I18nBot("tgbot.buttons.subLink")).WithCallbackData(t.encodeQuery("sub_link "+email)),
 		),
 		tu.InlineKeyboardRow(
 			tu.InlineKeyboardButton(t.I18nBot("tgbot.buttons.setTGUser")).WithCallbackData(t.encodeQuery("tg_user "+email)),
