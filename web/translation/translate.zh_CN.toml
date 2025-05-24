@@ -712,6 +712,7 @@
 "ResetAllTraffics" = "重置所有流量"
 "SortedTrafficUsageReport" = "排序的流量使用报告"
 "subLink" = "🔗 Subscription Link"
+"subJsonLink" = "🔗 JSON Link"
 
 
 [tgbot.answers]

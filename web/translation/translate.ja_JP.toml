@@ -712,6 +712,7 @@
 "ResetAllTraffics" = "すべてのトラフィックをリセット"
 "SortedTrafficUsageReport" = "ソートされたトラフィック使用レポート"
 "subLink" = "🔗 Subscription Link"
+"subJsonLink" = "🔗 JSON Link"
 
 
 [tgbot.answers]

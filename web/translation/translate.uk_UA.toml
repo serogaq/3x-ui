@@ -712,6 +712,7 @@
 "ResetAllTraffics" = "Скинути весь трафік"
 "SortedTrafficUsageReport" = "Відсортований звіт про використання трафіку"
 "subLink" = "🔗 Subscription Link"
+"subJsonLink" = "🔗 JSON Link"
 
 
 [tgbot.answers]

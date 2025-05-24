@@ -710,6 +710,7 @@
 "ResetAllTraffics" = "إعادة ضبط جميع الترافيك"
 "SortedTrafficUsageReport" = "تقرير استخدام الترافيك المرتب"
 "subLink" = "🔗 Subscription Link"
+"subJsonLink" = "🔗 JSON Link"
 
 
 [tgbot.answers]

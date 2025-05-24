@@ -2369,17 +2369,26 @@ func (t *Tgbot) clientSubscriptionLink(chatId int64, email string) {
 		t.SendMsgToTgbot(chatId, t.I18nBot("tgbot.noResult"))
 		return
 	}
-	subURI, err := t.settingService.GetSubURI()
-	if err != nil {
-		logger.Warning(err)
-		t.SendMsgToTgbot(chatId, t.I18nBot("tgbot.wentWrong"))
-		return
-	}
-	link := subURI + client.SubID
+       subURI, err := t.settingService.GetSubURI()
+       if err != nil {
+               logger.Warning(err)
+               t.SendMsgToTgbot(chatId, t.I18nBot("tgbot.wentWrong"))
+               return
+       }
+       subJsonURI, err := t.settingService.GetSubJsonURI()
+       if err != nil {
+               logger.Warning(err)
+               t.SendMsgToTgbot(chatId, t.I18nBot("tgbot.wentWrong"))
+               return
+       }
+       link := subURI + client.SubID
+       jsonLink := subJsonURI + client.SubID
 
 	output := ""
 	output += t.I18nBot("tgbot.messages.email", "Email=="+email)
-	output += fmt.Sprintf("%s: %s", t.I18nBot("tgbot.buttons.subLink"), link)
+       output += fmt.Sprintf("%s: %s", t.I18nBot("tgbot.buttons.subLink"), link)
+       output += "\n"
+       output += fmt.Sprintf("%s: %s", t.I18nBot("tgbot.buttons.subJsonLink"), jsonLink)
 
 	t.SendMsgToTgbot(chatId, output)
 }

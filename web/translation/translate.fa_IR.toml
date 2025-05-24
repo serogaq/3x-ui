@@ -712,6 +712,7 @@
 "ResetAllTraffics" = "بازنشانی همه ترافیک‌ها"
 "SortedTrafficUsageReport" = "گزارش استفاده از ترافیک مرتب‌شده"
 "subLink" = "🔗 Subscription Link"
+"subJsonLink" = "🔗 JSON Link"
 
 
 [tgbot.answers]
