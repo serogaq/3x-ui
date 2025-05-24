@@ -47,12 +47,15 @@ jobs:
         id: meta
         env:
           COMMENT_URL: ${{ steps.dep_comment.outputs.url }}
+          DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
         with:
           images: |
             ghcr.io/serogaq/3x-ui
           tags: |
             type=raw,value=deploy-${{ github.run_id }}
           labels: |
+            "org.opencontainers.image.description=${{ env.COMMENT_URL }}"
+          annotations: |
             "org.opencontainers.image.description=${{ env.COMMENT_URL }}"
 
       - name: Set up QEMU
@@ -80,6 +83,7 @@ jobs:
           platforms: linux/amd64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          annotations: ${{ steps.meta.outputs.annotations }}
 
       - name: Set latest commit status as ${{ job.status }}
         uses: myrotvorets/set-commit-status-action@master
