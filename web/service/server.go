@@ -115,8 +115,20 @@ type ServerService struct {
 func (s *ServerService) ResetDailyTraffic() {
 	ioStats, err := net.IOCounters(false)
 	if err == nil && len(ioStats) > 0 {
-		s.dailyBaseSent = ioStats[0].BytesSent
-		s.dailyBaseRecv = ioStats[0].BytesRecv
+		// persist aggregated totals so that restarts do not break daily counters
+		if !s.netBaseLoaded {
+			baseSent, err1 := s.settingService.GetNetTrafficSent()
+			baseRecv, err2 := s.settingService.GetNetTrafficRecv()
+			if err1 == nil && baseSent > ioStats[0].BytesSent {
+				s.netBaseSent = baseSent - ioStats[0].BytesSent
+			}
+			if err2 == nil && baseRecv > ioStats[0].BytesRecv {
+				s.netBaseRecv = baseRecv - ioStats[0].BytesRecv
+			}
+			s.netBaseLoaded = true
+		}
+		s.dailyBaseSent = ioStats[0].BytesSent + s.netBaseSent
+		s.dailyBaseRecv = ioStats[0].BytesRecv + s.netBaseRecv
 	}
 	s.lastDailyReset = time.Now().In(time.Local).Truncate(24 * time.Hour)
 	s.settingService.SetDailyBaseSent(s.dailyBaseSent)
@@ -289,8 +301,10 @@ func (s *ServerService) GetStatus(lastStatus *Status) *Status {
 			s.netBaseLoaded = true
 		}
 
-		status.NetTraffic.Sent = ioStat.BytesSent + s.netBaseSent
-		status.NetTraffic.Recv = ioStat.BytesRecv + s.netBaseRecv
+		currentTotalSent := ioStat.BytesSent + s.netBaseSent
+		currentTotalRecv := ioStat.BytesRecv + s.netBaseRecv
+		status.NetTraffic.Sent = currentTotalSent
+		status.NetTraffic.Recv = currentTotalRecv
 
 		// daily traffic
 		if s.lastDailyReset.IsZero() {
@@ -302,8 +316,8 @@ func (s *ServerService) GetStatus(lastStatus *Status) *Status {
 				s.dailyBaseRecv = baseRecv
 				s.lastDailyReset = time.Unix(lastReset, 0)
 			} else {
-				s.dailyBaseSent = ioStat.BytesSent
-				s.dailyBaseRecv = ioStat.BytesRecv
+				s.dailyBaseSent = currentTotalSent
+				s.dailyBaseRecv = currentTotalRecv
 				s.lastDailyReset = now.In(time.Local).Truncate(24 * time.Hour)
 				s.settingService.SetDailyBaseSent(s.dailyBaseSent)
 				s.settingService.SetDailyBaseRecv(s.dailyBaseRecv)
@@ -312,15 +326,23 @@ func (s *ServerService) GetStatus(lastStatus *Status) *Status {
 		}
 		currentDay := now.In(time.Local).Truncate(24 * time.Hour)
 		if currentDay.After(s.lastDailyReset) {
-			s.dailyBaseSent = ioStat.BytesSent
-			s.dailyBaseRecv = ioStat.BytesRecv
+			s.dailyBaseSent = currentTotalSent
+			s.dailyBaseRecv = currentTotalRecv
 			s.lastDailyReset = currentDay
 			s.settingService.SetDailyBaseSent(s.dailyBaseSent)
 			s.settingService.SetDailyBaseRecv(s.dailyBaseRecv)
 			s.settingService.SetLastDailyReset(s.lastDailyReset.Unix())
+		} else {
+			// adjust if container counters reset
+			if currentTotalSent < s.dailyBaseSent || currentTotalRecv < s.dailyBaseRecv {
+				s.dailyBaseSent = currentTotalSent
+				s.dailyBaseRecv = currentTotalRecv
+				s.settingService.SetDailyBaseSent(s.dailyBaseSent)
+				s.settingService.SetDailyBaseRecv(s.dailyBaseRecv)
+			}
 		}
-		status.NetDaily.Sent = ioStat.BytesSent - s.dailyBaseSent
-		status.NetDaily.Recv = ioStat.BytesRecv - s.dailyBaseRecv
+		status.NetDaily.Sent = currentTotalSent - s.dailyBaseSent
+		status.NetDaily.Recv = currentTotalRecv - s.dailyBaseRecv
 
 		if lastStatus != nil {
 			duration := now.Sub(lastStatus.T)
