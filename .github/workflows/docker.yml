@@ -7,6 +7,7 @@ on:
 
 jobs:
   build:
+    name: Build
     runs-on: ubuntu-22.04
 
     steps:
@@ -15,8 +16,8 @@ jobs:
         submodules: true
    
     - name: Docker meta
-      id: meta
       uses: docker/metadata-action@v5
+      id: meta
       with:
         images: |
           serogaq/3x-ui
