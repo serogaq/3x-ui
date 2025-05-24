@@ -75,10 +75,10 @@ jobs:
         if: always()
         with:
           script: |
-            const name = '${{ github.workflow }}';
+            const name = 'Deploy status';
             const url = '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}';
             const success = '${{ job.status }}' === 'success';
-            const body = `${name}: ${success ? "succeeded ✅\nTag: deploy-${{ github.run_id }}" : 'failed ❌'}\n${url}`;
+            const body = `${name}: ${success ? "succeeded ✅\nTag: deploy-${{ github.run_id }}" : "failed ❌\n" + url}`;
 
             await github.rest.issues.createComment({
               issue_number: context.issue.number,
