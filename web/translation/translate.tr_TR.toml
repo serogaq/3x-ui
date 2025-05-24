@@ -712,6 +712,7 @@
 "ResetAllTraffics" = "Tüm Trafikleri Sıfırla"
 "SortedTrafficUsageReport" = "Sıralı Trafik Kullanım Raporu"
 "subLink" = "🔗 Subscription Link"
+"subJsonLink" = "🔗 JSON Link"
 
 
 [tgbot.answers]

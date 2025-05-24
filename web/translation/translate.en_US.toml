@@ -714,6 +714,7 @@
 "ResetAllTraffics" = "Reset All Traffics"
 "SortedTrafficUsageReport" = "Sorted Traffic Usage Report"
 "subLink" = "🔗 Subscription Link"
+"subJsonLink" = "🔗 JSON Link"
 
 [tgbot.answers]
 "successfulOperation" = "✅ Operation successful!"
