@@ -107,6 +107,9 @@ type ServerService struct {
 	dailyBaseSent  uint64
 	dailyBaseRecv  uint64
 	lastDailyReset time.Time
+	netBaseSent    uint64
+	netBaseRecv    uint64
+	netBaseLoaded  bool
 }
 
 func (s *ServerService) ResetDailyTraffic() {
@@ -119,6 +122,18 @@ func (s *ServerService) ResetDailyTraffic() {
 	s.settingService.SetDailyBaseSent(s.dailyBaseSent)
 	s.settingService.SetDailyBaseRecv(s.dailyBaseRecv)
 	s.settingService.SetLastDailyReset(s.lastDailyReset.Unix())
+}
+
+func (s *ServerService) SaveNetTraffic() {
+	ioStats, err := net.IOCounters(false)
+	if err != nil || len(ioStats) == 0 {
+		return
+	}
+	ioStat := ioStats[0]
+	totalSent := ioStat.BytesSent + s.netBaseSent
+	totalRecv := ioStat.BytesRecv + s.netBaseRecv
+	s.settingService.SetNetTrafficSent(totalSent)
+	s.settingService.SetNetTrafficRecv(totalRecv)
 }
 
 func extractValue(body string, key string) string {
@@ -261,8 +276,21 @@ func (s *ServerService) GetStatus(lastStatus *Status) *Status {
 		logger.Warning("get io counters failed:", err)
 	} else if len(ioStats) > 0 {
 		ioStat := ioStats[0]
-		status.NetTraffic.Sent = ioStat.BytesSent
-		status.NetTraffic.Recv = ioStat.BytesRecv
+
+		if !s.netBaseLoaded {
+			baseSent, err1 := s.settingService.GetNetTrafficSent()
+			baseRecv, err2 := s.settingService.GetNetTrafficRecv()
+			if err1 == nil && baseSent > ioStat.BytesSent {
+				s.netBaseSent = baseSent - ioStat.BytesSent
+			}
+			if err2 == nil && baseRecv > ioStat.BytesRecv {
+				s.netBaseRecv = baseRecv - ioStat.BytesRecv
+			}
+			s.netBaseLoaded = true
+		}
+
+		status.NetTraffic.Sent = ioStat.BytesSent + s.netBaseSent
+		status.NetTraffic.Recv = ioStat.BytesRecv + s.netBaseRecv
 
 		// daily traffic
 		if s.lastDailyReset.IsZero() {

@@ -80,6 +80,8 @@ var defaultValueMap = map[string]string{
 	"dailyBaseSent":               "0",
 	"dailyBaseRecv":               "0",
 	"lastDailyReset":              "0",
+	"netTrafficSent":              "0",
+	"netTrafficRecv":              "0",
 }
 
 type SettingService struct{}
@@ -585,6 +587,30 @@ func (s *SettingService) GetLastDailyReset() (int64, error) {
 
 func (s *SettingService) SetLastDailyReset(ts int64) error {
 	return s.setString("lastDailyReset", strconv.FormatInt(ts, 10))
+}
+
+func (s *SettingService) GetNetTrafficSent() (uint64, error) {
+	str, err := s.getString("netTrafficSent")
+	if err != nil {
+		return 0, err
+	}
+	return strconv.ParseUint(str, 10, 64)
+}
+
+func (s *SettingService) SetNetTrafficSent(value uint64) error {
+	return s.setString("netTrafficSent", strconv.FormatUint(value, 10))
+}
+
+func (s *SettingService) GetNetTrafficRecv() (uint64, error) {
+	str, err := s.getString("netTrafficRecv")
+	if err != nil {
+		return 0, err
+	}
+	return strconv.ParseUint(str, 10, 64)
+}
+
+func (s *SettingService) SetNetTrafficRecv(value uint64) error {
+	return s.setString("netTrafficRecv", strconv.FormatUint(value, 10))
 }
 
 func (s *SettingService) GetIpLimitEnable() (bool, error) {
