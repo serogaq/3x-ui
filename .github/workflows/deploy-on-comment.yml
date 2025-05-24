@@ -27,14 +27,33 @@ jobs:
         with:
           ref: ${{ steps.comment-branch.outputs.head_ref }}
 
+      - name: Create deploy placeholder comment
+        id: dep_comment
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const name = 'Deploy status';
+            const { data: c } = await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `${name}: starting…`
+            })
+            core.setOutput('id', c.id)
+            core.setOutput('url', c.html_url)
+
       - name: Docker meta
         uses: docker/metadata-action@v5
         id: meta
+        env:
+          COMMENT_URL: ${{ steps.dep_comment.outputs.url }}
         with:
           images: |
             ghcr.io/serogaq/3x-ui
           tags: |
             type=raw,value=deploy-${{ github.run_id }}
+          labels: |
+            "org.opencontainers.image.description=${{ env.COMMENT_URL }}"
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -70,19 +89,20 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           status: ${{ job.status }}
 
-      - name: Add comment to PR
+      - name: Finalize deploy comment
         uses: actions/github-script@v6
         if: always()
         with:
           script: |
+            const id = Number('${{ steps.dep_comment.outputs.id }}')
             const name = 'Deploy status';
             const url = '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}';
             const success = '${{ job.status }}' === 'success';
             const body = `${name}: ${success ? "succeeded ✅\nTag: deploy-${{ github.run_id }}" : "failed ❌\n" + url}`;
 
-            await github.rest.issues.createComment({
-              issue_number: context.issue.number,
+            await github.rest.issues.updateComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: body
+              comment_id: id,
+              body
             })
