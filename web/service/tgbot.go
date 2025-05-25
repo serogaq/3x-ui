@@ -1888,6 +1888,11 @@ func (t *Tgbot) SendReport() {
 	if err == nil && backupEnable {
 		t.SendBackupToAdmins()
 	}
+
+	// reset traffic counters after sending daily report
+	if err == nil && runTime == "@daily" {
+		t.serverService.ResetDailyTraffic("telegram report")
+	}
 }
 
 func (t *Tgbot) SendBackupToAdmins() {

@@ -1,9 +1,6 @@
 package job
 
-import (
-	"x-ui/logger"
-	"x-ui/web/service"
-)
+import "x-ui/web/service"
 
 type LoginStatus byte
 
@@ -30,13 +27,4 @@ func (j *StatsNotifyJob) Run() {
 	}
 
 	j.tgbotService.SendReport()
-
-	runtime, err := j.settingService.GetTgbotRuntime()
-	if err != nil {
-		logger.Warning("StatsNotifyJob: get runtime failed", err)
-	}
-
-	if err == nil && runtime == "@daily" {
-		j.serverService.ResetDailyTraffic("telegram report")
-	}
 }
