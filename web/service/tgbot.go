@@ -1884,15 +1884,15 @@ func (t *Tgbot) SendReport() {
 	t.sendExhaustedToAdmins()
 	t.notifyExhausted()
 
-        backupEnable, err := t.settingService.GetTgBotBackup()
-        if err == nil && backupEnable {
-                t.SendBackupToAdmins()
-        }
+	backupEnable, err := t.settingService.GetTgBotBackup()
+	if err == nil && backupEnable {
+		t.SendBackupToAdmins()
+	}
 
-       // reset traffic counters after sending daily report
-       if err == nil && runTime == "@daily" {
-               t.serverService.ResetDailyTraffic("telegram report")
-       }
+	// reset traffic counters after sending daily report
+	if err == nil && runTime == "@daily" {
+		t.serverService.ResetDailyTraffic("telegram report")
+	}
 }
 
 func (t *Tgbot) SendBackupToAdmins() {

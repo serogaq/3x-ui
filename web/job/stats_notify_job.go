@@ -22,9 +22,9 @@ func NewStatsNotifyJob() *StatsNotifyJob {
 
 // Here run is a interface method of Job interface
 func (j *StatsNotifyJob) Run() {
-        if !j.xrayService.IsXrayRunning() {
-                return
-        }
+	if !j.xrayService.IsXrayRunning() {
+		return
+	}
 
-       j.tgbotService.SendReport()
+	j.tgbotService.SendReport()
 }
