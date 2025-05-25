@@ -37,6 +37,6 @@ func (j *StatsNotifyJob) Run() {
 	}
 
 	if err == nil && runtime == "@daily" {
-		j.serverService.ResetDailyTraffic()
+		j.serverService.ResetDailyTraffic("telegram report")
 	}
 }

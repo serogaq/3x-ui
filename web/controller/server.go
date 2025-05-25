@@ -71,7 +71,7 @@ func (a *ServerController) startTask() {
 }
 
 func (a *ServerController) ResetDailyTraffic() {
-	a.serverService.ResetDailyTraffic()
+	a.serverService.ResetDailyTraffic("manual")
 }
 
 func (a *ServerController) status(c *gin.Context) {
