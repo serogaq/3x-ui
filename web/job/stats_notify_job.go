@@ -1,9 +1,6 @@
 package job
 
-import (
-	"x-ui/logger"
-	"x-ui/web/service"
-)
+import "x-ui/web/service"
 
 type LoginStatus byte
 
@@ -25,18 +22,9 @@ func NewStatsNotifyJob() *StatsNotifyJob {
 
 // Here run is a interface method of Job interface
 func (j *StatsNotifyJob) Run() {
-	if !j.xrayService.IsXrayRunning() {
-		return
-	}
+        if !j.xrayService.IsXrayRunning() {
+                return
+        }
 
-	j.tgbotService.SendReport()
-
-	runtime, err := j.settingService.GetTgbotRuntime()
-	if err != nil {
-		logger.Warning("StatsNotifyJob: get runtime failed", err)
-	}
-
-	if err == nil && runtime == "@daily" {
-		j.serverService.ResetDailyTraffic("telegram report")
-	}
+       j.tgbotService.SendReport()
 }
