@@ -1870,13 +1870,13 @@ func (t *Tgbot) SendMsgToTgbotAdmins(msg string, replyMarkup ...telego.ReplyMark
 }
 
 func (t *Tgbot) SendReport() {
-        runTime, err := t.settingService.GetTgbotRuntime()
-        if err == nil && len(runTime) > 0 {
-                msg := ""
-                msg += t.I18nBot("tgbot.messages.report", "RunTime=="+runTime)
-                msg += t.I18nBot("tgbot.messages.datetime", "DateTime=="+time.Now().Format("2006-01-02 15:04:05"))
-                t.SendMsgToTgbotAdmins(msg)
-        }
+	runTime, err := t.settingService.GetTgbotRuntime()
+	if err == nil && len(runTime) > 0 {
+		msg := ""
+		msg += t.I18nBot("tgbot.messages.report", "RunTime=="+runTime)
+		msg += t.I18nBot("tgbot.messages.datetime", "DateTime=="+time.Now().Format("2006-01-02 15:04:05"))
+		t.SendMsgToTgbotAdmins(msg)
+	}
 
 	info := t.sendServerUsage()
 	t.SendMsgToTgbotAdmins(info)
