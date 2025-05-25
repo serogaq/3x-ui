@@ -112,7 +112,8 @@ type ServerService struct {
 	netBaseLoaded  bool
 }
 
-func (s *ServerService) ResetDailyTraffic() {
+func (s *ServerService) ResetDailyTraffic(reason string) {
+	logger.Infof("Daily traffic counters reset due to %s", reason)
 	ioStats, err := net.IOCounters(false)
 	if err == nil && len(ioStats) > 0 {
 		// persist aggregated totals so that restarts do not break daily counters

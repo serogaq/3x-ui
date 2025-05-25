@@ -11,5 +11,5 @@ func NewResetDailyTrafficJob() *ResetDailyTrafficJob {
 }
 
 func (j *ResetDailyTrafficJob) Run() {
-	j.server.ResetDailyTraffic()
+	j.server.ResetDailyTraffic("cron job")
 }
