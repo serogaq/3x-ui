@@ -307,6 +307,18 @@ func (s *ServerService) GetStatus(lastStatus *Status) *Status {
 		status.NetTraffic.Sent = currentTotalSent
 		status.NetTraffic.Recv = currentTotalRecv
 
+		// check if another instance reset daily counters
+		dbLastReset, err3 := s.settingService.GetLastDailyReset()
+		if err3 == nil && dbLastReset > s.lastDailyReset.Unix() {
+			baseSent, err1 := s.settingService.GetDailyBaseSent()
+			baseRecv, err2 := s.settingService.GetDailyBaseRecv()
+			if err1 == nil && err2 == nil {
+				s.dailyBaseSent = baseSent
+				s.dailyBaseRecv = baseRecv
+				s.lastDailyReset = time.Unix(dbLastReset, 0)
+			}
+		}
+
 		// daily traffic
 		if s.lastDailyReset.IsZero() {
 			baseSent, err1 := s.settingService.GetDailyBaseSent()
