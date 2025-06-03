@@ -1937,8 +1937,8 @@ func (t *Tgbot) sendServerUsage() string {
 func (t *Tgbot) prepareServerUsageInfo() string {
 	info, ipv4, ipv6 := "", "", ""
 
-	// get latest status of server
-	t.lastStatus = t.serverService.GetStatus(t.lastStatus)
+       // get latest status of server
+       t.lastStatus = t.serverService.GetStatus(t.lastStatus)
 	onlines := p.GetOnlineClients()
 
 	info += t.I18nBot("tgbot.messages.hostname", "Hostname=="+hostname)

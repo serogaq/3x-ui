@@ -337,23 +337,13 @@ func (s *ServerService) GetStatus(lastStatus *Status) *Status {
 				s.settingService.SetLastDailyReset(s.lastDailyReset.Unix())
 			}
 		}
-		currentDay := now.In(time.Local).Truncate(24 * time.Hour)
-		if currentDay.After(s.lastDailyReset) {
-			s.dailyBaseSent = currentTotalSent
-			s.dailyBaseRecv = currentTotalRecv
-			s.lastDailyReset = currentDay
-			s.settingService.SetDailyBaseSent(s.dailyBaseSent)
-			s.settingService.SetDailyBaseRecv(s.dailyBaseRecv)
-			s.settingService.SetLastDailyReset(s.lastDailyReset.Unix())
-		} else {
-			// adjust if container counters reset
-			if currentTotalSent < s.dailyBaseSent || currentTotalRecv < s.dailyBaseRecv {
-				s.dailyBaseSent = currentTotalSent
-				s.dailyBaseRecv = currentTotalRecv
-				s.settingService.SetDailyBaseSent(s.dailyBaseSent)
-				s.settingService.SetDailyBaseRecv(s.dailyBaseRecv)
-			}
-		}
+               // adjust if container counters reset
+               if currentTotalSent < s.dailyBaseSent || currentTotalRecv < s.dailyBaseRecv {
+                       s.dailyBaseSent = currentTotalSent
+                       s.dailyBaseRecv = currentTotalRecv
+                       s.settingService.SetDailyBaseSent(s.dailyBaseSent)
+                       s.settingService.SetDailyBaseRecv(s.dailyBaseRecv)
+               }
 		status.NetDaily.Sent = currentTotalSent - s.dailyBaseSent
 		status.NetDaily.Recv = currentTotalRecv - s.dailyBaseRecv
 
