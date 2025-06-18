@@ -227,9 +227,6 @@
                 <a-col :sm="24" :lg="12">
                   <a-card title='3X-UI' hoverable>
                     <a-tooltip>
-                      <a-tag color="green">
-                        <span>v{{ .cur_ver }}</span>
-                      </a-tag>
                       <template slot="title">
                         {{ if .custom_version }}v{{ .custom_version }}{{ else }}v{{ .cur_ver }}{{ end }}
                       </template>
