@@ -179,11 +179,20 @@ reset_user() {
         fi
         return 0
     fi
+    
     read -rp "Please set the login username [default is a random username]: " config_account
     [[ -z $config_account ]] && config_account=$(date +%s%N | md5sum | cut -c 1-8)
     read -rp "Please set the login password [default is a random password]: " config_password
     [[ -z $config_password ]] && config_password=$(date +%s%N | md5sum | cut -c 1-8)
-    /usr/local/x-ui/x-ui setting -username ${config_account} -password ${config_password} >/dev/null 2>&1
+
+    read -rp "Do you want to disable currently configured two-factor authentication? (y/n): " twoFactorConfirm
+    if [[ $twoFactorConfirm != "y" && $twoFactorConfirm != "Y" ]]; then
+        /usr/local/x-ui/x-ui setting -username ${config_account} -password ${config_password} -resetTwoFactor false >/dev/null 2>&1
+    else
+        /usr/local/x-ui/x-ui setting -username ${config_account} -password ${config_password} -resetTwoFactor true >/dev/null 2>&1
+        echo -e "Two factor authentication has been disabled."
+    fi
+    
     echo -e "Panel login username has been reset to: ${green} ${config_account} ${plain}"
     echo -e "Panel login password has been reset to: ${green} ${config_password} ${plain}"
     echo -e "${green} Please use the new login username and password to access the X-UI panel. Also remember them! ${plain}"
@@ -474,7 +483,7 @@ enable_bbr() {
     ubuntu | debian | armbian)
         apt-get update && apt-get install -yqq --no-install-recommends ca-certificates
         ;;
-    centos | almalinux | rocky | ol)
+    centos | rhel | almalinux | rocky | ol)
         yum -y update && yum -y install ca-certificates
         ;;
     fedora | amzn | virtuozzo)
@@ -995,7 +1004,7 @@ ssl_cert_issue() {
     ubuntu | debian | armbian)
         apt update && apt install socat -y
         ;;
-    centos | almalinux | rocky | ol)
+    centos | rhel | almalinux | rocky | ol)
         yum -y update && yum -y install socat
         ;;
     fedora | amzn | virtuozzo)
@@ -1511,7 +1520,7 @@ install_iplimit() {
         debian | armbian)
             apt update && apt install fail2ban -y
             ;;
-        centos | almalinux | rocky | ol)
+        centos | rhel | almalinux | rocky | ol)
             yum update -y && yum install epel-release -y
             yum -y install fail2ban
             ;;
@@ -1591,7 +1600,7 @@ remove_iplimit() {
             apt-get purge -y fail2ban -y
             apt-get autoremove -y
             ;;
-        centos | almalinux | rocky | ol)
+        centos | rhel | almalinux | rocky | ol)
             yum remove fail2ban -y
             yum autoremove -y
             ;;
