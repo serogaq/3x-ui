@@ -221,10 +221,20 @@ func (s *ServerService) GetStatus(lastStatus *Status) *Status {
 	}
 
 	// IP fetching with caching
-	if s.cachedIPv4 == "" || s.cachedIPv6 == "" {
+	if s.cachedIPv4 == "" {
 		s.cachedIPv4 = getPublicIP("https://api.ipify.org")
-		s.cachedIPv6 = getPublicIP("https://api6.ipify.org")
+		if s.cachedIPv4 == "" {
+			s.cachedIPv4 = getPublicIP("https://4.ident.me")
+		}
 	}
+
+	if s.cachedIPv6 == "" {
+		s.cachedIPv6 = getPublicIP("https://api6.ipify.org")
+		if s.cachedIPv6 == "" {
+			s.cachedIPv6 = getPublicIP("https://6.ident.me")
+		}
+	}
+
 	status.PublicIP.IPv4 = s.cachedIPv4
 	status.PublicIP.IPv6 = s.cachedIPv6
 
