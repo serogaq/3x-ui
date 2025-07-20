@@ -722,69 +722,14 @@ class URLBuilder {
 class LanguageManager {
     static supportedLanguages = [
         {
-            name: "العربية",
-            value: "ar-EG",
-            icon: "🇪🇬",
-        },
-        {
             name: "English",
             value: "en-US",
             icon: "🇺🇸",
         },
         {
-            name: "فارسی",
-            value: "fa-IR",
-            icon: "🇮🇷",
-        },
-        {
-            name: "简体中文",
-            value: "zh-CN",
-            icon: "🇨🇳",
-        },
-        {
-            name: "繁體中文",
-            value: "zh-TW",
-            icon: "🇹🇼",
-        },
-        {
-            name: "日本語",
-            value: "ja-JP",
-            icon: "🇯🇵",
-        },
-        {
             name: "Русский",
             value: "ru-RU",
             icon: "🇷🇺",
-        },
-        {
-            name: "Tiếng Việt",
-            value: "vi-VN",
-            icon: "🇻🇳",
-        },
-        {
-            name: "Español",
-            value: "es-ES",
-            icon: "🇪🇸",
-        },
-        {
-            name: "Indonesian",
-            value: "id-ID",
-            icon: "🇮🇩",
-        },
-        {
-            name: "Український",
-            value: "uk-UA",
-            icon: "🇺🇦",
-        },
-        {
-            name: "Türkçe",
-            value: "tr-TR",
-            icon: "🇹🇷",
-        },
-        {
-            name: "Português",
-            value: "pt-BR",
-            icon: "🇧🇷",
         }
     ]
 
@@ -796,16 +741,7 @@ class LanguageManager {
                 lang = window.navigator.language || window.navigator.userLanguage;
 
                 const simularLangs = [
-                    ["ar", this.supportedLanguages[0].value],
-                    ["fa", this.supportedLanguages[2].value],
-                    ["ja", this.supportedLanguages[5].value],
-                    ["ru", this.supportedLanguages[6].value],
-                    ["vi", this.supportedLanguages[7].value],
-                    ["es", this.supportedLanguages[8].value],
-                    ["id", this.supportedLanguages[9].value],
-                    ["uk", this.supportedLanguages[10].value],
-                    ["tr", this.supportedLanguages[11].value],
-                    ["pt", this.supportedLanguages[12].value],
+                    ["ru", this.supportedLanguages[1].value],
                 ]
 
                 simularLangs.forEach((pair) => {
