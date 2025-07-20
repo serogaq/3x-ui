@@ -3,14 +3,8 @@ set -euo pipefail
 
 TARGETARCH=${TARGETARCH:-$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')}
 BUILD_WITH_ANTIZAPRET=${BUILD_WITH_ANTIZAPRET:-0}
+GO_VERSION=${GO_VERSION:-1.24.4}
 export DEBIAN_FRONTEND=noninteractive
-
-apt update 
-apt install --assume-yes curl wget unzip procps file bsdmainutils busybox
-
-if [ "$TARGETARCH" == "arm64" ]; then
-  apt install gcc-aarch64-linux-gnu
-fi
 
 export_postman_collection() {
   local id="$1"
@@ -18,6 +12,20 @@ export_postman_collection() {
   local url="https://www.postman.com/collections/${id}?format=2.1"
   curl -sSL "$url" -o "$out"
 }
+
+apt update
+apt install --assume-yes curl wget unzip procps file bsdmainutils busybox
+
+if [ "$TARGETARCH" == "arm64" ]; then
+  apt install gcc-aarch64-linux-gnu
+fi
+
+go install "golang.org/dl/go${GO_VERSION}@latest"
+"$(go env GOPATH)/bin/go${GO_VERSION}" download
+export PATH="$(go env GOPATH)/bin:$PATH"
+ln -sf "$(go env GOPATH)/bin/go${GO_VERSION}" "$(go env GOPATH)/bin/go"
+
+go version
 
 go mod download
 
