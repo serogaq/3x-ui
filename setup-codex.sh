@@ -3,7 +3,7 @@ set -euo pipefail
 
 TARGETARCH=${TARGETARCH:-$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')}
 BUILD_WITH_ANTIZAPRET=${BUILD_WITH_ANTIZAPRET:-0}
-GO_VERSION=${GO_VERSION:-1.24.4}
+GO_VERSION=${GO_VERSION:-1.24.5}
 export DEBIAN_FRONTEND=noninteractive
 
 export_postman_collection() {
@@ -32,7 +32,7 @@ go mod download
 mkdir -p x-ui/bin
 cd x-ui/bin
 
-Xray_URL="https://github.com/XTLS/Xray-core/releases/download/v25.6.8/"
+Xray_URL="https://github.com/XTLS/Xray-core/releases/download/v25.7.24/"
 if [ "$TARGETARCH" == "amd64" ]; then
   wget -q ${Xray_URL}Xray-linux-64.zip
   unzip Xray-linux-64.zip
