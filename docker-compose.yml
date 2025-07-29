@@ -63,8 +63,11 @@ services:
     restart: unless-stopped
     sysctls:
       - net.ipv4.tcp_fastopen=3
-    cap_add:
-      - NET_ADMIN
+      - net.ipv4.conf.all.rp_filter=0
+      - net.ipv4.conf.default.rp_filter=0
+    privileged: true
+    devices:
+      - /dev/net/tun:/dev/net/tun
 
 networks:
   traefik:
