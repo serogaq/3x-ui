@@ -61,6 +61,10 @@ services:
       XUI_LOG_LEVEL: "${XUI_LOG_LEVEL:-info}"
     tty: true
     restart: unless-stopped
+    sysctls:
+      - net.ipv4.tcp_fastopen=3
+    cap_add:
+      - NET_ADMIN
 
 networks:
   traefik:
