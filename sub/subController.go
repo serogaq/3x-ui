@@ -6,6 +6,8 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+
+	"x-ui/database/model"
 )
 
 type SUBController struct {
@@ -85,6 +87,18 @@ func (a *SUBController) subs(c *gin.Context) {
 			host = c.Request.Host
 		}
 	}
+	info := &model.ClientDevice{
+		Hwid:        c.GetHeader("X-Hwid"),
+		DeviceOS:    c.GetHeader("X-Device-Os"),
+		VerOS:       c.GetHeader("X-Ver-Os"),
+		DeviceModel: c.GetHeader("X-Device-Model"),
+		UserAgent:   c.GetHeader("User-Agent"),
+		IPs:         c.GetHeader("X-Real-IP"),
+	}
+	if info.IPs == "" {
+		info.IPs = c.ClientIP()
+	}
+	a.subService.SaveDeviceInfo(subId, info)
 	supportUrl := a.subSupportUrl
 	profileWebPageUrl := a.subProfileWebPageUrl
 	happRouting := a.subHappRouting
@@ -139,6 +153,18 @@ func (a *SUBController) subJsons(c *gin.Context) {
 			host = c.Request.Host
 		}
 	}
+	info := &model.ClientDevice{
+		Hwid:        c.GetHeader("X-Hwid"),
+		DeviceOS:    c.GetHeader("X-Device-Os"),
+		VerOS:       c.GetHeader("X-Ver-Os"),
+		DeviceModel: c.GetHeader("X-Device-Model"),
+		UserAgent:   c.GetHeader("User-Agent"),
+		IPs:         c.GetHeader("X-Real-IP"),
+	}
+	if info.IPs == "" {
+		info.IPs = c.ClientIP()
+	}
+	a.subService.SaveDeviceInfo(subId, info)
 	supportUrl := a.subSupportUrl
 	profileWebPageUrl := a.subProfileWebPageUrl
 	happRouting := a.subHappRouting

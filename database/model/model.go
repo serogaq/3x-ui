@@ -2,6 +2,7 @@ package model
 
 import (
 	"fmt"
+	"time"
 
 	"x-ui/util/json_util"
 	"x-ui/xray"
@@ -60,6 +61,18 @@ type InboundClientIps struct {
 	Id          int    `json:"id" gorm:"primaryKey;autoIncrement"`
 	ClientEmail string `json:"clientEmail" form:"clientEmail" gorm:"unique"`
 	Ips         string `json:"ips" form:"ips"`
+}
+
+type ClientDevice struct {
+	Id          int       `json:"id" gorm:"primaryKey;autoIncrement"`
+	ClientEmail string    `json:"clientEmail" form:"clientEmail"`
+	Hwid        string    `json:"hwid" form:"hwid"`
+	DeviceOS    string    `json:"deviceOs" form:"deviceOs"`
+	VerOS       string    `json:"verOs" form:"verOs"`
+	DeviceModel string    `json:"deviceModel" form:"deviceModel"`
+	UserAgent   string    `json:"userAgent" form:"userAgent"`
+	IPs         string    `json:"ips" form:"ips"`
+	CreatedAt   time.Time `json:"createdAt"`
 }
 
 type HistoryOfSeeders struct {
