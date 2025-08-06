@@ -28,7 +28,10 @@
     show(email) {
       this.visible = true;
       refreshDevices(email).then((list) => {
-        this.list = list;
+        this.list = list.map((d) => ({
+          ...d,
+          createdAt: moment(d.createdAt).format('DD.MM.YY HH:mm'),
+        }));
         this.title = `${baseDevicesTitle} (${list.length})`;
       });
     },
