@@ -28,17 +28,20 @@ go mod download
 TOOLCHAIN_URL=""
 MUSL_CC_HOST="https://github.com/musl-cc/musl.cc/releases/download/v0.0.1"
 if [ "$TARGETARCH" == "amd64" ]; then
-  TOOLCHAIN_URL="$MUSL_CC_HOST/x86_64-linux-musl-cross.tgz"
+  TOOLCHAIN_URL="$MUSL_CC_HOST/x86_64-linux-musl-native.tgz"
 elif [ "$TARGETARCH" == "arm64" ]; then
-  TOOLCHAIN_URL="$MUSL_CC_HOST/aarch64-linux-musl-cross.tgz"
+  TOOLCHAIN_URL="$MUSL_CC_HOST/aarch64-linux-musl-native.tgz"
 fi
 echo "Downloading musl toolchain for ${TARGETARCH}"
 curl -LO "$TOOLCHAIN_URL"
+ls -lh x86_64-linux-musl-native.tgz
+file x86_64-linux-musl-native.tgz
 tar -xf *.tgz
-TOOLCHAIN_DIR=$(find . -maxdepth 1 -type d -name "*-cross" | head -n1)
+TOOLCHAIN_DIR=$(find . -maxdepth 1 -type d -name "*-native" | head -n1)
 TOOLCHAIN_DIR=$(realpath "$TOOLCHAIN_DIR")
 export PATH="$TOOLCHAIN_DIR/bin:$PATH"
 export CC=$(find $TOOLCHAIN_DIR/bin -name '*-gcc' | head -n1)
+chmod +x $CC
 echo "Using CC=$CC"
 
 mkdir -p x-ui/bin
