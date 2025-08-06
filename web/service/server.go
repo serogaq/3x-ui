@@ -2,6 +2,7 @@ package service
 
 import (
 	"archive/zip"
+	"bufio"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -481,7 +482,7 @@ func (s *ServerService) GetXrayVersions() ([]string, error) {
 			continue
 		}
 
-		if major > 25 || (major == 25 && minor > 6) || (major == 25 && minor == 6 && patch >= 8) {
+		if major > 25 || (major == 25 && minor > 8) || (major == 25 && minor == 8 && patch >= 3) {
 			versions = append(versions, release.TagName)
 		}
 	}
@@ -683,6 +684,81 @@ func (s *ServerService) GetErrorLog(count string, grep string) []string {
 	} else {
 		return []string{"Error Log disabled!"}
 	}
+}
+
+func (s *ServerService) GetXrayLogs(
+	count string,
+	filter string,
+	showDirect string,
+	showBlocked string,
+	showProxy string,
+	freedoms []string,
+	blackholes []string) []string {
+
+	countInt, _ := strconv.Atoi(count)
+	var lines []string
+
+	pathToAccessLog, err := xray.GetAccessLogPath()
+	if err != nil {
+		return lines
+	}
+
+	file, err := os.Open(pathToAccessLog)
+	if err != nil {
+		return lines
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+
+		if line == "" || strings.Contains(line, "api -> api") {
+			//skipping empty lines and api calls 
+			continue
+		}
+
+		if filter != "" && !strings.Contains(line, filter) {
+			//applying filter if it's not empty
+			continue
+		}
+
+		//adding suffixes to further distinguish entries by outbound
+		if hasSuffix(line, freedoms) {
+			if showDirect == "false" {
+				continue
+			}
+			line = line + " f"
+		} else if hasSuffix(line, blackholes) {
+			if showBlocked == "false" {
+				continue
+			}
+			line = line + " b"
+		} else {
+			if showProxy == "false" {
+				continue
+			}
+			line = line + " p"
+		}
+
+		lines = append(lines, line)
+	}
+
+	if len(lines) > countInt {
+		lines = lines[len(lines)-countInt:]
+	}
+
+	return lines
+}
+
+func hasSuffix(line string, suffixes []string) bool {
+	for _, sfx := range suffixes {
+		if strings.HasSuffix(line, sfx+"]") {
+			return true
+		}
+	}
+	return false
 }
 
 func (s *ServerService) GetConfigJson() (any, error) {
@@ -946,4 +1022,28 @@ func (s *ServerService) GetNewmldsa65() (any, error) {
 	}
 
 	return keyPair, nil
+}
+
+func (s *ServerService) GetNewEchCert(sni string) (interface{}, error) {
+	// Run the command
+	cmd := exec.Command(xray.GetBinaryPath(), "tls", "ech", "--serverName", sni)
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	err := cmd.Run()
+	if err != nil {
+		return nil, err
+	}
+
+	lines := strings.Split(out.String(), "\n")
+	if len(lines) < 4 {
+		return nil, common.NewError("invalid ech cert")
+	}
+
+	configList := lines[1]
+	serverKeys := lines[3]
+
+	return map[string]interface{}{
+		"echServerKeys": serverKeys,
+		"echConfigList": configList,
+	}, nil
 }

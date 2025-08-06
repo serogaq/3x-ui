@@ -8,7 +8,7 @@ on:
 jobs:
   build:
     name: Build
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
@@ -16,8 +16,8 @@ jobs:
         submodules: true
    
     - name: Docker meta
-      uses: docker/metadata-action@v5
       id: meta
+      uses: docker/metadata-action@v5
       with:
         images: |
           serogaq/3x-ui
