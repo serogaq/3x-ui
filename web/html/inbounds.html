@@ -681,6 +681,7 @@
 {{template "modals/inboundInfoModal"}}
 {{template "modals/clientsModal"}}
 {{template "modals/clientsBulkModal"}}
+{{template "modals/devicesModal"}}
 <script>
     const columns = [{
         title: "ID",
@@ -1330,6 +1331,16 @@
                 }
                 newDbInbound = this.checkFallback(dbInbound);
                 infoModal.show(newDbInbound, index);
+            },
+            showDevices(dbInboundId, client) {
+                dbInbound = this.dbInbounds.find(row => row.id === dbInboundId);
+                if (dbInbound.isMultiUser()) {
+                    inbound = dbInbound.toInbound();
+                    clients = inbound.clients;
+                    index = this.findIndexOfClient(dbInbound.protocol, clients, client);
+                    client = clients[index];
+                }
+                devicesModal.show(client.email);
             },
             switchEnable(dbInboundId,state) {
               dbInbound = this.dbInbounds.find(row => row.id === dbInboundId);

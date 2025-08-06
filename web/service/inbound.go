@@ -1906,6 +1906,46 @@ func (s *InboundService) ClearClientIps(clientEmail string) error {
 	return nil
 }
 
+func (s *InboundService) SaveClientDeviceInfo(email string, device *model.ClientDevice) error {
+	db := database.GetDB()
+	cd := *device
+	cd.ClientEmail = email
+	var existing model.ClientDevice
+	err := db.Model(model.ClientDevice{}).Where(
+		"client_email = ? AND hwid = ? AND device_os = ? AND ver_os = ? AND device_model = ? AND user_agent = ?",
+		cd.ClientEmail, cd.Hwid, cd.DeviceOS, cd.VerOS, cd.DeviceModel, cd.UserAgent,
+	).First(&existing).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return db.Create(&cd).Error
+		}
+		return err
+	}
+
+	ips := strings.Split(existing.IPs, ",")
+	for _, ip := range ips {
+		if ip == cd.IPs {
+			return nil
+		}
+	}
+	if existing.IPs == "" {
+		existing.IPs = cd.IPs
+	} else {
+		existing.IPs = existing.IPs + "," + cd.IPs
+	}
+	return db.Model(&existing).Update("ips", existing.IPs).Error
+}
+
+func (s *InboundService) GetClientDevices(email string) ([]model.ClientDevice, error) {
+	db := database.GetDB()
+	var devices []model.ClientDevice
+	err := db.Model(model.ClientDevice{}).Where("client_email = ?", email).Order("id desc").Find(&devices).Error
+	if err != nil {
+		return nil, err
+	}
+	return devices, nil
+}
+
 func (s *InboundService) SearchInbounds(query string) ([]*model.Inbound, error) {
 	db := database.GetDB()
 	var inbounds []*model.Inbound

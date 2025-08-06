@@ -104,6 +104,24 @@ func (s *SubService) GetSubs(subId string, host string) ([]string, string, error
 	return result, header, nil
 }
 
+func (s *SubService) SaveDeviceInfo(subId string, device *model.ClientDevice) {
+	inbounds, err := s.getInboundsBySubId(subId)
+	if err != nil {
+		return
+	}
+	for _, inbound := range inbounds {
+		clients, err := s.inboundService.GetClients(inbound)
+		if err != nil || clients == nil {
+			continue
+		}
+		for _, client := range clients {
+			if client.Enable && client.SubID == subId {
+				s.inboundService.SaveClientDeviceInfo(client.Email, device)
+			}
+		}
+	}
+}
+
 func (s *SubService) getInboundsBySubId(subId string) ([]*model.Inbound, error) {
 	db := database.GetDB()
 	var inbounds []*model.Inbound

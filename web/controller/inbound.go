@@ -36,6 +36,7 @@ func (a *InboundController) initRouter(g *gin.RouterGroup) {
 	g.POST("/update/:id", a.updateInbound)
 	g.POST("/clientOnlineIps/:email", a.getClientOnlineIPs)
 	g.POST("/clientIps/:email", a.getClientIps)
+	g.POST("/clientDevices/:email", a.getClientDevices)
 	g.POST("/clearClientIps/:email", a.clearClientIps)
 	g.POST("/addClient", a.addInboundClient)
 	g.POST("/:id/delClient/:clientId", a.delInboundClient)
@@ -188,6 +189,16 @@ func (a *InboundController) getClientIps(c *gin.Context) {
 	}
 
 	jsonObj(c, ips, nil)
+}
+
+func (a *InboundController) getClientDevices(c *gin.Context) {
+	email := c.Param("email")
+	devices, err := a.inboundService.GetClientDevices(email)
+	if err != nil {
+		jsonObj(c, []model.ClientDevice{}, err)
+		return
+	}
+	jsonObj(c, devices, nil)
 }
 
 func (a *InboundController) clearClientIps(c *gin.Context) {
