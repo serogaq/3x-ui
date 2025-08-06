@@ -5,6 +5,8 @@ TARGETARCH=${TARGETARCH:-$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')}
 BUILD_WITH_ANTIZAPRET=${BUILD_WITH_ANTIZAPRET:-0}
 GO_VERSION=${GO_VERSION:-1.24.5}
 export DEBIAN_FRONTEND=noninteractive
+export CGO_ENABLED=1
+export GOOS=linux
 
 export_postman_collection() {
   local id="$1"
@@ -14,11 +16,11 @@ export_postman_collection() {
 }
 
 apt update
-apt install --assume-yes curl wget unzip procps file bsdmainutils busybox
+apt install --assume-yes curl wget unzip procps file bsdmainutils busybox libc6-dev
 
-if [ "$TARGETARCH" == "arm64" ]; then
-  apt install gcc-aarch64-linux-gnu
-fi
+#if [ "$TARGETARCH" == "arm64" ]; then
+#  apt install gcc-aarch64-linux-gnu
+#fi
 
 go install "golang.org/dl/go${GO_VERSION}@latest"
 "$(go env GOPATH)/bin/go${GO_VERSION}" download
@@ -29,10 +31,26 @@ go version
 
 go mod download
 
+TOOLCHAIN_URL=""
+MUSL_CC_HOST="https://github.com/musl-cc/musl.cc/releases/download/v0.0.1"
+if [ "$TARGETARCH" == "amd64" ]; then
+  TOOLCHAIN_URL="$MUSL_CC_HOST/x86_64-linux-musl-cross.tgz"
+elif [ "$TARGETARCH" == "arm64" ]; then
+  TOOLCHAIN_URL="$MUSL_CC_HOST/aarch64-linux-musl-cross.tgz"
+fi
+echo "Downloading musl toolchain for ${TARGETARCH}"
+curl -LO "$TOOLCHAIN_URL"
+tar -xf *.tgz
+TOOLCHAIN_DIR=$(find . -maxdepth 1 -type d -name "*-cross" | head -n1)
+TOOLCHAIN_DIR=$(realpath "$TOOLCHAIN_DIR")
+export PATH="$TOOLCHAIN_DIR/bin:$PATH"
+export CC=$(find $TOOLCHAIN_DIR/bin -name '*-gcc' | head -n1)
+echo "Using CC=$CC"
+
 mkdir -p x-ui/bin
 cd x-ui/bin
 
-Xray_URL="https://github.com/XTLS/Xray-core/releases/download/v25.7.26/"
+Xray_URL="https://github.com/XTLS/Xray-core/releases/download/v25.8.3/"
 if [ "$TARGETARCH" == "amd64" ]; then
   wget -q ${Xray_URL}Xray-linux-64.zip
   unzip Xray-linux-64.zip
