@@ -34,8 +34,6 @@ elif [ "$TARGETARCH" == "arm64" ]; then
 fi
 echo "Downloading musl toolchain for ${TARGETARCH}"
 curl -LO "$TOOLCHAIN_URL"
-ls -lh x86_64-linux-musl-native.tgz
-file x86_64-linux-musl-native.tgz
 tar -xf *.tgz
 TOOLCHAIN_DIR=$(find . -maxdepth 1 -type d -name "*-native" | head -n1)
 TOOLCHAIN_DIR=$(realpath "$TOOLCHAIN_DIR")
