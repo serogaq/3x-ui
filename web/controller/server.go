@@ -153,6 +153,7 @@ func (a *ServerController) getErrorLog(c *gin.Context) {
 	count := c.Param("count")
 	grep := c.PostForm("grep")
 	logs := a.serverService.GetErrorLog(count, grep)
+	jsonObj(c, logs, nil)
 }
 
 func (a *ServerController) getXrayLogs(c *gin.Context) {
