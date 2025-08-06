@@ -37,6 +37,13 @@
             </template>
         </a-setting-list-item>
         <a-setting-list-item paddings="small">
+            <template #title>{{ i18n "pages.settings.subHappRouting"}}</template>
+            <template #description>{{ i18n "pages.settings.subHappRoutingDesc"}}</template>
+            <template #control>
+                <a-input type="text" v-model="allSetting.subHappRouting"></a-input>
+            </template>
+        </a-setting-list-item>
+        <a-setting-list-item paddings="small">
             <template #title>{{ i18n "pages.settings.subListen"}}</template>
             <template #description>{{ i18n "pages.settings.subListenDesc"}}</template>
             <template #control>

@@ -57,6 +57,7 @@ var defaultValueMap = map[string]string{
 	"subAnnounce":                 "",
 	"subSupportUrl":               "",
 	"subProfileWebPageUrl":        "",
+	"subHappRouting":              "",
 	"subListen":                   "",
 	"subPort":                     "2096",
 	"subPath":                     "/sub/",
@@ -461,6 +462,10 @@ func (s *SettingService) GetSubProfileWebPageUrl() (string, error) {
 	return s.getString("subProfileWebPageUrl")
 }
 
+func (s *SettingService) GetSubHappRouting() (string, error) {
+	return s.getString("subHappRouting")
+}
+
 func (s *SettingService) GetSubListen() (string, error) {
 	return s.getString("subListen")
 }
@@ -673,6 +678,7 @@ func (s *SettingService) GetDefaultSettings(host string) (any, error) {
 		"subAnnounce":          func() (any, error) { return s.GetSubAnnounce() },
 		"subSupportUrl":        func() (any, error) { return s.GetSubSupportUrl() },
 		"subProfileWebPageUrl": func() (any, error) { return s.GetSubProfileWebPageUrl() },
+		"subHappRouting":       func() (any, error) { return s.GetSubHappRouting() },
 		"subURI":               func() (any, error) { return s.GetSubURI() },
 		"subJsonURI":           func() (any, error) { return s.GetSubJsonURI() },
 		"remarkModel":          func() (any, error) { return s.GetRemarkModel() },
@@ -696,6 +702,7 @@ func (s *SettingService) GetDefaultSettings(host string) (any, error) {
 		subAnnounce, _ := s.GetSubAnnounce()
 		subSupportUrl, _ := s.GetSubSupportUrl()
 		subProfileWebPageUrl, _ := s.GetSubProfileWebPageUrl()
+		subHappRouting, _ := s.GetSubHappRouting()
 		subPort, _ := s.GetSubPort()
 		subPath, _ := s.GetSubPath()
 		subJsonPath, _ := s.GetSubJsonPath()
@@ -733,6 +740,9 @@ func (s *SettingService) GetDefaultSettings(host string) (any, error) {
 		}
 		if result["subProfileWebPageUrl"].(string) == "" {
 			result["subProfileWebPageUrl"] = subProfileWebPageUrl
+		}
+		if result["subHappRouting"].(string) == "" {
+			result["subHappRouting"] = subHappRouting
 		}
 		if result["subJsonURI"].(string) == "" {
 			result["subJsonURI"] = subURI + subJsonPath

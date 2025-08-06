@@ -354,6 +354,8 @@
 "subSupportUrlDesc" = "Ссылка, передаваемая в заголовке Support-Url"
 "subProfileWebPageUrl" = "Ссылка на сайт"
 "subProfileWebPageUrlDesc" = "Ссылка, передаваемая в заголовке Profile-Web-Page-Url"
+"subHappRouting" = "Happ Роутинг"
+"subHappRoutingDesc" = "Ссылка на роутинг, для клиента Happ, передаваемая в заголовке Routing"
 "subListen" = "Прослушивание IP"
 "subListenDesc" = "Оставьте пустым по умолчанию, чтобы отслеживать все IP-адреса"
 "subPort" = "Порт подписки"

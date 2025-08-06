@@ -127,11 +127,16 @@ func (s *Server) initRouter() (*gin.Engine, error) {
 		SubProfileWebPageUrl = ""
 	}
 
+	SubHappRouting, err := s.settingService.GetSubHappRouting()
+	if err != nil {
+		SubHappRouting = ""
+	}
+
 	g := engine.Group("/")
 
 	s.sub = NewSUBController(
 		g, LinksPath, JsonPath, Encrypt, ShowInfo, RemarkModel, SubUpdates,
-		SubJsonFragment, SubJsonNoises, SubJsonMux, SubJsonRules, SubTitle, SubAnnounce, SubSupportUrl, SubProfileWebPageUrl)
+		SubJsonFragment, SubJsonNoises, SubJsonMux, SubJsonRules, SubTitle, SubAnnounce, SubSupportUrl, SubProfileWebPageUrl, SubHappRouting)
 
 	return engine, nil
 }

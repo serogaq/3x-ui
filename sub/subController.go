@@ -13,6 +13,7 @@ type SUBController struct {
 	subAnnounce          string
 	subSupportUrl        string
 	subProfileWebPageUrl string
+	subHappRouting       string
 	subPath              string
 	subJsonPath          string
 	subEncrypt           bool
@@ -38,6 +39,7 @@ func NewSUBController(
 	subAnnounce string,
 	subSupportUrl string,
 	subProfileWebPageUrl string,
+	subHappRouting string,
 ) *SUBController {
 	sub := NewSubService(showInfo, rModel)
 	a := &SUBController{
@@ -45,6 +47,7 @@ func NewSUBController(
 		subAnnounce:          subAnnounce,
 		subSupportUrl:        subSupportUrl,
 		subProfileWebPageUrl: subProfileWebPageUrl,
+		subHappRouting:       subHappRouting,
 		subPath:              subPath,
 		subJsonPath:          jsonPath,
 		subEncrypt:           encrypt,
@@ -84,6 +87,7 @@ func (a *SUBController) subs(c *gin.Context) {
 	}
 	supportUrl := a.subSupportUrl
 	profileWebPageUrl := a.subProfileWebPageUrl
+	happRouting := a.subHappRouting
 	announceText := a.subAnnounce
 	subs, header, err := a.subService.GetSubs(subId, host)
 	if err != nil || len(subs) == 0 {
@@ -103,6 +107,9 @@ func (a *SUBController) subs(c *gin.Context) {
 		}
 		if profileWebPageUrl != "" {
 			c.Writer.Header().Set("Profile-Web-Page-Url", profileWebPageUrl)
+		}
+		if happRouting != "" {
+			c.Writer.Header().Set("Routing", happRouting)
 		}
 		if announceText != "" {
 			c.Writer.Header().Set("Announce", announceText)
@@ -134,6 +141,7 @@ func (a *SUBController) subJsons(c *gin.Context) {
 	}
 	supportUrl := a.subSupportUrl
 	profileWebPageUrl := a.subProfileWebPageUrl
+	happRouting := a.subHappRouting
 	announceText := a.subAnnounce
 	jsonSub, header, err := a.subJsonService.GetJson(subId, host)
 	if err != nil || len(jsonSub) == 0 {
@@ -149,6 +157,9 @@ func (a *SUBController) subJsons(c *gin.Context) {
 		}
 		if profileWebPageUrl != "" {
 			c.Writer.Header().Set("Profile-Web-Page-Url", profileWebPageUrl)
+		}
+		if happRouting != "" {
+			c.Writer.Header().Set("Routing", happRouting)
 		}
 		if announceText != "" {
 			c.Writer.Header().Set("Announce", announceText)
