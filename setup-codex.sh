@@ -18,14 +18,8 @@ export_postman_collection() {
 apt update
 apt install --assume-yes curl wget unzip procps file bsdmainutils busybox libc6-dev
 
-#if [ "$TARGETARCH" == "arm64" ]; then
-#  apt install gcc-aarch64-linux-gnu
-#fi
-
 go install "golang.org/dl/go${GO_VERSION}@latest"
-"$(go env GOPATH)/bin/go${GO_VERSION}" download
-export PATH="$(go env GOPATH)/bin:$PATH"
-ln -sf "$(go env GOPATH)/bin/go${GO_VERSION}" "$(go env GOPATH)/bin/go"
+"go${GO_VERSION}" download
 
 go version
 
