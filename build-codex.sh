@@ -5,7 +5,7 @@ TARGETARCH=${TARGETARCH:-$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')}
 BUILD_WITH_ANTIZAPRET=${BUILD_WITH_ANTIZAPRET:-0}
 WORK_DIR=${WORK_DIR:-$(pwd)}
 GO_VERSION=${GO_VERSION:-1.24.5}
-TOOLCHAIN_DIR=$(find "$WORK_DIR" -maxdepth 2 -type d -name "*-cross" | head -n1)
+TOOLCHAIN_DIR=$(find "$WORK_DIR" -maxdepth 1 -type d -name "*-cross" | head -n1)
 TOOLCHAIN_DIR=$(realpath "$TOOLCHAIN_DIR")
 export DEBIAN_FRONTEND=noninteractive
 export CGO_ENABLED=1
@@ -17,13 +17,6 @@ export CC=$(find $TOOLCHAIN_DIR/bin -name '*-gcc' | head -n1)
 cd $WORK_DIR
 
 test -f config/custom_version || touch config/custom_version
-
-ls -alR
-#if [ "$TARGETARCH" == "arm64" ]; then
-#  export GOARCH=arm64
-#  export CC=aarch64-linux-gnu-gcc
-#fi
-#go build -ldflags "-w -s" -o xui-build -v main.go
 
 echo "Using CC=$CC"
 
