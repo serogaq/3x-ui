@@ -252,6 +252,37 @@
           </td>
         </tr>
       </table>
+      <a-divider v-if="app.clientConnectionLog > 0">{{ i18n "pages.inbounds.connectionLog" }}</a-divider>
+      <table v-if="app.clientConnectionLog > 0" :style="{ display: 'inline-table', marginBlock: '10px', width: '100%', textAlign: 'center' }">
+        <tr>
+          <th>{{ i18n "pages.inbounds.connectTime" }}</th>
+          <th>{{ i18n "pages.inbounds.disconnectTime" }}</th>
+          <th>{{ i18n "pages.inbounds.sessionDuration" }}</th>
+        </tr>
+        <tr v-for="log in infoModal.connectionLogs">
+          <td>
+            <a-tag>
+              <template v-if="app.datepicker === 'gregorian'">
+                [[ DateUtil.formatMillis(log.connectTime) ]]
+              </template>
+              <template v-else>
+                [[ DateUtil.convertToJalalian(moment(log.connectTime)) ]]
+              </template>
+            </a-tag>
+          </td>
+          <td>
+            <a-tag>
+              <template v-if="app.datepicker === 'gregorian'">
+                [[ DateUtil.formatMillis(log.disconnectTime) ]]
+              </template>
+              <template v-else>
+                [[ DateUtil.convertToJalalian(moment(log.disconnectTime)) ]]
+              </template>
+            </a-tag>
+          </td>
+          <td><a-tag>[[ formatDuration(log.duration) ]]</a-tag></td>
+        </tr>
+      </table>
       <template v-if="app.subSettings.enable && infoModal.clientSettings.subId">
         <a-divider>Subscription URL</a-divider>
         <tr-info-row class="tr-info-row">
@@ -459,6 +490,12 @@
     });
   }
 
+  const abbr = {
+    s: '{{ i18n "abbrSecond" }}',
+    m: '{{ i18n "abbrMinute" }}',
+    h: '{{ i18n "abbrHour" }}',
+  };
+
   const infoModal = {
     visible: false,
     inbound: new Inbound(),
@@ -473,6 +510,7 @@
     subLink: '',
     subJsonLink: '',
     clientIps: '',
+    connectionLogs: [],
     show(dbInbound, index) {
       this.index = index;
       this.inbound = dbInbound.toInbound();
@@ -505,6 +543,16 @@
           this.subLink = this.genSubLink(this.clientSettings.subId);
           this.subJsonLink = this.genSubJsonLink(this.clientSettings.subId);
         }
+      }
+      this.connectionLogs = [];
+      if (app.clientConnectionLog > 0 && this.clientStats && this.clientStats.email) {
+        HttpUtil.post(`/panel/inbound/clientConnLogs/${this.clientStats.email}`)
+          .then((msg) => {
+            if (msg.success) {
+              this.connectionLogs = msg.obj || [];
+            }
+          })
+          .catch(() => {});
       }
       this.visible = true;
     },
@@ -577,6 +625,18 @@
             this.infoModal.clientIps = 'No IP Record';
           })
           .catch(() => {});
+      },
+      formatDuration(sec) {
+        sec = Math.floor(sec);
+        if (sec < 60) return `${sec} ${abbr.s}`;
+        if (sec < 3600) {
+          const m = Math.floor(sec / 60);
+          return `${m} ${abbr.m}`;
+        }
+        const h = Math.floor(sec / 3600);
+        const m = Math.floor((sec % 3600) / 60);
+        const s = sec % 60;
+        return `${h} ${abbr.h} ${m} ${abbr.m} ${s} ${abbr.s}`;
       },
     },
   });

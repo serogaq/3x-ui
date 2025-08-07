@@ -37,6 +37,7 @@ func (a *InboundController) initRouter(g *gin.RouterGroup) {
 	g.POST("/clientOnlineIps/:email", a.getClientOnlineIPs)
 	g.POST("/clientIps/:email", a.getClientIps)
 	g.POST("/clientDevices/:email", a.getClientDevices)
+	g.POST("/clientConnLogs/:email", a.getClientConnLogs)
 	g.POST("/clearClientIps/:email", a.clearClientIps)
 	g.POST("/addClient", a.addInboundClient)
 	g.POST("/:id/delClient/:clientId", a.delInboundClient)
@@ -199,6 +200,25 @@ func (a *InboundController) getClientDevices(c *gin.Context) {
 		return
 	}
 	jsonObj(c, devices, nil)
+}
+
+func (a *InboundController) getClientConnLogs(c *gin.Context) {
+	email := c.Param("email")
+	logs, err := a.inboundService.GetClientConnectionLogs(email)
+	if err != nil {
+		jsonObj(c, []model.ClientConnectionLog{}, err)
+		return
+	}
+	type logResp struct {
+		ConnectTime    int64 `json:"connectTime"`
+		DisconnectTime int64 `json:"disconnectTime"`
+		Duration       int64 `json:"duration"`
+	}
+	res := make([]logResp, len(logs))
+	for i, l := range logs {
+		res[i] = logResp{l.ConnectTime.UnixMilli(), l.DisconnectTime.UnixMilli(), l.Duration}
+	}
+	jsonObj(c, res, nil)
 }
 
 func (a *InboundController) clearClientIps(c *gin.Context) {

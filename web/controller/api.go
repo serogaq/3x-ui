@@ -39,6 +39,7 @@ func (a *APIController) initRouter(g *gin.RouterGroup) {
 		{"POST", "/update/:id", a.inboundController.updateInbound},
 		{"POST", "/clientIps/:email", a.inboundController.getClientIps},
 		{"POST", "/clientDevices/:email", a.inboundController.getClientDevices},
+		{"POST", "/clientConnLogs/:email", a.inboundController.getClientConnLogs},
 		{"POST", "/clearClientIps/:email", a.inboundController.clearClientIps},
 		{"POST", "/addClient", a.inboundController.addInboundClient},
 		{"POST", "/:id/delClient/:clientId", a.inboundController.delInboundClient},

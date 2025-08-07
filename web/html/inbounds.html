@@ -808,6 +808,7 @@
             showAlert: false,
             ipLimitEnable: false,
             pageSize: 50,
+            clientConnectionLog: 0,
         },
         methods: {
             loading(spinning = true) {
@@ -865,6 +866,7 @@
                         subJsonURI: subJsonURI
                     };
                     this.pageSize = pageSize;
+                    this.clientConnectionLog = clientConnectionLog;
                     this.remarkModel = remarkModel;
                     this.datepicker = datepicker;
                     this.ipLimitEnable = ipLimitEnable;

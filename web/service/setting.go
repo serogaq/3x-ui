@@ -34,6 +34,7 @@ var defaultValueMap = map[string]string{
 	"webBasePath":                 "/",
 	"sessionMaxAge":               "360",
 	"pageSize":                    "50",
+	"clientConnectionLog":         "0",
 	"expireDiff":                  "0",
 	"trafficDiff":                 "0",
 	"remarkModel":                 "-ieo",
@@ -510,6 +511,14 @@ func (s *SettingService) GetPageSize() (int, error) {
 	return s.getInt("pageSize")
 }
 
+func (s *SettingService) GetClientConnectionLog() (int, error) {
+	return s.getInt("clientConnectionLog")
+}
+
+func (s *SettingService) SetClientConnectionLog(value int) error {
+	return s.setInt("clientConnectionLog", value)
+}
+
 func (s *SettingService) GetSubURI() (string, error) {
 	return s.getString("subURI")
 }
@@ -670,6 +679,7 @@ func (s *SettingService) GetDefaultSettings(host string) (any, error) {
 		"expireDiff":           func() (any, error) { return s.GetExpireDiff() },
 		"trafficDiff":          func() (any, error) { return s.GetTrafficDiff() },
 		"pageSize":             func() (any, error) { return s.GetPageSize() },
+		"clientConnectionLog":  func() (any, error) { return s.GetClientConnectionLog() },
 		"defaultCert":          func() (any, error) { return s.GetCertFile() },
 		"defaultKey":           func() (any, error) { return s.GetKeyFile() },
 		"tgBotEnable":          func() (any, error) { return s.GetTgbotEnabled() },

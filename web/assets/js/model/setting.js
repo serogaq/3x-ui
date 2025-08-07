@@ -9,6 +9,7 @@ class AllSetting {
         this.webBasePath = "/";
         this.sessionMaxAge = 360;
         this.pageSize = 50;
+        this.clientConnectionLog = 0;
         this.expireDiff = 0;
         this.trafficDiff = 0;
         this.remarkModel = "-ieo";

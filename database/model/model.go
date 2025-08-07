@@ -75,6 +75,14 @@ type ClientDevice struct {
 	CreatedAt   time.Time `json:"createdAt"`
 }
 
+type ClientConnectionLog struct {
+	Id             int       `json:"id" gorm:"primaryKey;autoIncrement"`
+	ClientEmail    string    `json:"clientEmail" form:"clientEmail"`
+	ConnectTime    time.Time `json:"connectTime" form:"connectTime"`
+	DisconnectTime time.Time `json:"disconnectTime" form:"disconnectTime"`
+	Duration       int64     `json:"duration" form:"duration"`
+}
+
 type HistoryOfSeeders struct {
 	Id         int    `json:"id" gorm:"primaryKey;autoIncrement"`
 	SeederName string `json:"seederName"`

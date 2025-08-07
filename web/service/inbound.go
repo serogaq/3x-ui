@@ -21,6 +21,8 @@ type InboundService struct {
 	xrayApi xray.XrayAPI
 }
 
+var clientConnStart = make(map[string]time.Time)
+
 func (s *InboundService) GetInbounds(userId int) ([]*model.Inbound, error) {
 	db := database.GetDB()
 	var inbounds []*model.Inbound
@@ -828,6 +830,7 @@ func (s *InboundService) addClientTraffic(tx *gorm.DB, traffics []*xray.ClientTr
 		if p != nil {
 			p.SetOnlineClients(nil)
 		}
+		s.updateConnectionLogs(tx, []string{})
 		return nil
 	}
 
@@ -871,12 +874,54 @@ func (s *InboundService) addClientTraffic(tx *gorm.DB, traffics []*xray.ClientTr
 	// Set onlineUsers
 	p.SetOnlineClients(onlineClients)
 
+	s.updateConnectionLogs(tx, onlineClients)
+
 	err = tx.Save(dbClientTraffics).Error
 	if err != nil {
 		logger.Warning("AddClientTraffic update data ", err)
 	}
 
 	return nil
+}
+
+func (s *InboundService) updateConnectionLogs(tx *gorm.DB, current []string) {
+	settingService := SettingService{}
+	limit, err := settingService.GetClientConnectionLog()
+	if err != nil || limit <= 0 {
+		clientConnStart = make(map[string]time.Time)
+		return
+	}
+
+	now := time.Now()
+	for _, email := range current {
+		if _, ok := clientConnStart[email]; !ok {
+			clientConnStart[email] = now
+		}
+	}
+
+	for email, start := range clientConnStart {
+		if !s.contains(current, email) {
+			logEntry := &model.ClientConnectionLog{
+				ClientEmail:    email,
+				ConnectTime:    start,
+				DisconnectTime: now,
+				Duration:       int64(now.Sub(start).Seconds()),
+			}
+			if err := tx.Create(logEntry).Error; err != nil {
+				logger.Warning("save connection log", err)
+			} else {
+				var ids []int
+				tx.Model(&model.ClientConnectionLog{}).
+					Where("client_email = ?", email).
+					Order("connect_time").
+					Offset(limit).Pluck("id", &ids)
+				if len(ids) > 0 {
+					tx.Delete(&model.ClientConnectionLog{}, ids)
+				}
+			}
+			delete(clientConnStart, email)
+		}
+	}
 }
 
 func (s *InboundService) adjustTraffics(tx *gorm.DB, dbClientTraffics []*xray.ClientTraffic) ([]*xray.ClientTraffic, error) {
@@ -2092,6 +2137,24 @@ func (s *InboundService) MigrateDB() {
 
 func (s *InboundService) GetOnlineClients() []string {
 	return p.GetOnlineClients()
+}
+
+func (s *InboundService) GetClientConnectionLogs(email string) ([]*model.ClientConnectionLog, error) {
+	settingService := SettingService{}
+	limit, err := settingService.GetClientConnectionLog()
+	if err != nil || limit <= 0 {
+		return []*model.ClientConnectionLog{}, err
+	}
+	db := database.GetDB()
+	var logs []*model.ClientConnectionLog
+	err = db.Model(&model.ClientConnectionLog{}).
+		Where("client_email = ?", email).
+		Order("connect_time desc").
+		Limit(limit).Find(&logs).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return nil, err
+	}
+	return logs, nil
 }
 
 func (s *InboundService) FilterAndSortClientEmails(emails []string) ([]string, []string, error) {

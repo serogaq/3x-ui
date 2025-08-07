@@ -25,6 +25,7 @@ type AllSetting struct {
 	WebBasePath                 string `json:"webBasePath" form:"webBasePath"`
 	SessionMaxAge               int    `json:"sessionMaxAge" form:"sessionMaxAge"`
 	PageSize                    int    `json:"pageSize" form:"pageSize"`
+	ClientConnectionLog         int    `json:"clientConnectionLog" form:"clientConnectionLog"`
 	ExpireDiff                  int    `json:"expireDiff" form:"expireDiff"`
 	TrafficDiff                 int    `json:"trafficDiff" form:"trafficDiff"`
 	RemarkModel                 string `json:"remarkModel" form:"remarkModel"`
@@ -113,6 +114,10 @@ func (s *AllSetting) CheckValid() error {
 
 	if s.TgMem < 0 || s.TgMem > 100 {
 		return common.NewError("TgMem must be in the range 0-100, passed ", s.TgMem)
+	}
+
+	if s.ClientConnectionLog < 0 || s.ClientConnectionLog > 100 {
+		return common.NewError("ClientConnectionLog must be in the range 0-100, passed ", s.ClientConnectionLog)
 	}
 
 	if !strings.HasPrefix(s.WebBasePath, "/") {
