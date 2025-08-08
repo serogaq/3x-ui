@@ -47,6 +47,7 @@ func (a *InboundController) initRouter(g *gin.RouterGroup) {
 	g.POST("/:id/resetClientTraffic/:email", a.resetClientTraffic)
 	g.POST("/resetAllTraffics", a.resetAllTraffics)
 	g.POST("/resetAllClientTraffics/:id", a.resetAllClientTraffics)
+	g.POST("/resetAllClientOnlines/:id", a.resetAllClientOnlines)
 	g.POST("/delDepletedClients/:id", a.delDepletedClients)
 	g.POST("/import", a.importInbound)
 	g.POST("/onlines", a.onlines)
@@ -325,6 +326,17 @@ func (a *InboundController) resetAllClientTraffics(c *gin.Context) {
 		a.xrayService.SetToNeedRestart()
 	}
 	jsonMsg(c, I18nWeb(c, "pages.inbounds.toasts.resetAllClientTrafficSuccess"), nil)
+}
+
+func (a *InboundController) resetAllClientOnlines(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		jsonMsg(c, I18nWeb(c, "pages.inbounds.toasts.inboundUpdateSuccess"), err)
+		return
+	}
+
+	err = a.inboundService.ClearAllClientOnlineLogs(id)
+	jsonMsg(c, I18nWeb(c, "pages.inbounds.toasts.resetAllClientOnlinesSuccess"), err)
 }
 
 func (a *InboundController) importInbound(c *gin.Context) {

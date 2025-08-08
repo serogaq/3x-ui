@@ -260,6 +260,10 @@
                           <a-icon type="file-done"></a-icon>
                           {{ i18n "pages.inbounds.resetAllClientTraffics" }}
                         </a-menu-item>
+                        <a-menu-item key="resetOnlines">
+                          <a-icon type="history"></a-icon>
+                          {{ i18n "pages.inbounds.resetAllClientOnlines" }}
+                        </a-menu-item>
                         <a-menu-item key="delDepletedClients" :style="{ color: '#FF4D4F' }">
                           <a-icon type="rest"></a-icon>
                           {{ i18n "pages.inbounds.delDepletedClients" }}
@@ -346,6 +350,10 @@
                             <a-menu-item key="resetClients">
                               <a-icon type="file-done"></a-icon>
                               {{ i18n "pages.inbounds.resetInboundClientTraffics"}}
+                            </a-menu-item>
+                            <a-menu-item key="resetOnlines">
+                              <a-icon type="history"></a-icon>
+                              {{ i18n "pages.inbounds.resetInboundClientOnlines"}}
                             </a-menu-item>
                             <a-menu-item key="export">
                               <a-icon type="export"></a-icon>
@@ -1008,6 +1016,9 @@
                     case "resetClients":
                         this.resetAllClientTraffics(-1);
                         break;
+                    case "resetOnlines":
+                        this.resetAllClientOnlines(-1);
+                        break;
                     case "delDepletedClients":
                         this.delDepletedClients(-1)
                         break;
@@ -1044,6 +1055,9 @@
                         break;
                     case "resetClients":
                         this.resetAllClientTraffics(dbInbound.id);
+                        break;
+                    case "resetOnlines":
+                        this.resetAllClientOnlines(dbInbound.id);
                         break;
                     case "clone":
                         this.openCloneInbound(dbInbound);
@@ -1400,6 +1414,16 @@
                     okText: '{{ i18n "reset"}}',
                     cancelText: '{{ i18n "cancel"}}',
                     onOk: () => this.submit('/panel/inbound/resetAllClientTraffics/' + dbInboundId),
+                })
+            },
+            resetAllClientOnlines(dbInboundId) {
+                this.$confirm({
+                    title: dbInboundId > 0 ? '{{ i18n "pages.inbounds.resetInboundClientOnlinesTitle"}}' : '{{ i18n "pages.inbounds.resetAllClientOnlinesTitle"}}',
+                    content: dbInboundId > 0 ? '{{ i18n "pages.inbounds.resetInboundClientOnlinesContent"}}' : '{{ i18n "pages.inbounds.resetAllClientOnlinesContent"}}',
+                    class: themeSwitcher.currentTheme,
+                    okText: '{{ i18n "reset"}}',
+                    cancelText: '{{ i18n "cancel"}}',
+                    onOk: () => this.submit('/panel/inbound/resetAllClientOnlines/' + dbInboundId),
                 })
             },
             delDepletedClients(dbInboundId) {

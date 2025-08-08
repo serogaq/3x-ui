@@ -1933,6 +1933,29 @@ func (s *InboundService) ClearClientOnlineLogs(email string) error {
 	return db.Where("email = ?", email).Delete(&model.ClientOnlineLog{}).Error
 }
 
+func (s *InboundService) ClearAllClientOnlineLogs(id int) error {
+	db := database.GetDB()
+	if id == -1 {
+		return db.Session(&gorm.Session{AllowGlobalUpdate: true}).Delete(&model.ClientOnlineLog{}).Error
+	}
+	inbound, err := s.GetInbound(id)
+	if err != nil {
+		return err
+	}
+	clients, err := s.GetClients(inbound)
+	if err != nil {
+		return err
+	}
+	emails := make([]string, 0, len(clients))
+	for _, c := range clients {
+		emails = append(emails, c.Email)
+	}
+	if len(emails) == 0 {
+		return nil
+	}
+	return db.Where("email IN ?", emails).Delete(&model.ClientOnlineLog{}).Error
+}
+
 func (s *InboundService) GetClientOnlineSessions(email string) ([]*entity.ClientOnlineSession, error) {
 	logs, err := s.GetClientOnlineLogs(email)
 	if err != nil {
