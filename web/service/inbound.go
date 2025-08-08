@@ -1981,30 +1981,47 @@ func (s *InboundService) GetClientOnlineSessions(email string) ([]*entity.Client
 			continue
 		}
 		if l.CreatedAt.Sub(last) > gap {
-			dis := last.Add(-interval)
+			dis := last.Add(interval)
 			if dis.Before(start) {
 				dis = start
 			}
-			sessions = append(sessions, &entity.ClientOnlineSession{
-				Connect:    start.UnixMilli(),
-				Disconnect: dis.UnixMilli(),
-				Duration:   int64(dis.Sub(start).Seconds()),
-			})
+			durMs := dis.UnixMilli() - start.UnixMilli()
+			if durMs < 0 {
+				durMs = 0
+			}
+			dur := (durMs + 999) / 1000
+			if dur > 0 {
+				sessions = append(sessions, &entity.ClientOnlineSession{
+					Connect:    start.UnixMilli(),
+					Disconnect: dis.UnixMilli(),
+					Duration:   dur,
+				})
+			}
 			start = l.CreatedAt
 		}
 		last = l.CreatedAt
 	}
 	if !start.IsZero() {
-		session := &entity.ClientOnlineSession{Connect: start.UnixMilli()}
 		if time.Since(last) > gap {
-			dis := last.Add(-interval)
+			dis := last.Add(interval)
 			if dis.Before(start) {
 				dis = start
 			}
-			session.Disconnect = dis.UnixMilli()
-			session.Duration = int64(dis.Sub(start).Seconds())
+			durMs := dis.UnixMilli() - start.UnixMilli()
+			if durMs < 0 {
+				durMs = 0
+			}
+			dur := (durMs + 999) / 1000
+			if dur > 0 {
+				sessions = append(sessions, &entity.ClientOnlineSession{
+					Connect:    start.UnixMilli(),
+					Disconnect: dis.UnixMilli(),
+					Duration:   dur,
+				})
+			}
+		} else {
+			sessions = append(sessions, &entity.ClientOnlineSession{Connect: start.UnixMilli()})
 		}
-		sessions = append(sessions, session)
 	}
 	sort.Slice(sessions, func(i, j int) bool { return sessions[i].Connect > sessions[j].Connect })
 	return sessions, nil
