@@ -36,6 +36,7 @@ var defaultValueMap = map[string]string{
 	"pageSize":                    "50",
 	"expireDiff":                  "0",
 	"trafficDiff":                 "0",
+	"clientConnLog":               "0",
 	"remarkModel":                 "-ieo",
 	"timeLocation":                "Local",
 	"tgBotEnable":                 "false",
@@ -385,6 +386,10 @@ func (s *SettingService) GetTrafficDiff() (int, error) {
 	return s.getInt("trafficDiff")
 }
 
+func (s *SettingService) GetClientConnLog() (int, error) {
+	return s.getInt("clientConnLog")
+}
+
 func (s *SettingService) GetSessionMaxAge() (int, error) {
 	return s.getInt("sessionMaxAge")
 }
@@ -669,6 +674,7 @@ func (s *SettingService) GetDefaultSettings(host string) (any, error) {
 	settings := map[string]settingFunc{
 		"expireDiff":           func() (any, error) { return s.GetExpireDiff() },
 		"trafficDiff":          func() (any, error) { return s.GetTrafficDiff() },
+		"clientConnLog":        func() (any, error) { return s.GetClientConnLog() },
 		"pageSize":             func() (any, error) { return s.GetPageSize() },
 		"defaultCert":          func() (any, error) { return s.GetCertFile() },
 		"defaultKey":           func() (any, error) { return s.GetKeyFile() },

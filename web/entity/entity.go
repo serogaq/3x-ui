@@ -27,6 +27,7 @@ type AllSetting struct {
 	PageSize                    int    `json:"pageSize" form:"pageSize"`
 	ExpireDiff                  int    `json:"expireDiff" form:"expireDiff"`
 	TrafficDiff                 int    `json:"trafficDiff" form:"trafficDiff"`
+	ClientConnLog               int    `json:"clientConnLog" form:"clientConnLog"`
 	RemarkModel                 string `json:"remarkModel" form:"remarkModel"`
 	TgBotEnable                 bool   `json:"tgBotEnable" form:"tgBotEnable"`
 	TgBotToken                  string `json:"tgBotToken" form:"tgBotToken"`
@@ -115,6 +116,10 @@ func (s *AllSetting) CheckValid() error {
 		return common.NewError("TgMem must be in the range 0-100, passed ", s.TgMem)
 	}
 
+	if s.ClientConnLog < 0 || s.ClientConnLog > 5000 {
+		return common.NewError("clientConnLog must be in the range 0-5000, passed ", s.ClientConnLog)
+	}
+
 	if !strings.HasPrefix(s.WebBasePath, "/") {
 		s.WebBasePath = "/" + s.WebBasePath
 	}
@@ -141,4 +146,10 @@ func (s *AllSetting) CheckValid() error {
 	}
 
 	return nil
+}
+
+type ClientOnlineSession struct {
+	Connect    int64 `json:"connect"`
+	Disconnect int64 `json:"disconnect"`
+	Duration   int64 `json:"duration"`
 }

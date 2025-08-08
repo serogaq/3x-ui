@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"x-ui/database/model"
+	"x-ui/web/entity"
 	"x-ui/web/service"
 	"x-ui/web/session"
 
@@ -38,6 +39,8 @@ func (a *InboundController) initRouter(g *gin.RouterGroup) {
 	g.POST("/clientIps/:email", a.getClientIps)
 	g.POST("/clientDevices/:email", a.getClientDevices)
 	g.POST("/clearClientIps/:email", a.clearClientIps)
+	g.POST("/clientOnlines/:email", a.getClientOnlines)
+	g.POST("/clearClientOnlines/:email", a.clearClientOnlines)
 	g.POST("/addClient", a.addInboundClient)
 	g.POST("/:id/delClient/:clientId", a.delInboundClient)
 	g.POST("/updateClient/:clientId", a.updateInboundClient)
@@ -369,6 +372,22 @@ func (a *InboundController) delDepletedClients(c *gin.Context) {
 
 func (a *InboundController) onlines(c *gin.Context) {
 	jsonObj(c, a.inboundService.GetOnlineClients(), nil)
+}
+
+func (a *InboundController) getClientOnlines(c *gin.Context) {
+	email := c.Param("email")
+	logs, err := a.inboundService.GetClientOnlineSessions(email)
+	if err != nil {
+		jsonObj(c, []entity.ClientOnlineSession{}, err)
+		return
+	}
+	jsonObj(c, logs, nil)
+}
+
+func (a *InboundController) clearClientOnlines(c *gin.Context) {
+	email := c.Param("email")
+	err := a.inboundService.ClearClientOnlineLogs(email)
+	jsonMsg(c, "", err)
 }
 
 func (a *InboundController) updateClientTraffic(c *gin.Context) {
