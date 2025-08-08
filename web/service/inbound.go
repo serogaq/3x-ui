@@ -758,7 +758,7 @@ func (s *InboundService) UpdateInboundClient(data *model.Inbound, clientId strin
 	return needRestart, tx.Save(oldInbound).Error
 }
 
-func (s *InboundService) AddTraffic(inboundTraffics []*xray.Traffic, clientTraffics []*xray.ClientTraffic) (error, bool) {
+func (s *InboundService) AddTraffic(inboundTraffics []*xray.Traffic, clientTraffics []*xray.ClientTraffic, onlineClients []string) (error, bool) {
 	var err error
 	db := database.GetDB()
 	tx := db.Begin()
@@ -774,7 +774,7 @@ func (s *InboundService) AddTraffic(inboundTraffics []*xray.Traffic, clientTraff
 	if err != nil {
 		return err, false
 	}
-	err = s.addClientTraffic(tx, clientTraffics)
+	err = s.addClientTraffic(tx, clientTraffics, onlineClients)
 	if err != nil {
 		return err, false
 	}
@@ -824,17 +824,16 @@ func (s *InboundService) addInboundTraffic(tx *gorm.DB, traffics []*xray.Traffic
 	return nil
 }
 
-func (s *InboundService) addClientTraffic(tx *gorm.DB, traffics []*xray.ClientTraffic) (err error) {
-	if len(traffics) == 0 {
-		// Empty onlineUsers
-		if p != nil {
-			p.SetOnlineClients(nil)
-		}
-		s.updateConnectionLogs(tx, []string{})
-		return nil
+func (s *InboundService) addClientTraffic(tx *gorm.DB, traffics []*xray.ClientTraffic, onlineClients []string) (err error) {
+	if p != nil {
+		p.SetOnlineClients(onlineClients)
 	}
 
-	var onlineClients []string
+	s.updateConnectionLogs(tx, onlineClients)
+
+	if len(traffics) == 0 {
+		return nil
+	}
 
 	emails := make([]string, 0, len(traffics))
 	for _, traffic := range traffics {
@@ -856,25 +855,15 @@ func (s *InboundService) addClientTraffic(tx *gorm.DB, traffics []*xray.ClientTr
 		return err
 	}
 
-	for dbTraffic_index := range dbClientTraffics {
-		for traffic_index := range traffics {
-			if dbClientTraffics[dbTraffic_index].Email == traffics[traffic_index].Email {
-				dbClientTraffics[dbTraffic_index].Up += traffics[traffic_index].Up
-				dbClientTraffics[dbTraffic_index].Down += traffics[traffic_index].Down
-
-				// Add user in onlineUsers array on traffic
-				if traffics[traffic_index].Up+traffics[traffic_index].Down > 0 {
-					onlineClients = append(onlineClients, traffics[traffic_index].Email)
-				}
+	for dbTrafficIndex := range dbClientTraffics {
+		for trafficIndex := range traffics {
+			if dbClientTraffics[dbTrafficIndex].Email == traffics[trafficIndex].Email {
+				dbClientTraffics[dbTrafficIndex].Up += traffics[trafficIndex].Up
+				dbClientTraffics[dbTrafficIndex].Down += traffics[trafficIndex].Down
 				break
 			}
 		}
 	}
-
-	// Set onlineUsers
-	p.SetOnlineClients(onlineClients)
-
-	s.updateConnectionLogs(tx, onlineClients)
 
 	err = tx.Save(dbClientTraffics).Error
 	if err != nil {

@@ -28,7 +28,11 @@ func (j *XrayTrafficJob) Run() {
 	if err != nil {
 		return
 	}
-	err, needRestart0 := j.inboundService.AddTraffic(traffics, clientTraffics)
+	onlineClients, err := j.xrayService.GetOnlineClientEmails()
+	if err != nil {
+		onlineClients = []string{}
+	}
+	err, needRestart0 := j.inboundService.AddTraffic(traffics, clientTraffics, onlineClients)
 	if err != nil {
 		logger.Warning("add inbound traffic failed:", err)
 	}

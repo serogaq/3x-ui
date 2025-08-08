@@ -3,8 +3,8 @@ package service
 import (
 	"encoding/json"
 	"errors"
-	"sync"
 	"strconv"
+	"sync"
 
 	"x-ui/logger"
 	"x-ui/xray"
@@ -80,7 +80,7 @@ func (s *XrayService) GetXrayConfig() (*xray.Config, error) {
 		return nil, err
 	}
 
-	s.inboundService.AddTraffic(nil, nil)
+	s.inboundService.AddTraffic(nil, nil, []string{})
 
 	inbounds, err := s.inboundService.GetAllInbounds()
 	if err != nil {
@@ -187,6 +187,24 @@ func (s *XrayService) GetXrayTraffic() ([]*xray.Traffic, []*xray.ClientTraffic, 
 		return nil, nil, err
 	}
 	return traffic, clientTraffic, nil
+}
+
+func (s *XrayService) GetOnlineClientEmails() ([]string, error) {
+	if !s.IsXrayRunning() {
+		err := errors.New("xray is not running")
+		logger.Debug("Attempted to fetch online clients, but Xray is not running:", err)
+		return nil, err
+	}
+	apiPort := p.GetAPIPort()
+	s.xrayAPI.Init(apiPort)
+	defer s.xrayAPI.Close()
+
+	emails, err := s.xrayAPI.GetOnlineClientEmails()
+	if err != nil {
+		logger.Debug("Failed to fetch Xray online clients:", err)
+		return nil, err
+	}
+	return emails, nil
 }
 
 func (s *XrayService) RestartXray(isForce bool) error {

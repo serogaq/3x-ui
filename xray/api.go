@@ -4,9 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math"
 	"regexp"
 	"time"
-	"math"
 
 	"x-ui/logger"
 	"x-ui/util/common"
@@ -230,8 +230,36 @@ func (x *XrayAPI) GetClientOnlineIPs(email string) (int, error) {
 	}
 
 	count := resp.GetStat().Value
-	
+
 	return int(count), nil
+}
+
+func (x *XrayAPI) GetOnlineClientEmails() ([]string, error) {
+	if x.grpcClient == nil {
+		return nil, common.NewError("xray api is not initialized")
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	defer cancel()
+
+	if x.StatsServiceClient == nil {
+		return nil, common.NewError("xray StatusServiceClient is not initialized")
+	}
+
+	resp, err := (*x.StatsServiceClient).QueryStats(ctx, &statsService.QueryStatsRequest{Reset_: false})
+	if err != nil {
+		logger.Debug("Failed to query Xray stats:", err)
+		return nil, err
+	}
+
+	onlineRegex := regexp.MustCompile(`user>>>([^>]+)>>>online`)
+	emails := make([]string, 0)
+	for _, stat := range resp.GetStat() {
+		if matches := onlineRegex.FindStringSubmatch(stat.Name); len(matches) == 2 && stat.Value > 0 {
+			emails = append(emails, matches[1])
+		}
+	}
+	return emails, nil
 }
 
 func processTraffic(matches []string, value int64, trafficMap map[string]*Traffic) {
