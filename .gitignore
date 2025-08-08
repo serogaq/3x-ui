@@ -9,8 +9,10 @@
 
 # Ignore temporary files
 tmp/
+*-musl-native/
 *.tar
 *.tar.gz
+*.tgz
 postman_api_collection.json
 
 # Ignore build and distribution directories
