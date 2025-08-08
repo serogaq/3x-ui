@@ -7,6 +7,7 @@ This Agents.md file provides comprehensive guidance for OpenAI Codex and other A
 ### General Conventions for Agents.md Implementation
 
 - OpenAI Codex should follow the existing code style in each file
+- The x86_64-linux-musl-native directory is needed to build the application. OpenAI Codex should not delete it, but it should not be added to the PR either
 - Agents.md requires meaningful variable and function names in OpenAI Codex output
 
 ### CSS/Styling Standards for OpenAI Codex
