@@ -27,6 +27,9 @@ type AllSetting struct {
 	PageSize                    int    `json:"pageSize" form:"pageSize"`
 	ExpireDiff                  int    `json:"expireDiff" form:"expireDiff"`
 	TrafficDiff                 int    `json:"trafficDiff" form:"trafficDiff"`
+	ClientConnLog               int    `json:"clientConnLog" form:"clientConnLog"`
+	ClientConnLogInterval       int    `json:"clientConnLogInterval" form:"clientConnLogInterval"`
+	ClientConnLogGap            int    `json:"clientConnLogGap" form:"clientConnLogGap"`
 	RemarkModel                 string `json:"remarkModel" form:"remarkModel"`
 	TgBotEnable                 bool   `json:"tgBotEnable" form:"tgBotEnable"`
 	TgBotToken                  string `json:"tgBotToken" form:"tgBotToken"`
@@ -115,6 +118,18 @@ func (s *AllSetting) CheckValid() error {
 		return common.NewError("TgMem must be in the range 0-100, passed ", s.TgMem)
 	}
 
+	if s.ClientConnLog < 0 || s.ClientConnLog > 10000 {
+		return common.NewError("clientConnLog must be in the range 0-10000, passed ", s.ClientConnLog)
+	}
+
+	if s.ClientConnLogInterval <= 0 || s.ClientConnLogInterval > 180 {
+		return common.NewError("clientConnLogInterval must be in the range 1-180, passed ", s.ClientConnLogInterval)
+	}
+
+	if s.ClientConnLogGap <= 0 || s.ClientConnLogGap > 180 {
+		return common.NewError("clientConnLogGap must be in the range 1-180, passed ", s.ClientConnLogGap)
+	}
+
 	if !strings.HasPrefix(s.WebBasePath, "/") {
 		s.WebBasePath = "/" + s.WebBasePath
 	}
@@ -141,4 +156,10 @@ func (s *AllSetting) CheckValid() error {
 	}
 
 	return nil
+}
+
+type ClientOnlineSession struct {
+	Connect    int64 `json:"connect"`
+	Disconnect int64 `json:"disconnect"`
+	Duration   int64 `json:"duration"`
 }

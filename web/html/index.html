@@ -935,6 +935,7 @@ ${dateTime}
             showAlert: false,
             showIp: false,
             ipLimitEnable: false,
+            clientConnLog: 0,
         },
         methods: {
             loading(spinning, tip = '{{ i18n "loading"}}') {
@@ -1109,6 +1110,7 @@ ${dateTime}
             const msg = await HttpUtil.post('/panel/setting/defaultSettings');
             if (msg.success) {
               this.ipLimitEnable = msg.obj.ipLimitEnable;
+              this.clientConnLog = msg.obj.clientConnLog;
             }
 
             while (true) {

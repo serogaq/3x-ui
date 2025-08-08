@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"embed"
+	"fmt"
 	"html/template"
 	"io"
 	"io/fs"
@@ -250,6 +251,12 @@ func (s *Server) startTask() {
 
 	// check client ips from log file every 10 sec
 	s.cron.AddJob("@every 10s", job.NewCheckClientIpJob())
+
+	interval, err := s.settingService.GetClientConnLogInterval()
+	if err == nil && interval > 0 {
+		spec := fmt.Sprintf("@every %ds", interval)
+		s.cron.AddJob(spec, job.NewClientOnlineLogJob())
+	}
 
 	// check client ips from log file every day
 	s.cron.AddJob("@daily", job.NewClearLogsJob())

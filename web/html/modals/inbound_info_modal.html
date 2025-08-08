@@ -252,6 +252,28 @@
           </td>
         </tr>
       </table>
+      <template v-if="app.clientConnLog > 0">
+        <a-divider>{{ i18n "pages.inbounds.connectionLog" }}
+          <a-tooltip>
+            <template slot="title">
+              <span>{{ i18n "pages.inbounds.connectionLogClear" }}</span>
+            </template>
+            <a-icon type="delete" @click="clearConnLog" :style="{ marginLeft: '5px' }"></a-icon>
+          </a-tooltip>
+        </a-divider>
+        <table :style="{ display: 'inline-table', marginBlock: '10px', width: '100%', textAlign: 'center' }">
+          <tr>
+            <th>{{ i18n "pages.inbounds.connect" }}</th>
+            <th>{{ i18n "pages.inbounds.disconnect" }}</th>
+            <th>{{ i18n "pages.inbounds.duration" }}</th>
+          </tr>
+          <tr v-for="(log,index) in infoModal.connectionLogs" :key="index">
+            <td><a-tag color="green" v-if="log.connect">[[ formatTime(log.connect) ]]</a-tag></td>
+            <td><a-tag v-if="log.disconnect" color="red">[[ formatTime(log.disconnect) ]]</a-tag></td>
+            <td><a-tag v-if="log.duration">[[ formatDuration(log.duration) ]]</a-tag></td>
+          </tr>
+        </table>
+      </template>
       <template v-if="app.subSettings.enable && infoModal.clientSettings.subId">
         <a-divider>Subscription URL</a-divider>
         <tr-info-row class="tr-info-row">
@@ -473,6 +495,7 @@
     subLink: '',
     subJsonLink: '',
     clientIps: '',
+    connectionLogs: [],
     show(dbInbound, index) {
       this.index = index;
       this.inbound = dbInbound.toInbound();
@@ -505,6 +528,13 @@
           this.subLink = this.genSubLink(this.clientSettings.subId);
           this.subJsonLink = this.genSubJsonLink(this.clientSettings.subId);
         }
+      }
+      if (app.clientConnLog > 0 && this.clientStats && this.clientStats.email) {
+        HttpUtil.post(`/panel/inbound/clientOnlines/${this.clientStats.email}`).then((msg) => {
+          if (msg.success) {
+            this.connectionLogs = msg.obj;
+          }
+        });
       }
       this.visible = true;
     },
@@ -577,6 +607,41 @@
             this.infoModal.clientIps = 'No IP Record';
           })
           .catch(() => {});
+      },
+      clearConnLog() {
+        HttpUtil.post(`/panel/inbound/clearClientOnlines/${this.infoModal.clientStats.email}`)
+          .then((msg) => {
+            if (!msg.success) {
+              return;
+            }
+            this.infoModal.connectionLogs = [];
+          })
+          .catch(() => {});
+      },
+      formatTime(ts) {
+        if (app.datepicker === 'gregorian') {
+          return moment(ts).format('DD.MM.YY HH:mm:ss');
+        }
+        return DateUtil.convertToJalalian(moment(ts));
+      },
+      formatDuration(sec) {
+        if (!sec) return '';
+        const u = {
+          d: '{{ i18n "pages.inbounds.durationD" }}',
+          h: '{{ i18n "pages.inbounds.durationH" }}',
+          m: '{{ i18n "pages.inbounds.durationM" }}',
+          s: '{{ i18n "pages.inbounds.durationS" }}',
+        };
+        const d = Math.floor(sec / 86400);
+        const h = Math.floor((sec % 86400) / 3600);
+        const m = Math.floor((sec % 3600) / 60);
+        const s = sec % 60;
+        const parts = [];
+        if (d) parts.push(`${d} ${u.d}`);
+        if (h) parts.push(`${h} ${u.h}`);
+        if (m) parts.push(`${m} ${u.m}`);
+        if (s || parts.length === 0) parts.push(`${s} ${u.s}`);
+        return parts.join(' ');
       },
     },
   });

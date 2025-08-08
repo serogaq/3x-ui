@@ -12,6 +12,7 @@ import (
 	"x-ui/database/model"
 	"x-ui/logger"
 	"x-ui/util/common"
+	"x-ui/web/entity"
 	"x-ui/xray"
 
 	"gorm.io/gorm"
@@ -1904,6 +1905,109 @@ func (s *InboundService) ClearClientIps(clientEmail string) error {
 		return err
 	}
 	return nil
+}
+
+func (s *InboundService) AddClientOnlineLog(email string, t time.Time, limit int) error {
+	db := database.GetDB()
+	log := &model.ClientOnlineLog{Email: email, CreatedAt: t}
+	if err := db.Create(log).Error; err != nil {
+		return err
+	}
+	var ids []int
+	db.Model(&model.ClientOnlineLog{}).Where("email = ?", email).Order("created_at desc").Offset(limit).Pluck("id", &ids)
+	if len(ids) > 0 {
+		db.Where("id IN ?", ids).Delete(&model.ClientOnlineLog{})
+	}
+	return nil
+}
+
+func (s *InboundService) GetClientOnlineLogs(email string) ([]model.ClientOnlineLog, error) {
+	db := database.GetDB()
+	logs := []model.ClientOnlineLog{}
+	err := db.Model(&model.ClientOnlineLog{}).Where("email = ?", email).Order("created_at").Find(&logs).Error
+	return logs, err
+}
+
+func (s *InboundService) ClearClientOnlineLogs(email string) error {
+	db := database.GetDB()
+	return db.Where("email = ?", email).Delete(&model.ClientOnlineLog{}).Error
+}
+
+func (s *InboundService) ClearAllClientOnlineLogs(id int) error {
+	db := database.GetDB()
+	if id == -1 {
+		return db.Session(&gorm.Session{AllowGlobalUpdate: true}).Delete(&model.ClientOnlineLog{}).Error
+	}
+	inbound, err := s.GetInbound(id)
+	if err != nil {
+		return err
+	}
+	clients, err := s.GetClients(inbound)
+	if err != nil {
+		return err
+	}
+	emails := make([]string, 0, len(clients))
+	for _, c := range clients {
+		emails = append(emails, c.Email)
+	}
+	if len(emails) == 0 {
+		return nil
+	}
+	return db.Where("email IN ?", emails).Delete(&model.ClientOnlineLog{}).Error
+}
+
+func (s *InboundService) GetClientOnlineSessions(email string) ([]*entity.ClientOnlineSession, error) {
+	logs, err := s.GetClientOnlineLogs(email)
+	if err != nil {
+		return nil, err
+	}
+	sessions := make([]*entity.ClientOnlineSession, 0)
+	settingService := SettingService{}
+	gapSec, err := settingService.GetClientConnLogGap()
+	if err != nil {
+		gapSec = 60
+	}
+	intervalSec, err := settingService.GetClientConnLogInterval()
+	if err != nil {
+		intervalSec = 10
+	}
+	gap := time.Duration(gapSec) * time.Second
+	interval := time.Duration(intervalSec) * time.Second
+	var start, last time.Time
+	for _, l := range logs {
+		if start.IsZero() {
+			start = l.CreatedAt
+			last = l.CreatedAt
+			continue
+		}
+		if l.CreatedAt.Sub(last) > gap {
+			dis := last.Add(-interval)
+			if dis.Before(start) {
+				dis = start
+			}
+			sessions = append(sessions, &entity.ClientOnlineSession{
+				Connect:    start.UnixMilli(),
+				Disconnect: dis.UnixMilli(),
+				Duration:   int64(dis.Sub(start).Seconds()),
+			})
+			start = l.CreatedAt
+		}
+		last = l.CreatedAt
+	}
+	if !start.IsZero() {
+		session := &entity.ClientOnlineSession{Connect: start.UnixMilli()}
+		if time.Since(last) > gap {
+			dis := last.Add(-interval)
+			if dis.Before(start) {
+				dis = start
+			}
+			session.Disconnect = dis.UnixMilli()
+			session.Duration = int64(dis.Sub(start).Seconds())
+		}
+		sessions = append(sessions, session)
+	}
+	sort.Slice(sessions, func(i, j int) bool { return sessions[i].Connect > sessions[j].Connect })
+	return sessions, nil
 }
 
 func (s *InboundService) SaveClientDeviceInfo(email string, device *model.ClientDevice) error {
