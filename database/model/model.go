@@ -73,6 +73,7 @@ type ClientDevice struct {
 	UserAgent   string    `json:"userAgent" form:"userAgent"`
 	IPs         string    `json:"ips" form:"ips"`
 	CreatedAt   time.Time `json:"createdAt"`
+	UpdatedAt   time.Time `json:"updatedAt"`
 }
 
 type ClientOnlineLog struct {

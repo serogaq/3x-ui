@@ -24,6 +24,7 @@
       { title: '{{ i18n "userAgent" }}', dataIndex: 'userAgent', key: 'userAgent' },
       { title: '{{ i18n "pages.index.ipAddresses" }}', dataIndex: 'ips', key: 'ips' },
       { title: '{{ i18n "createdAt" }}', dataIndex: 'createdAt', key: 'createdAt' },
+      { title: '{{ i18n "updatedAt" }}', dataIndex: 'updatedAt', key: 'updatedAt' },
     ],
     show(email) {
       this.visible = true;
@@ -31,6 +32,7 @@
         this.list = list.map((d) => ({
           ...d,
           createdAt: moment(d.createdAt).format('DD.MM.YY HH:mm'),
+          updatedAt: moment(d.updatedAt).format('DD.MM.YY HH:mm'),
         }));
         this.title = `${baseDevicesTitle} (${list.length})`;
       });
