@@ -37,6 +37,7 @@
 "deviceModel" = "Device Model"
 "userAgent" = "User Agent"
 "createdAt" = "Created At"
+"updatedAt" = "Updated At"
 "encryption" = "Encryption"
 "useIPv4ForHost" = "Use IPv4 for host"
 "transmission" = "Transmission"

@@ -37,6 +37,7 @@
 "deviceModel" = "Модель устройства"
 "userAgent" = "User-Agent"
 "createdAt" = "Создано"
+"updatedAt" = "Обновлено"
 "encryption" = "Шифрование"
 "useIPv4ForHost" = "Использовать IPv4 для хоста"
 "transmission" = "Транспорт"

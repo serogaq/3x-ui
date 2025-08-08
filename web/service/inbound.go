@@ -2027,17 +2027,24 @@ func (s *InboundService) SaveClientDeviceInfo(email string, device *model.Client
 	}
 
 	ips := strings.Split(existing.IPs, ",")
+	found := false
 	for _, ip := range ips {
 		if ip == cd.IPs {
-			return nil
+			found = true
+			break
 		}
 	}
-	if existing.IPs == "" {
-		existing.IPs = cd.IPs
-	} else {
-		existing.IPs = existing.IPs + "," + cd.IPs
+	if !found {
+		if existing.IPs == "" {
+			existing.IPs = cd.IPs
+		} else {
+			existing.IPs = existing.IPs + "," + cd.IPs
+		}
 	}
-	return db.Model(&existing).Update("ips", existing.IPs).Error
+	return db.Model(&existing).Updates(map[string]any{
+		"ips":        existing.IPs,
+		"updated_at": time.Now(),
+	}).Error
 }
 
 func (s *InboundService) GetClientDevices(email string) ([]model.ClientDevice, error) {
