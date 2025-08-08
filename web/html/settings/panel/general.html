@@ -71,6 +71,20 @@
             </template>
         </a-setting-list-item>
         <a-setting-list-item paddings="small">
+            <template #title>{{ i18n "pages.settings.clientConnLogInterval" }}</template>
+            <template #description>{{ i18n "pages.settings.clientConnLogIntervalDesc" }}</template>
+            <template #control>
+                <a-input-number :min="1" :max="180" v-model="allSetting.clientConnLogInterval" :style="{ width: '100%' }"></a-input-number>
+            </template>
+        </a-setting-list-item>
+        <a-setting-list-item paddings="small">
+            <template #title>{{ i18n "pages.settings.clientConnLogGap" }}</template>
+            <template #description>{{ i18n "pages.settings.clientConnLogGapDesc" }}</template>
+            <template #control>
+                <a-input-number :min="1" :max="180" v-model="allSetting.clientConnLogGap" :style="{ width: '100%' }"></a-input-number>
+            </template>
+        </a-setting-list-item>
+        <a-setting-list-item paddings="small">
             <template #title>{{ i18n "pages.settings.language"}}</template>
             <template #control>
                 <a-select ref="selectLang" v-model="lang" @change="LanguageManager.setLanguage(lang)"

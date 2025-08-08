@@ -1939,10 +1939,17 @@ func (s *InboundService) GetClientOnlineSessions(email string) ([]*entity.Client
 		return nil, err
 	}
 	sessions := make([]*entity.ClientOnlineSession, 0)
-	const (
-		gap      = 60 * time.Second
-		interval = 10 * time.Second
-	)
+	settingService := SettingService{}
+	gapSec, err := settingService.GetClientConnLogGap()
+	if err != nil {
+		gapSec = 60
+	}
+	intervalSec, err := settingService.GetClientConnLogInterval()
+	if err != nil {
+		intervalSec = 10
+	}
+	gap := time.Duration(gapSec) * time.Second
+	interval := time.Duration(intervalSec) * time.Second
 	var start, last time.Time
 	for _, l := range logs {
 		if start.IsZero() {
