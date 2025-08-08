@@ -620,7 +620,7 @@
       },
       formatTime(ts) {
         if (app.datepicker === 'gregorian') {
-          return DateUtil.formatMillis(ts);
+          return moment(ts).format('DD.MM.YY HH:mm:ss');
         }
         return DateUtil.convertToJalalian(moment(ts));
       },

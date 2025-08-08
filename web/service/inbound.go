@@ -1939,7 +1939,10 @@ func (s *InboundService) GetClientOnlineSessions(email string) ([]*entity.Client
 		return nil, err
 	}
 	sessions := make([]*entity.ClientOnlineSession, 0)
-	const gap = 60 * time.Second
+	const (
+		gap      = 60 * time.Second
+		interval = 10 * time.Second
+	)
 	var start, last time.Time
 	for _, l := range logs {
 		if start.IsZero() {
@@ -1948,10 +1951,14 @@ func (s *InboundService) GetClientOnlineSessions(email string) ([]*entity.Client
 			continue
 		}
 		if l.CreatedAt.Sub(last) > gap {
+			dis := last.Add(-interval)
+			if dis.Before(start) {
+				dis = start
+			}
 			sessions = append(sessions, &entity.ClientOnlineSession{
 				Connect:    start.UnixMilli(),
-				Disconnect: last.UnixMilli(),
-				Duration:   int64(last.Sub(start).Seconds()),
+				Disconnect: dis.UnixMilli(),
+				Duration:   int64(dis.Sub(start).Seconds()),
 			})
 			start = l.CreatedAt
 		}
@@ -1960,8 +1967,12 @@ func (s *InboundService) GetClientOnlineSessions(email string) ([]*entity.Client
 	if !start.IsZero() {
 		session := &entity.ClientOnlineSession{Connect: start.UnixMilli()}
 		if time.Since(last) > gap {
-			session.Disconnect = last.UnixMilli()
-			session.Duration = int64(last.Sub(start).Seconds())
+			dis := last.Add(-interval)
+			if dis.Before(start) {
+				dis = start
+			}
+			session.Disconnect = dis.UnixMilli()
+			session.Duration = int64(dis.Sub(start).Seconds())
 		}
 		sessions = append(sessions, session)
 	}
