@@ -11,6 +11,9 @@ class AllSetting {
         this.pageSize = 50;
         this.expireDiff = 0;
         this.trafficDiff = 0;
+        this.clientConnLog = 0;
+        this.clientConnLogInterval = 0;
+        this.clientConnLogGap = 60;
         this.remarkModel = "-ieo";
         this.datepicker = "gregorian";
         this.tgBotEnable = false;

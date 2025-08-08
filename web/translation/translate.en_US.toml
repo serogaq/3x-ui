@@ -366,7 +366,7 @@
 "clientConnLog" = "Client Connection Log"
 "clientConnLogDesc" = "Number of connection log records per client (0 disables logging)"
 "clientConnLogInterval" = "Connection Log Interval"
-"clientConnLogIntervalDesc" = "How often to record client online status (unit: second)"
+"clientConnLogIntervalDesc" = "How often to record client online status (unit: second; 0 disables)"
 "clientConnLogGap" = "Disconnect Threshold"
 "clientConnLogGapDesc" = "Seconds without online records to mark a disconnect"
 "tgNotifyCpu" = "CPU Load Notification"
