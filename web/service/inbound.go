@@ -825,20 +825,28 @@ func (s *InboundService) addInboundTraffic(tx *gorm.DB, traffics []*xray.Traffic
 }
 
 func (s *InboundService) addClientTraffic(tx *gorm.DB, traffics []*xray.ClientTraffic, onlineClients []string) (err error) {
-	if p != nil {
-		p.SetOnlineClients(onlineClients)
-	}
-
-	s.updateConnectionLogs(tx, onlineClients)
-
 	if len(traffics) == 0 {
+		if p != nil {
+			p.SetOnlineClients(onlineClients)
+		}
+		s.updateConnectionLogs(tx, onlineClients)
 		return nil
 	}
 
 	emails := make([]string, 0, len(traffics))
-	for _, traffic := range traffics {
-		emails = append(emails, traffic.Email)
+	if len(onlineClients) == 0 {
+		for _, traffic := range traffics {
+			emails = append(emails, traffic.Email)
+			if traffic.Up+traffic.Down > 0 {
+				onlineClients = append(onlineClients, traffic.Email)
+			}
+		}
+	} else {
+		for _, traffic := range traffics {
+			emails = append(emails, traffic.Email)
+		}
 	}
+
 	dbClientTraffics := make([]*xray.ClientTraffic, 0, len(traffics))
 	err = tx.Model(xray.ClientTraffic{}).Where("email IN (?)", emails).Find(&dbClientTraffics).Error
 	if err != nil {
@@ -847,11 +855,19 @@ func (s *InboundService) addClientTraffic(tx *gorm.DB, traffics []*xray.ClientTr
 
 	// Avoid empty slice error
 	if len(dbClientTraffics) == 0 {
+		if p != nil {
+			p.SetOnlineClients(onlineClients)
+		}
+		s.updateConnectionLogs(tx, onlineClients)
 		return nil
 	}
 
 	dbClientTraffics, err = s.adjustTraffics(tx, dbClientTraffics)
 	if err != nil {
+		if p != nil {
+			p.SetOnlineClients(onlineClients)
+		}
+		s.updateConnectionLogs(tx, onlineClients)
 		return err
 	}
 
@@ -864,6 +880,11 @@ func (s *InboundService) addClientTraffic(tx *gorm.DB, traffics []*xray.ClientTr
 			}
 		}
 	}
+
+	if p != nil {
+		p.SetOnlineClients(onlineClients)
+	}
+	s.updateConnectionLogs(tx, onlineClients)
 
 	err = tx.Save(dbClientTraffics).Error
 	if err != nil {
