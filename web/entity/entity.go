@@ -118,8 +118,8 @@ func (s *AllSetting) CheckValid() error {
 		return common.NewError("TgMem must be in the range 0-100, passed ", s.TgMem)
 	}
 
-	if s.ClientConnLog < 0 || s.ClientConnLog > 5000 {
-		return common.NewError("clientConnLog must be in the range 0-5000, passed ", s.ClientConnLog)
+	if s.ClientConnLog < 0 || s.ClientConnLog > 10000 {
+		return common.NewError("clientConnLog must be in the range 0-10000, passed ", s.ClientConnLog)
 	}
 
 	if s.ClientConnLogInterval <= 0 || s.ClientConnLogInterval > 180 {
