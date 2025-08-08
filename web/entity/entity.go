@@ -130,6 +130,10 @@ func (s *AllSetting) CheckValid() error {
 		return common.NewError("clientConnLogGap must be in the range 1-180, passed ", s.ClientConnLogGap)
 	}
 
+	if s.ClientConnLogGap <= s.ClientConnLogInterval {
+		return common.NewError("clientConnLogGap must be greater than clientConnLogInterval, passed ", s.ClientConnLogGap, " <= ", s.ClientConnLogInterval)
+	}
+
 	if !strings.HasPrefix(s.WebBasePath, "/") {
 		s.WebBasePath = "/" + s.WebBasePath
 	}
