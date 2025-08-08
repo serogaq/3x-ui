@@ -67,7 +67,7 @@
             <template #title>{{ i18n "pages.settings.clientConnLog" }}</template>
             <template #description>{{ i18n "pages.settings.clientConnLogDesc" }}</template>
             <template #control>
-                <a-input-number :min="0" :max="5000" v-model="allSetting.clientConnLog" :style="{ width: '100%' }"></a-input-number>
+                <a-input-number :min="0" :max="10000" v-model="allSetting.clientConnLog" :style="{ width: '100%' }"></a-input-number>
             </template>
         </a-setting-list-item>
         <a-setting-list-item paddings="small">
