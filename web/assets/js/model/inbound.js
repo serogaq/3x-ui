@@ -1220,7 +1220,7 @@ class Inbound extends XrayCommonClass {
 
     canEnableTls() {
         if (![Protocols.VMESS, Protocols.VLESS, Protocols.TROJAN, Protocols.SHADOWSOCKS].includes(this.protocol)) return false;
-        return ["tcp", "ws", "http", "grpc", "httpupgrade", "xhttp"].includes(this.network);
+        return ["tcp", "ws", "http", "grpc", "kcp", "httpupgrade", "xhttp"].includes(this.network);
     }
 
     //this is used for xtls-rprx-vision
