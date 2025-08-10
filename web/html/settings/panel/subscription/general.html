@@ -41,10 +41,10 @@
             <template #description>{{ i18n "pages.settings.subHappRoutingDesc"}}</template>
             <template #control>
                 <a-row :gutter="8">
-                    <a-col :xs="24" :md="18">
+                    <a-col :xs="24" :md="21">
                         <a-textarea v-model="allSetting.subHappRouting" :rows="3"></a-textarea>
                     </a-col>
-                    <a-col :xs="24" :md="6">
+                    <a-col :xs="24" :md="3" :style="{ paddingTop: isMobile ? '20px' : '0' }">
                         <a-select v-model="allSetting.subHappRoutingAction" :style="{ width: '100%' }">
                             <a-select-option value="add">add</a-select-option>
                             <a-select-option value="onadd">onadd</a-select-option>
