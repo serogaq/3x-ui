@@ -16,6 +16,7 @@ type SUBController struct {
 	subSupportUrl        string
 	subProfileWebPageUrl string
 	subHappRouting       string
+	subHappRoutingAction string
 	subPath              string
 	subJsonPath          string
 	subEncrypt           bool
@@ -42,6 +43,7 @@ func NewSUBController(
 	subSupportUrl string,
 	subProfileWebPageUrl string,
 	subHappRouting string,
+	subHappRoutingAction string,
 ) *SUBController {
 	sub := NewSubService(showInfo, rModel)
 	a := &SUBController{
@@ -50,6 +52,7 @@ func NewSUBController(
 		subSupportUrl:        subSupportUrl,
 		subProfileWebPageUrl: subProfileWebPageUrl,
 		subHappRouting:       subHappRouting,
+		subHappRoutingAction: subHappRoutingAction,
 		subPath:              subPath,
 		subJsonPath:          jsonPath,
 		subEncrypt:           encrypt,
@@ -101,7 +104,15 @@ func (a *SUBController) subs(c *gin.Context) {
 	a.subService.SaveDeviceInfo(subId, info)
 	supportUrl := a.subSupportUrl
 	profileWebPageUrl := a.subProfileWebPageUrl
-	happRouting := a.subHappRouting
+	happRouting := ""
+	if a.subHappRouting != "" {
+		encoded := base64.StdEncoding.EncodeToString([]byte(a.subHappRouting))
+		action := a.subHappRoutingAction
+		if action == "" {
+			action = "onadd"
+		}
+		happRouting = "happ://" + action + "/" + encoded
+	}
 	announceText := a.subAnnounce
 	subs, header, err := a.subService.GetSubs(subId, host)
 	if err != nil || len(subs) == 0 {
@@ -167,7 +178,15 @@ func (a *SUBController) subJsons(c *gin.Context) {
 	a.subService.SaveDeviceInfo(subId, info)
 	supportUrl := a.subSupportUrl
 	profileWebPageUrl := a.subProfileWebPageUrl
-	happRouting := a.subHappRouting
+	happRouting := ""
+	if a.subHappRouting != "" {
+		encoded := base64.StdEncoding.EncodeToString([]byte(a.subHappRouting))
+		action := a.subHappRoutingAction
+		if action == "" {
+			action = "onadd"
+		}
+		happRouting = "happ://" + action + "/" + encoded
+	}
 	announceText := a.subAnnounce
 	jsonSub, header, err := a.subJsonService.GetJson(subId, host)
 	if err != nil || len(jsonSub) == 0 {

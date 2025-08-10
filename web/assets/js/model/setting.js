@@ -37,6 +37,7 @@ class AllSetting {
         this.subSupportUrl = "";
         this.subProfileWebPageUrl = "";
         this.subHappRouting = "";
+        this.subHappRoutingAction = "onadd";
         this.subListen = "";
         this.subPort = 2096;
         this.subPath = "/sub/";

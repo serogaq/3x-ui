@@ -52,6 +52,7 @@ type AllSetting struct {
 	SubSupportUrl               string `json:"subSupportUrl" form:"subSupportUrl"`
 	SubProfileWebPageUrl        string `json:"subProfileWebPageUrl" form:"subProfileWebPageUrl"`
 	SubHappRouting              string `json:"subHappRouting" form:"subHappRouting"`
+	SubHappRoutingAction        string `json:"subHappRoutingAction" form:"subHappRoutingAction"`
 	SubListen                   string `json:"subListen" form:"subListen"`
 	SubPort                     int    `json:"subPort" form:"subPort"`
 	SubPath                     string `json:"subPath" form:"subPath"`
