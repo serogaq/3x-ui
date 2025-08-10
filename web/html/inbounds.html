@@ -1137,7 +1137,11 @@
                     protocol: inbound.protocol,
                     settings: inbound.settings.toString(),
                 };
-                if (inbound.canEnableStream()) data.streamSettings = inbound.stream.toString();
+                if (inbound.canEnableStream()){
+                  data.streamSettings = inbound.stream.toString();
+                } else if (inbound.stream?.sockopt) {
+                  data.streamSettings = JSON.stringify({ sockopt: inbound.stream.sockopt.toJson() }, null, 2);
+                }
                 data.sniffing = inbound.sniffing.toString();
                 data.allocate = inbound.allocate.toString();
 
@@ -1157,7 +1161,11 @@
                     protocol: inbound.protocol,
                     settings: inbound.settings.toString(),
                 };
-                if (inbound.canEnableStream()) data.streamSettings = inbound.stream.toString();
+                if (inbound.canEnableStream()){
+                  data.streamSettings = inbound.stream.toString();
+                } else if (inbound.stream?.sockopt) {
+                  data.streamSettings = JSON.stringify({ sockopt: inbound.stream.sockopt.toJson() }, null, 2);
+                }
                 data.sniffing = inbound.sniffing.toString();
                 data.allocate = inbound.allocate.toString();
 
