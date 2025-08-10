@@ -387,7 +387,7 @@
 "subProfileWebPageUrl" = "Profile Web Page URL"
 "subProfileWebPageUrlDesc" = "URL shown in Profile-Web-Page-Url header"
 "subHappRouting" = "Happ Routing"
-"subHappRoutingDesc" = "Link to routing, for Happ client, sent in Routing header"
+"subHappRoutingDesc" = "JSON routing config for Happ client, encoded and sent in Routing header"
 "subListen" = "Listen IP"
 "subListenDesc" = "The IP address for the subscription service. (leave blank to listen on all IPs)"
 "subPort" = "Listen Port"
