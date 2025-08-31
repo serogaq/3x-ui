@@ -3,7 +3,6 @@ package controller
 import (
 	"net"
 	"net/http"
-	"os"
 	"strings"
 
 	"x-ui/config"
