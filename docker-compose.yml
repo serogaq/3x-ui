@@ -11,6 +11,8 @@ services:
     container_name: 3x-ui
     hostname: ${HOSTNAME:-3x-ui}
     networks:
+      pubv6:
+        ipv6_address: "${V6_ADDRESS}"
       traefik:
     labels:
       - "traefik.enable=true"
@@ -33,12 +35,27 @@ services:
       - "traefik.tcp.services.3x-ui-inbound-443.loadbalancer.server.port=443"
       - "traefik.tcp.services.3x-ui-inbound-443.loadbalancer.proxyprotocol.version=2"
       #
-      - "traefik.tcp.routers.vless-grpc.rule=HostSNI(`${XUI_VLESS_GRPC_SNI}`)"
-      - "traefik.tcp.routers.vless-grpc.tls.passthrough=true"
-      - "traefik.tcp.routers.vless-grpc.entrypoints=websecure"
-      - "traefik.tcp.routers.vless-grpc.service=3x-ui-inbound-8888"
-      - "traefik.tcp.services.3x-ui-inbound-8888.loadbalancer.server.port=8888"
-      - "traefik.tcp.services.3x-ui-inbound-8888.loadbalancer.proxyprotocol.version=2"
+      - "traefik.tcp.routers.vless-grpc-cloudflare.rule=HostSNI(`${XUI_VLESS_GRPC_SNI}`)"
+      - "traefik.tcp.routers.vless-grpc-cloudflare.tls.passthrough=true"
+      - "traefik.tcp.routers.vless-grpc-cloudflare.entrypoints=websecure"
+      - "traefik.tcp.routers.vless-grpc-cloudflare.service=3x-ui-inbound-8008"
+      - "traefik.tcp.services.3x-ui-inbound-8008.loadbalancer.server.port=8008"
+      - "traefik.tcp.services.3x-ui-inbound-8008.loadbalancer.proxyprotocol.version=2"
+      #
+      - "traefik.tcp.routers.vless-ws-gcore.rule=HostSNI(`${XUI_VLESS_WEBSOCKET_SNI}`)"
+      - "traefik.tcp.routers.vless-ws-gcore.tls.passthrough=true"
+      - "traefik.tcp.routers.vless-ws-gcore.entrypoints=websecure"
+      - "traefik.tcp.routers.vless-ws-gcore.service=3x-ui-inbound-8009"
+      - "traefik.tcp.services.3x-ui-inbound-8009.loadbalancer.server.port=8009"
+      - "traefik.tcp.services.3x-ui-inbound-8009.loadbalancer.proxyprotocol.version=2"
+      #
+      - "traefik.udp.routers.vless-mkcp-srtp.entrypoints=udp-16384"
+      - "traefik.udp.routers.vless-mkcp-srtp.service=3x-ui-inbound-16384"
+      - "traefik.udp.services.3x-ui-inbound-16384.loadbalancer.server.port=16384"
+      #
+      - "traefik.udp.routers.vless-mkcp-dtls.entrypoints=udp-3478"
+      - "traefik.udp.routers.vless-mkcp-dtls.service=3x-ui-inbound-3478"
+      - "traefik.udp.services.3x-ui-inbound-3478.loadbalancer.server.port=3478"
     volumes:
       - ./db/:/etc/x-ui/
       - ./db/fail2ban.sqlite3:/var/lib/fail2ban/fail2ban.sqlite3
@@ -56,7 +73,6 @@ services:
       XRAY_VMESS_AEAD_FORCED: "false"
       XUI_ENABLE_FAIL2BAN: "${XUI_ENABLE_FAIL2BAN:-false}"
       XUI_SERVER_IP: "${XUI_SERVER_IP}"
-      XUI_GETREMOTEIP_PRIORITY_HEADER: "${XUI_GETREMOTEIP_PRIORITY_HEADER:-}"
       XUI_DEBUG: "${XUI_DEBUG:-false}"
       XUI_LOG_LEVEL: "${XUI_LOG_LEVEL:-info}"
     tty: true
@@ -72,3 +88,10 @@ services:
 networks:
   traefik:
     external: true
+  pubv6:
+    driver: bridge
+    enable_ipv6: true
+    ipam:
+      config:
+        - subnet: "${V6_SUBNET}"
+          gateway: "${V6_GATEWAY}"
