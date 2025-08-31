@@ -35,14 +35,19 @@ services:
       - "traefik.tcp.services.3x-ui-inbound-443.loadbalancer.server.port=443"
       - "traefik.tcp.services.3x-ui-inbound-443.loadbalancer.proxyprotocol.version=2"
       #
-      - "traefik.http.routers.vless-grpc.rule=Host(`${XUI_VLESS_GRPC_HOST}`) && PathPrefix(`${XUI_VLESS_GRPC_PATH}`)"
-      - "traefik.http.routers.vless-grpc.middlewares=cf-x-real-ip@file"
-      - "traefik.http.routers.vless-grpc.entrypoints=websecure"
-      - "traefik.http.routers.vless-grpc.tls=true"
-      - "traefik.http.routers.vless-grpc.service=3x-ui-inbound-8800"
-      - "traefik.http.services.3x-ui-inbound-8800.loadbalancer.server.scheme=h2c"
-      - "traefik.http.services.3x-ui-inbound-8800.loadbalancer.server.port=8800"
-      - "traefik.http.services.3x-ui-inbound-8800.loadbalancer.serversTransport=h2c@file"
+      - "traefik.tcp.routers.vless-grpc-cloudflare.rule=HostSNI(`${XUI_VLESS_GRPC_SNI}`)"
+      - "traefik.tcp.routers.vless-grpc-cloudflare.tls.passthrough=true"
+      - "traefik.tcp.routers.vless-grpc-cloudflare.entrypoints=websecure"
+      - "traefik.tcp.routers.vless-grpc-cloudflare.service=3x-ui-inbound-8008"
+      - "traefik.tcp.services.3x-ui-inbound-8008.loadbalancer.server.port=8008"
+      - "traefik.tcp.services.3x-ui-inbound-8008.loadbalancer.proxyprotocol.version=2"
+      #
+      - "traefik.tcp.routers.vless-ws-gcore.rule=HostSNI(`${XUI_VLESS_WEBSOCKET_SNI}`)"
+      - "traefik.tcp.routers.vless-ws-gcore.tls.passthrough=true"
+      - "traefik.tcp.routers.vless-ws-gcore.entrypoints=websecure"
+      - "traefik.tcp.routers.vless-ws-gcore.service=3x-ui-inbound-8009"
+      - "traefik.tcp.services.3x-ui-inbound-8009.loadbalancer.server.port=8009"
+      - "traefik.tcp.services.3x-ui-inbound-8009.loadbalancer.proxyprotocol.version=2"
       #
       - "traefik.udp.routers.vless-mkcp-srtp.entrypoints=udp-16384"
       - "traefik.udp.routers.vless-mkcp-srtp.service=3x-ui-inbound-16384"
@@ -79,22 +84,6 @@ services:
     privileged: true
     devices:
       - /dev/net/tun:/dev/net/tun
-
-  ndppd:
-    image: debian:12-slim
-    container_name: ndppd
-    network_mode: host
-    privileged: true
-    volumes:
-      - ./ndppd.conf:/etc/ndppd.conf:ro
-    restart: unless-stopped
-    command: >
-      sh -c "apt-get update &&
-             apt-get install -y --no-install-recommends ndppd procps iproute2 &&
-             sysctl -w net.ipv6.conf.all.forwarding=1 net.ipv6.conf.all.proxy_ndp=1 net.ipv6.conf.eth0.proxy_ndp=1 net.ipv6.conf.eth0.accept_ra=2 &&
-             ip -6 route del ${V6_SUBNET} dev eth0 2>/dev/null || true &&
-             rm -rf /var/lib/apt/lists/* &&
-             ndppd -d -c /etc/ndppd.conf"
 
 networks:
   traefik:
