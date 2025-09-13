@@ -111,7 +111,7 @@ func (a *SUBController) subs(c *gin.Context) {
 		if action == "" {
 			action = "onadd"
 		}
-		happRouting = "happ://" + action + "/" + encoded
+		happRouting = "happ://routing/" + action + "/" + encoded
 	}
 	announceText := a.subAnnounce
 	subs, header, err := a.subService.GetSubs(subId, host)
@@ -185,7 +185,7 @@ func (a *SUBController) subJsons(c *gin.Context) {
 		if action == "" {
 			action = "onadd"
 		}
-		happRouting = "happ://" + action + "/" + encoded
+		happRouting = "happ://routing/" + action + "/" + encoded
 	}
 	announceText := a.subAnnounce
 	jsonSub, header, err := a.subJsonService.GetJson(subId, host)
