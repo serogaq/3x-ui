@@ -13,6 +13,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -121,24 +122,61 @@ func NewServer() *Server {
 }
 
 // getHtmlFiles walks the local `web/html` directory and returns a list of
-// template file paths. Used only in debug/development mode.
-func (s *Server) getHtmlFiles() ([]string, error) {
-	files := make([]string, 0)
-	dir, _ := os.Getwd()
-	err := fs.WalkDir(os.DirFS(dir), "web/html", func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-		if d.IsDir() {
-			return nil
-		}
-		files = append(files, path)
-		return nil
-	})
-	if err != nil {
-		return nil, err
+// template file paths along with the base directory they were loaded from.
+// Used only in debug/development mode.
+func (s *Server) getHtmlFiles() ([]string, string, error) {
+	baseDirs := make([]string, 0, 3)
+	if wd, err := os.Getwd(); err == nil {
+		baseDirs = append(baseDirs, wd)
 	}
-	return files, nil
+	if exe, err := os.Executable(); err == nil {
+		baseDirs = append(baseDirs, filepath.Dir(exe))
+	}
+	if srcRoot := os.Getenv("XUI_SOURCE_ROOT"); srcRoot != "" {
+		baseDirs = append(baseDirs, srcRoot)
+	}
+
+	seen := make(map[string]struct{}, len(baseDirs))
+	var lastErr error
+	for _, dir := range baseDirs {
+		dir = filepath.Clean(dir)
+		if _, ok := seen[dir]; ok {
+			continue
+		}
+		seen[dir] = struct{}{}
+
+		templatesRoot := filepath.Join(dir, "web", "html")
+		if _, err := os.Stat(templatesRoot); err != nil {
+			if !os.IsNotExist(err) {
+				lastErr = err
+			}
+			continue
+		}
+
+		localFiles := make([]string, 0)
+		err := fs.WalkDir(os.DirFS(dir), "web/html", func(path string, d fs.DirEntry, err error) error {
+			if err != nil {
+				return err
+			}
+			if d.IsDir() {
+				return nil
+			}
+			localFiles = append(localFiles, filepath.Join(dir, path))
+			return nil
+		})
+		if err != nil {
+			lastErr = err
+			continue
+		}
+		if len(localFiles) > 0 {
+			return localFiles, dir, nil
+		}
+	}
+
+	if lastErr != nil {
+		return nil, "", lastErr
+	}
+	return nil, "", fmt.Errorf("web/html directory not found; set XUI_SOURCE_ROOT to the project root when running with XUI_DEBUG=true")
 }
 
 // getHtmlTemplate parses embedded HTML templates from the bundled `htmlFS`
@@ -240,17 +278,28 @@ func (s *Server) initRouter() (*gin.Engine, error) {
 	engine.Use(locale.LocalizerMiddleware())
 
 	// set static files and template
+	useLocalTemplates := false
 	if config.IsDebug() {
-		// for development
-		files, err := s.getHtmlFiles()
-		if err != nil {
-			return nil, err
+		files, sourceDir, err := s.getHtmlFiles()
+		if err == nil && len(files) > 0 {
+			engine.LoadHTMLFiles(files...)
+			assetsDir := filepath.Join(sourceDir, "web", "assets")
+			if _, statErr := os.Stat(assetsDir); statErr == nil {
+				engine.StaticFS(basePath+"assets", http.FS(os.DirFS(assetsDir)))
+			} else {
+				logger.Warningf("debug assets directory missing at %s: %v; falling back to embedded assets", assetsDir, statErr)
+				engine.StaticFS(basePath+"assets", http.FS(&wrapAssetsFS{FS: assetsFS}))
+			}
+			useLocalTemplates = true
+		} else {
+			if err != nil {
+				logger.Warningf("debug template reload disabled: %v", err)
+			} else {
+				logger.Warning("debug template reload disabled: no templates found in web/html")
+			}
 		}
-		// Use the registered func map with the loaded templates
-		engine.LoadHTMLFiles(files...)
-		engine.StaticFS(basePath+"assets", http.FS(os.DirFS("web/assets")))
-	} else {
-		// for production
+	}
+	if !useLocalTemplates {
 		template, err := s.getHtmlTemplate(funcMap)
 		if err != nil {
 			return nil, err

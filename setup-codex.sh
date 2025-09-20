@@ -19,7 +19,6 @@ apt update
 apt install --assume-yes curl wget unzip procps file bsdmainutils busybox libc6-dev
 
 go install "golang.org/dl/go${GO_VERSION}@latest"
-"go${GO_VERSION}" download
 
 go version
 

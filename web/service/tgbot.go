@@ -2991,7 +2991,7 @@ func (t *Tgbot) clientSubscriptionLink(chatId int64, email string) {
 		return
 	}
 
-	subJsonEnable, err := s.settingService.GetSubJsonEnable()
+	subJsonEnable, err := t.settingService.GetSubJsonEnable()
 	if err != nil {
 		logger.Warning(err)
 		t.SendMsgToTgbot(chatId, t.I18nBot("tgbot.wentWrong"))
