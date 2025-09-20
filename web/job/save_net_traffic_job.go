@@ -1,6 +1,6 @@
 package job
 
-import "x-ui/web/service"
+import "github.com/mhsanaei/3x-ui/v2/web/service"
 
 type SaveNetTrafficJob struct {
 	server service.ServerService

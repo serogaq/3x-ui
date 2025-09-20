@@ -2,7 +2,7 @@ package job
 
 import (
 	"time"
-	"x-ui/web/service"
+	"github.com/mhsanaei/3x-ui/v2/web/service"
 )
 
 type ClientOnlineLogJob struct {

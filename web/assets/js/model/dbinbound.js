@@ -10,6 +10,8 @@ class DBInbound {
         this.remark = "";
         this.enable = true;
         this.expiryTime = 0;
+        this.trafficReset = "never";
+        this.lastTrafficResetTime = 0;
 
         this.listen = "";
         this.port = 0;
@@ -49,8 +51,8 @@ class DBInbound {
         return this.protocol === Protocols.SHADOWSOCKS;
     }
 
-    get isSocks() {
-        return this.protocol === Protocols.SOCKS;
+    get isMixed() {
+        return this.protocol === Protocols.MIXED;
     }
 
     get isHTTP() {

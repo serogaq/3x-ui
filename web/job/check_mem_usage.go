@@ -3,8 +3,8 @@ package job
 import (
 	"strconv"
 
-	"x-ui/web/service"
-	"x-ui/logger"
+	"github.com/mhsanaei/3x-ui/v2/web/service"
+	"github.com/mhsanaei/3x-ui/v2/logger"
 
 	"github.com/shirou/gopsutil/v4/mem"
 )

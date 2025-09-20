@@ -4,7 +4,7 @@
 </a-modal>
 <script>
   function refreshDevices(email) {
-    return HttpUtil.post(`/panel/inbound/clientDevices/${email}`).then((msg) => {
+    return HttpUtil.post(`/panel/api/inbound/clientDevices/${email}`).then((msg) => {
       if (msg.success) {
         return msg.obj;
       }

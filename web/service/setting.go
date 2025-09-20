@@ -10,14 +10,14 @@ import (
 	"strings"
 	"time"
 
-	"x-ui/database"
-	"x-ui/database/model"
-	"x-ui/logger"
-	"x-ui/util/common"
-	"x-ui/util/random"
-	"x-ui/util/reflect_util"
-	"x-ui/web/entity"
-	"x-ui/xray"
+	"github.com/mhsanaei/3x-ui/v2/database"
+	"github.com/mhsanaei/3x-ui/v2/database/model"
+	"github.com/mhsanaei/3x-ui/v2/logger"
+	"github.com/mhsanaei/3x-ui/v2/util/common"
+	"github.com/mhsanaei/3x-ui/v2/util/random"
+	"github.com/mhsanaei/3x-ui/v2/util/reflect_util"
+	"github.com/mhsanaei/3x-ui/v2/web/entity"
+	"github.com/mhsanaei/3x-ui/v2/xray"
 )
 
 //go:embed config.json
@@ -55,7 +55,8 @@ var defaultValueMap = map[string]string{
 	"tgLang":                      "en-US",
 	"twoFactorEnable":             "false",
 	"twoFactorToken":              "",
-	"subEnable":                   "false",
+	"subEnable":                   "true",
+	"subJsonEnable":               "false",
 	"subTitle":                    "",
 	"subAnnounce":                 "",
 	"subSupportUrl":               "",
@@ -89,6 +90,8 @@ var defaultValueMap = map[string]string{
 	"netTrafficRecv":              "0",
 }
 
+// SettingService provides business logic for application settings management.
+// It handles configuration storage, retrieval, and validation for all system settings.
 type SettingService struct{}
 
 func (s *SettingService) GetDefaultJsonConfig() (any, error) {
@@ -462,6 +465,10 @@ func (s *SettingService) GetSubEnable() (bool, error) {
 	return s.getBool("subEnable")
 }
 
+func (s *SettingService) GetSubJsonEnable() (bool, error) {
+	return s.getBool("subJsonEnable")
+}
+
 func (s *SettingService) GetSubTitle() (string, error) {
 	return s.getString("subTitle")
 }
@@ -697,6 +704,7 @@ func (s *SettingService) GetDefaultSettings(host string) (any, error) {
 		"defaultKey":            func() (any, error) { return s.GetKeyFile() },
 		"tgBotEnable":           func() (any, error) { return s.GetTgbotEnabled() },
 		"subEnable":             func() (any, error) { return s.GetSubEnable() },
+		"subJsonEnable":         func() (any, error) { return s.GetSubJsonEnable() },
 		"subTitle":              func() (any, error) { return s.GetSubTitle() },
 		"subAnnounce":           func() (any, error) { return s.GetSubAnnounce() },
 		"subSupportUrl":         func() (any, error) { return s.GetSubSupportUrl() },
@@ -720,7 +728,14 @@ func (s *SettingService) GetDefaultSettings(host string) (any, error) {
 		result[key] = value
 	}
 
-	if result["subEnable"].(bool) && (result["subURI"].(string) == "" || result["subJsonURI"].(string) == "") {
+	subEnable := result["subEnable"].(bool)
+	subJsonEnable := false
+	if v, ok := result["subJsonEnable"]; ok {
+		if b, ok2 := v.(bool); ok2 {
+			subJsonEnable = b
+		}
+	}
+	if (subEnable && result["subURI"].(string) == "") || (subJsonEnable && result["subJsonURI"].(string) == "") {
 		subURI := ""
 		subTitle, _ := s.GetSubTitle()
 		subAnnounce, _ := s.GetSubAnnounce()
@@ -751,7 +766,7 @@ func (s *SettingService) GetDefaultSettings(host string) (any, error) {
 		} else {
 			subURI += fmt.Sprintf("%s:%d", subDomain, subPort)
 		}
-		if result["subURI"].(string) == "" {
+		if subEnable && result["subURI"].(string) == "" {
 			result["subURI"] = subURI + subPath
 		}
 		if result["subTitle"].(string) == "" {
@@ -772,7 +787,7 @@ func (s *SettingService) GetDefaultSettings(host string) (any, error) {
 		if result["subHappRoutingAction"].(string) == "" {
 			result["subHappRoutingAction"] = subHappRoutingAction
 		}
-		if result["subJsonURI"].(string) == "" {
+		if subJsonEnable && result["subJsonURI"].(string) == "" {
 			result["subJsonURI"] = subURI + subJsonPath
 		}
 	}

@@ -1,3 +1,5 @@
+// Package web provides the main web server implementation for the 3x-ui panel,
+// including HTTP/HTTPS serving, routing, templates, and background job scheduling.
 package web
 
 import (
@@ -15,15 +17,15 @@ import (
 	"strings"
 	"time"
 
-	"x-ui/config"
-	"x-ui/logger"
-	"x-ui/util/common"
-	"x-ui/web/controller"
-	"x-ui/web/job"
-	"x-ui/web/locale"
-	"x-ui/web/middleware"
-	"x-ui/web/network"
-	"x-ui/web/service"
+	"github.com/mhsanaei/3x-ui/v2/config"
+	"github.com/mhsanaei/3x-ui/v2/logger"
+	"github.com/mhsanaei/3x-ui/v2/util/common"
+	"github.com/mhsanaei/3x-ui/v2/web/controller"
+	"github.com/mhsanaei/3x-ui/v2/web/job"
+	"github.com/mhsanaei/3x-ui/v2/web/locale"
+	"github.com/mhsanaei/3x-ui/v2/web/middleware"
+	"github.com/mhsanaei/3x-ui/v2/web/network"
+	"github.com/mhsanaei/3x-ui/v2/web/service"
 
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-contrib/sessions"
@@ -32,7 +34,7 @@ import (
 	"github.com/robfig/cron/v3"
 )
 
-//go:embed assets/*
+//go:embed assets
 var assetsFS embed.FS
 
 //go:embed html/*
@@ -79,6 +81,17 @@ func (f *wrapAssetsFileInfo) ModTime() time.Time {
 	return startTime
 }
 
+// EmbeddedHTML returns the embedded HTML templates filesystem for reuse by other servers.
+func EmbeddedHTML() embed.FS {
+	return htmlFS
+}
+
+// EmbeddedAssets returns the embedded assets filesystem for reuse by other servers.
+func EmbeddedAssets() embed.FS {
+	return assetsFS
+}
+
+// Server represents the main web server for the 3x-ui panel with controllers, services, and scheduled jobs.
 type Server struct {
 	httpServer *http.Server
 	listener   net.Listener
@@ -98,6 +111,7 @@ type Server struct {
 	cancel context.CancelFunc
 }
 
+// NewServer creates a new web server instance with a cancellable context.
 func NewServer() *Server {
 	ctx, cancel := context.WithCancel(context.Background())
 	return &Server{
@@ -106,6 +120,8 @@ func NewServer() *Server {
 	}
 }
 
+// getHtmlFiles walks the local `web/html` directory and returns a list of
+// template file paths. Used only in debug/development mode.
 func (s *Server) getHtmlFiles() ([]string, error) {
 	files := make([]string, 0)
 	dir, _ := os.Getwd()
@@ -125,6 +141,9 @@ func (s *Server) getHtmlFiles() ([]string, error) {
 	return files, nil
 }
 
+// getHtmlTemplate parses embedded HTML templates from the bundled `htmlFS`
+// using the provided template function map and returns the resulting
+// template set for production usage.
 func (s *Server) getHtmlTemplate(funcMap template.FuncMap) (*template.Template, error) {
 	t := template.New("").Funcs(funcMap)
 	err := fs.WalkDir(htmlFS, "html", func(path string, d fs.DirEntry, err error) error {
@@ -148,6 +167,8 @@ func (s *Server) getHtmlTemplate(funcMap template.FuncMap) (*template.Template, 
 	return t, nil
 }
 
+// initRouter initializes Gin, registers middleware, templates, static
+// assets, controllers and returns the configured engine.
 func (s *Server) initRouter() (*gin.Engine, error) {
 	if config.IsDebug() {
 		gin.SetMode(gin.DebugMode)
@@ -177,10 +198,19 @@ func (s *Server) initRouter() (*gin.Engine, error) {
 	if err != nil {
 		return nil, err
 	}
-	engine.Use(gzip.Gzip(gzip.DefaultCompression, gzip.WithExcludedPaths([]string{basePath + "panel/API/"})))
+	engine.Use(gzip.Gzip(gzip.DefaultCompression, gzip.WithExcludedPaths([]string{basePath + "panel/api/"})))
 	assetsBasePath := basePath + "assets/"
 
 	store := cookie.NewStore(secret)
+	// Configure default session cookie options, including expiration (MaxAge)
+	if sessionMaxAge, err := s.settingService.GetSessionMaxAge(); err == nil {
+		store.Options(sessions.Options{
+			Path:     "/",
+			MaxAge:   sessionMaxAge * 60, // minutes -> seconds
+			HttpOnly: true,
+			SameSite: http.SameSiteLaxMode,
+		})
+	}
 	engine.Use(sessions.Sessions("3x-ui", store))
 	engine.Use(func(c *gin.Context) {
 		c.Set("base_path", basePath)
@@ -202,15 +232,32 @@ func (s *Server) initRouter() (*gin.Engine, error) {
 	i18nWebFunc := func(key string, params ...string) string {
 		return locale.I18n(locale.Web, key, params...)
 	}
-	engine.FuncMap["i18n"] = i18nWebFunc
+	// Register template functions before loading templates
+	funcMap := template.FuncMap{
+		"i18n": i18nWebFunc,
+	}
+	engine.SetFuncMap(funcMap)
 	engine.Use(locale.LocalizerMiddleware())
 
-	template, err := s.getHtmlTemplate(engine.FuncMap)
-	if err != nil {
-		return nil, err
+	// set static files and template
+	if config.IsDebug() {
+		// for development
+		files, err := s.getHtmlFiles()
+		if err != nil {
+			return nil, err
+		}
+		// Use the registered func map with the loaded templates
+		engine.LoadHTMLFiles(files...)
+		engine.StaticFS(basePath+"assets", http.FS(os.DirFS("web/assets")))
+	} else {
+		// for production
+		template, err := s.getHtmlTemplate(funcMap)
+		if err != nil {
+			return nil, err
+		}
+		engine.SetHTMLTemplate(template)
+		engine.StaticFS(basePath+"assets", http.FS(&wrapAssetsFS{FS: assetsFS}))
 	}
-	engine.SetHTMLTemplate(template)
-	engine.StaticFS(basePath+"assets", http.FS(&wrapAssetsFS{FS: assetsFS}))
 
 	// Apply the redirect middleware (`/xui` to `/panel`)
 	engine.Use(middleware.RedirectMiddleware(basePath))
@@ -225,6 +272,8 @@ func (s *Server) initRouter() (*gin.Engine, error) {
 	return engine, nil
 }
 
+// startTask schedules background jobs (Xray checks, traffic jobs, cron
+// jobs) which the panel relies on for periodic maintenance and monitoring.
 func (s *Server) startTask() {
 	err := s.xrayService.RestartXray(true)
 	if err != nil {
@@ -260,6 +309,14 @@ func (s *Server) startTask() {
 
 	// check client ips from log file every day
 	s.cron.AddJob("@daily", job.NewClearLogsJob())
+
+	// Inbound traffic reset jobs
+	// Run once a day, midnight
+	s.cron.AddJob("@daily", job.NewPeriodicTrafficResetJob("daily"))
+	// Run once a week, midnight between Sat/Sun
+	s.cron.AddJob("@weekly", job.NewPeriodicTrafficResetJob("weekly"))
+	// Run once a month, midnight, first of month
+	s.cron.AddJob("@monthly", job.NewPeriodicTrafficResetJob("monthly"))
 
 	// persist net traffic every 5 minutes
 	s.cron.AddJob("@every 5m", job.NewSaveNetTrafficJob())
@@ -314,6 +371,7 @@ func (s *Server) startTask() {
 	}
 }
 
+// Start initializes and starts the web server with configured settings, routes, and background jobs.
 func (s *Server) Start() (err error) {
 	// This is an anonymous function, no function name
 	defer func() {
@@ -393,6 +451,7 @@ func (s *Server) Start() (err error) {
 	return nil
 }
 
+// Stop gracefully shuts down the web server, stops Xray, cron jobs, and Telegram bot.
 func (s *Server) Stop() error {
 	s.cancel()
 	s.xrayService.StopXray()
@@ -413,10 +472,12 @@ func (s *Server) Stop() error {
 	return common.Combine(err1, err2)
 }
 
+// GetCtx returns the server's context for cancellation and deadline management.
 func (s *Server) GetCtx() context.Context {
 	return s.ctx
 }
 
+// GetCron returns the server's cron scheduler instance.
 func (s *Server) GetCron() *cron.Cron {
 	return s.cron
 }

@@ -16,6 +16,7 @@ tmp/
 postman_api_collection.json
 
 # Ignore build and distribution directories
+.go-cache/
 db/
 cert/
 backup/

@@ -4,7 +4,7 @@ set -euo pipefail
 TARGETARCH=${TARGETARCH:-$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')}
 BUILD_WITH_ANTIZAPRET=${BUILD_WITH_ANTIZAPRET:-0}
 WORK_DIR=${WORK_DIR:-$(pwd)}
-GO_VERSION=${GO_VERSION:-1.25.0}
+GO_VERSION=${GO_VERSION:-1.25.1}
 TOOLCHAIN_DIR=$(find "$WORK_DIR" -maxdepth 1 -type d -name "*-native" | head -n1)
 TOOLCHAIN_DIR=$(realpath "$TOOLCHAIN_DIR")
 export DEBIAN_FRONTEND=noninteractive
