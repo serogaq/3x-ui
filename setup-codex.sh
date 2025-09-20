@@ -45,7 +45,7 @@ echo "Using CC=$CC"
 mkdir -p x-ui/bin
 cd x-ui/bin
 
-Xray_URL="https://github.com/XTLS/Xray-core/releases/download/v25.8.29/"
+Xray_URL="https://github.com/XTLS/Xray-core/releases/download/v25.9.11/"
 if [ "$TARGETARCH" == "amd64" ]; then
   wget -q ${Xray_URL}Xray-linux-64.zip
   unzip Xray-linux-64.zip

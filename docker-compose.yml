@@ -35,6 +35,13 @@ services:
       - "traefik.tcp.services.3x-ui-inbound-443.loadbalancer.server.port=443"
       - "traefik.tcp.services.3x-ui-inbound-443.loadbalancer.proxyprotocol.version=2"
       #
+      - "traefik.tcp.routers.vless-reality-2.rule=HostSNIRegexp(`${XUI_VLESS_REALITY_2_SNI}`)"
+      - "traefik.tcp.routers.vless-reality-2.tls.passthrough=true"
+      - "traefik.tcp.routers.vless-reality-2.entrypoints=websecure"
+      - "traefik.tcp.routers.vless-reality-2.service=3x-ui-inbound-4443"
+      - "traefik.tcp.services.3x-ui-inbound-4443.loadbalancer.server.port=4443"
+      - "traefik.tcp.services.3x-ui-inbound-4443.loadbalancer.proxyprotocol.version=2"
+      #
       - "traefik.tcp.routers.vless-grpc-cloudflare.rule=HostSNI(`${XUI_VLESS_GRPC_SNI}`)"
       - "traefik.tcp.routers.vless-grpc-cloudflare.tls.passthrough=true"
       - "traefik.tcp.routers.vless-grpc-cloudflare.entrypoints=websecure"
