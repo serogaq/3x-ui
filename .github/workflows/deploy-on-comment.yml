@@ -8,7 +8,7 @@ jobs:
   deploy:
     name: Deploy
     if: github.event.issue.pull_request && contains(github.event.comment.body, '/deploy') && github.event.comment.author_association == 'OWNER'
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: Get PR branch
