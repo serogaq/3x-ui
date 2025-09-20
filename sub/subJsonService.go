@@ -190,10 +190,7 @@ func (s *SubJsonService) getConfig(inbound *model.Inbound, client model.Client, 
 		case "vmess":
 			newOutbounds = append(newOutbounds, s.genVnext(inbound, streamSettings, client))
 		case "vless":
-			var vlessSettings model.VLESSSettings
-			_ = json.Unmarshal([]byte(inbound.Settings), &vlessSettings)
-
-			newOutbounds = append(newOutbounds, s.genVless(inbound, streamSettings, client, vlessSettings.Encryption))
+			newOutbounds = append(newOutbounds, s.genVless(inbound, streamSettings, client))
 		case "trojan", "shadowsocks":
 			newOutbounds = append(newOutbounds, s.genServer(inbound, streamSettings, client))
 		}
@@ -320,7 +317,7 @@ func (s *SubJsonService) genVnext(inbound *model.Inbound, streamSettings json_ut
 	return result
 }
 
-func (s *SubJsonService) genVless(inbound *model.Inbound, streamSettings json_util.RawMessage, client model.Client, encryption string) json_util.RawMessage {
+func (s *SubJsonService) genVless(inbound *model.Inbound, streamSettings json_util.RawMessage, client model.Client) json_util.RawMessage {
 	outbound := Outbound{}
 	outbound.Protocol = string(inbound.Protocol)
 	outbound.Tag = "proxy"
@@ -332,8 +329,17 @@ func (s *SubJsonService) genVless(inbound *model.Inbound, streamSettings json_ut
 	settings["address"] = inbound.Listen
 	settings["port"] = inbound.Port
 	settings["id"] = client.ID
-	settings["flow"] = client.Flow
-	settings["encryption"] = encryption
+	if client.Flow != "" {
+		settings["flow"] = client.Flow
+	}
+
+	// Add encryption for VLESS outbound from inbound settings
+	var inboundSettings map[string]any
+	json.Unmarshal([]byte(inbound.Settings), &inboundSettings)
+	if encryption, ok := inboundSettings["encryption"].(string); ok {
+		settings["encryption"] = encryption
+	}
+
 	outbound.Settings = settings
 	result, _ := json.MarshalIndent(outbound, "", "  ")
 	return result
