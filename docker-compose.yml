@@ -81,6 +81,7 @@ services:
       XUI_ENABLE_FAIL2BAN: "${XUI_ENABLE_FAIL2BAN:-false}"
       XUI_SERVER_IP: "${XUI_SERVER_IP}"
       XUI_DEBUG: "${XUI_DEBUG:-false}"
+      XUI_SOURCE_ROOT: "${XUI_SOURCE_ROOT:-/app/src}"
       XUI_LOG_LEVEL: "${XUI_LOG_LEVEL:-info}"
     tty: true
     restart: unless-stopped
