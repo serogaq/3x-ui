@@ -215,10 +215,10 @@ func (a *SUBController) ApplyCommonHeaders(c *gin.Context, header, updateInterva
 	if profileWebPageUrl != "" {
 		c.Writer.Header().Set("Profile-Web-Page-Url", profileWebPageUrl)
 	}
-	if happRouting != "" {
-		c.Writer.Header().Set("Routing", happRouting)
+	if routing != "" {
+		c.Writer.Header().Set("Routing", routing)
 	}
-	if announceText != "" {
-		c.Writer.Header().Set("Announce", announceText)
+	if announce != "" {
+		c.Writer.Header().Set("Announce", announce)
 	}
 }
