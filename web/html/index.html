@@ -535,6 +535,7 @@
   </a-modal>
 </a-layout>
 {{template "page/body_scripts" .}}
+<script src="{{ .base_path }}assets/js/util/log-modals.js?{{ .custom_version }}"></script>
 {{template "component/aSidebar" .}}
 {{template "component/aThemeSwitch" .}}
 {{template "component/aCustomStatistic" .}}
@@ -884,107 +885,8 @@
     },
   };
 
-  const accessLogModal = {
-      visible: false,
-      logs: [],
-      rows: 500,
-      grep: '',
-      loading: false,
-      show(logs) {
-          this.visible = true;
-          this.logs = logs; 
-          this.formattedLogs = this.logs?.length > 0 ? this.formatLogs(this.logs) : "No Record...";
-      },
-      formatLogs(logs) {
-          let formattedLogs = '';
-          const levelColors = ["#3c89e8","#008771","#008771","#f37b24","#e04141","#bcbcbc"];
-
-          logs.forEach((log, index) => {
-            if (log.length <= 3) {
-              return;
-            }
-            let [date, time] = log.split(' ', 2);
-            let message = log.substr(date?.length !== undefined && time?.length !== undefined ? (date.length+time.length+2) : 0);
-            let messageColor = levelColors[5];
-            if (message && message.indexOf('-> blocked') !== -1) {
-              messageColor = levelColors[4];
-            }
-
-            if (index > 0) formattedLogs += '<br/>';
-            formattedLogs += `<span style="color: ${levelColors[0]};">${date} ${time}</span> `;
-            formattedLogs += `- <span style="color: ${messageColor};">${message}</span>`;
-          });
-
-          return formattedLogs;
-      },
-      hide() {
-          this.visible = false;
-      },
-  };
-
-  const errorLogModal = {
-      visible: false,
-      logs: [],
-      rows: 500,
-      grep: '',
-      loading: false,
-      show(logs) {
-          this.visible = true;
-          this.logs = logs;
-          this.formattedLogs = this.logs?.length > 0 ? this.formatLogs(this.logs) : "No Record...";
-      },
-      formatLogs(logs) {
-          let formattedLogs = '';
-          const levels = ["DEBUG","INFO","NOTICE","WARNING","ERROR"];
-          const levelsMap = {"[Debug]": levels[0], "[Info]": levels[1], "[Notice]": levels[2], "[Warning]": levels[3], "[Error]": levels[4]};
-          const levelColors = ["#3c89e8","#008771","#008771","#f37b24","#e04141","#bcbcbc"];
-          const idColors = ['#CADABF','#5F6F65','#FFDFD6','#BC9F8B','#C9DABF','#9CA986','#808D7C','#E7E8D8','#B5CFB7'];
-          let idColorIndex = 0;
-          let lastLogId = '';
-
-          logs.forEach((log, index) => {
-            if (log.length <= 3) {
-              return;
-            }
-            let [date, time, levelTag, id] = log.split(' ', 4);
-            if (date?.length === undefined || time?.length === undefined || levelTag?.length === undefined || id?.length === undefined) {
-              if (index > 0) formattedLogs += '<br/>';
-              formattedLogs += log;
-            } else {
-              let message = log.substr(
-                date?.length !== undefined && time?.length !== undefined && levelTag?.length !== undefined && id?.length !== undefined ?
-                  (date.length + time.length + levelTag.length + id.length + 4) : 0
-              );
-              let level = levelsMap[levelTag];
-              const levelIndex = levels.indexOf(level, levels) || 5;
-
-              if (index > 0) formattedLogs += '<br/>';
-              formattedLogs += `<span style="color: ${levelColors[0]};">${date} ${time}</span> `;
-              formattedLogs += `<span style="color: ${levelColors[levelIndex]};">${level}</span> `;
-              formattedLogs += ' - ';
-
-              if (id.substr(0, 1) === '[') {
-                if (lastLogId !== '' && lastLogId !== id) {
-                  idColorIndex++;
-                }
-                if (idColorIndex >= idColors.length) {
-                  idColorIndex = 0;
-                }
-                let idColor = idColors[idColorIndex];
-                lastLogId = id;
-                formattedLogs += `<span style="color: ${idColor};">${id}</span> <span style="color: ${levelColors[5]};">${message}</span>`;
-              } else {
-                formattedLogs += `<span style="color: ${levelColors[5]};">${id} ${message}</span>`;
-              }
-            }
-          });
-
-          return formattedLogs;
-      },
-      hide() {
-          this.visible = false;
-      },
-  };
+  const accessLogModal = LogModalService.createAccessLogModal();
+  const errorLogModal = LogModalService.createErrorLogModal();
 
   const xraylogModal = {
       visible: false,
@@ -1223,24 +1125,10 @@
         logModal.loading = false;
       },
       async openAccessLog() {
-          accessLogModal.loading = true;
-          const msg = await HttpUtil.post('/panel/api/server/access-log/'+accessLogModal.rows, { grep: accessLogModal.grep });
-          if (!msg.success) {
-              return;
-          }
-          accessLogModal.show(msg.obj);
-          await PromiseUtil.sleep(500);
-          accessLogModal.loading = false;
+        await LogModalService.openAccessLog(accessLogModal);
       },
       async openErrorLog() {
-          errorLogModal.loading = true;
-          const msg = await HttpUtil.post('/panel/api/server/error-log/'+errorLogModal.rows, { grep: errorLogModal.grep });
-          if (!msg.success) {
-              return;
-          }
-          errorLogModal.show(msg.obj);
-          await PromiseUtil.sleep(500);
-          errorLogModal.loading = false;
+        await LogModalService.openErrorLog(errorLogModal);
       },
       async openXrayLogs() {
         xraylogModal.loading = true;
