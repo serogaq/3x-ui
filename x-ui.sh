@@ -75,7 +75,7 @@ before_show_menu() {
 }
 
 install() {
-    bash <(curl -Ls https://raw.githubusercontent.com/MHSanaei/3x-ui/main/install.sh)
+    bash <(curl -Ls https://raw.githubusercontent.com/serogaq/3x-ui/main/install.sh)
     if [[ $? == 0 ]]; then
         if [[ $# == 0 ]]; then
             start
@@ -86,7 +86,7 @@ install() {
 }
 
 update() {
-    confirm "This function will forcefully reinstall the latest version, and the data will not be lost. Do you want to continue?" "y"
+    confirm "This function will update all x-ui components to the latest version, and the data will not be lost. Do you want to continue?" "y"
     if [[ $? != 0 ]]; then
         LOGE "Cancelled"
         if [[ $# == 0 ]]; then
@@ -94,7 +94,7 @@ update() {
         fi
         return 0
     fi
-    bash <(curl -Ls https://raw.githubusercontent.com/MHSanaei/3x-ui/main/install.sh)
+    bash <(curl -Ls https://raw.githubusercontent.com/serogaq/3x-ui/main/update.sh)
     if [[ $? == 0 ]]; then
         LOGI "Update is complete, Panel has automatically restarted "
         before_show_menu
@@ -112,7 +112,7 @@ update_menu() {
         return 0
     fi
 
-    wget -O /usr/bin/x-ui https://raw.githubusercontent.com/MHSanaei/3x-ui/main/x-ui.sh
+    wget -O /usr/bin/x-ui https://raw.githubusercontent.com/serogaq/3x-ui/main/x-ui.sh
     chmod +x /usr/local/x-ui/x-ui.sh
     chmod +x /usr/bin/x-ui
 
@@ -154,11 +154,19 @@ uninstall() {
         fi
         return 0
     fi
-    systemctl stop x-ui
-    systemctl disable x-ui
-    rm /etc/systemd/system/x-ui.service -f
-    systemctl daemon-reload
-    systemctl reset-failed
+
+    if [[ $release == "alpine" ]]; then
+        rc-service x-ui stop
+        rc-update del x-ui
+        rm /etc/init.d/x-ui -f
+    else
+        systemctl stop x-ui
+        systemctl disable x-ui
+        rm /etc/systemd/system/x-ui.service -f
+        systemctl daemon-reload
+        systemctl reset-failed
+    fi
+
     rm /etc/x-ui/ -rf
     rm /usr/local/x-ui/ -rf
 
@@ -182,9 +190,9 @@ reset_user() {
     fi
     
     read -rp "Please set the login username [default is a random username]: " config_account
-    [[ -z $config_account ]] && config_account=$(date +%s%N | md5sum | cut -c 1-8)
+    [[ -z $config_account ]] && config_account=$(gen_random_string 10)
     read -rp "Please set the login password [default is a random password]: " config_password
-    [[ -z $config_password ]] && config_password=$(date +%s%N | md5sum | cut -c 1-8)
+    [[ -z $config_password ]] && config_password=$(gen_random_string 18)
 
     read -rp "Do you want to disable currently configured two-factor authentication? (y/n): " twoFactorConfirm
     if [[ $twoFactorConfirm != "y" && $twoFactorConfirm != "Y" ]]; then
@@ -287,7 +295,11 @@ start() {
         echo ""
         LOGI "Panel is running, No need to start again, If you need to restart, please select restart"
     else
-        systemctl start x-ui
+        if [[ $release == "alpine" ]]; then
+            rc-service x-ui start
+        else
+            systemctl start x-ui
+        fi
         sleep 2
         check_status
         if [[ $? == 0 ]]; then
@@ -308,7 +320,11 @@ stop() {
         echo ""
         LOGI "Panel stopped, No need to stop again!"
     else
-        systemctl stop x-ui
+        if [[ $release == "alpine" ]]; then
+            rc-service x-ui stop
+        else
+            systemctl stop x-ui
+        fi
         sleep 2
         check_status
         if [[ $? == 1 ]]; then
@@ -324,7 +340,11 @@ stop() {
 }
 
 restart() {
-    systemctl restart x-ui
+    if [[ $release == "alpine" ]]; then
+        rc-service x-ui restart
+    else
+        systemctl restart x-ui
+    fi
     sleep 2
     check_status
     if [[ $? == 0 ]]; then
@@ -338,14 +358,22 @@ restart() {
 }
 
 status() {
-    systemctl status x-ui -l
+    if [[ $release == "alpine" ]]; then
+        rc-service x-ui status
+    else
+        systemctl status x-ui -l
+    fi
     if [[ $# == 0 ]]; then
         before_show_menu
     fi
 }
 
 enable() {
-    systemctl enable x-ui
+    if [[ $release == "alpine" ]]; then
+        rc-update add x-ui
+    else
+        systemctl enable x-ui
+    fi
     if [[ $? == 0 ]]; then
         LOGI "x-ui Set to boot automatically on startup successfully"
     else
@@ -358,7 +386,11 @@ enable() {
 }
 
 disable() {
-    systemctl disable x-ui
+    if [[ $release == "alpine" ]]; then
+        rc-update del x-ui
+    else
+        systemctl disable x-ui
+    fi
     if [[ $? == 0 ]]; then
         LOGI "x-ui Autostart Cancelled successfully"
     else
@@ -371,32 +403,54 @@ disable() {
 }
 
 show_log() {
-    echo -e "${green}\t1.${plain} Debug Log"
-    echo -e "${green}\t2.${plain} Clear All logs"
-    echo -e "${green}\t0.${plain} Back to Main Menu"
-    read -rp "Choose an option: " choice
+    if [[ $release == "alpine" ]]; then
+        echo -e "${green}\t1.${plain} Debug Log"
+        echo -e "${green}\t0.${plain} Back to Main Menu"
+        read -rp "Choose an option: " choice
 
-    case "$choice" in
-    0)
-        show_menu
-        ;;
-    1)
-        journalctl -u x-ui -e --no-pager -f -p debug
-        if [[ $# == 0 ]]; then
-            before_show_menu
-        fi
-        ;;
-    2)
-        sudo journalctl --rotate
-        sudo journalctl --vacuum-time=1s
-        echo "All Logs cleared."
-        restart
-        ;;
-    *)
-        echo -e "${red}Invalid option. Please select a valid number.${plain}\n"
-        show_log
-        ;;
-    esac
+        case "$choice" in
+        0)
+            show_menu
+            ;;
+        1)
+            grep -F 'x-ui[' /var/log/messages
+            if [[ $# == 0 ]]; then
+                before_show_menu
+            fi
+            ;;
+        *)
+            echo -e "${red}Invalid option. Please select a valid number.${plain}\n"
+            show_log
+            ;;
+        esac
+    else
+        echo -e "${green}\t1.${plain} Debug Log"
+        echo -e "${green}\t2.${plain} Clear All logs"
+        echo -e "${green}\t0.${plain} Back to Main Menu"
+        read -rp "Choose an option: " choice
+
+        case "$choice" in
+        0)
+            show_menu
+            ;;
+        1)
+            journalctl -u x-ui -e --no-pager -f -p debug
+            if [[ $# == 0 ]]; then
+                before_show_menu
+            fi
+            ;;
+        2)
+            sudo journalctl --rotate
+            sudo journalctl --vacuum-time=1s
+            echo "All Logs cleared."
+            restart
+            ;;
+        *)
+            echo -e "${red}Invalid option. Please select a valid number.${plain}\n"
+            show_log
+            ;;
+        esac
+    fi
 }
 
 bbr_menu() {
@@ -465,6 +519,12 @@ enable_bbr() {
     arch | manjaro | parch)
         pacman -Sy --noconfirm ca-certificates
         ;;
+	opensuse-tumbleweed | opensuse-leap)
+        zypper refresh && zypper -q install -y ca-certificates
+        ;;
+    alpine)
+        apk add ca-certificates
+        ;;
     *)
         echo -e "${red}Unsupported operating system. Please check the script and install the necessary packages manually.${plain}\n"
         exit 1
@@ -501,23 +561,42 @@ update_shell() {
 
 # 0: running, 1: not running, 2: not installed
 check_status() {
-    if [[ ! -f /etc/systemd/system/x-ui.service ]]; then
-        return 2
-    fi
-    temp=$(systemctl status x-ui | grep Active | awk '{print $3}' | cut -d "(" -f2 | cut -d ")" -f1)
-    if [[ "${temp}" == "running" ]]; then
-        return 0
+    if [[ $release == "alpine" ]]; then
+        if [[ ! -f /etc/init.d/x-ui ]]; then
+            return 2
+        fi
+        if [[ $(rc-service x-ui status | grep -F 'status: started' -c) == 1 ]]; then
+            return 0
+        else
+            return 1
+        fi
     else
-        return 1
+        if [[ ! -f /etc/systemd/system/x-ui.service ]]; then
+            return 2
+        fi
+        temp=$(systemctl status x-ui | grep Active | awk '{print $3}' | cut -d "(" -f2 | cut -d ")" -f1)
+        if [[ "${temp}" == "running" ]]; then
+            return 0
+        else
+            return 1
+        fi
     fi
 }
 
 check_enabled() {
-    temp=$(systemctl is-enabled x-ui)
-    if [[ "${temp}" == "enabled" ]]; then
-        return 0
+    if [[ $release == "alpine" ]]; then
+        if [[ $(rc-update show | grep -F 'x-ui' | grep default -c) == 1 ]]; then
+            return 0
+        else
+            return 1
+        fi
     else
-        return 1
+        temp=$(systemctl is-enabled x-ui)
+        if [[ "${temp}" == "enabled" ]]; then
+            return 0
+        else
+            return 1
+        fi
     fi
 }
 
@@ -783,10 +862,32 @@ delete_ports() {
     fi
 }
 
+update_all_geofiles() {
+        update_main_geofiles
+        update_ir_geofiles
+        update_ru_geofiles
+}
+
+update_main_geofiles() {
+        wget -O geoip.dat       https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geoip.dat
+        wget -O geosite.dat     https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat
+}
+
+update_ir_geofiles() {
+        wget -O geoip_IR.dat    https://github.com/chocolate4u/Iran-v2ray-rules/releases/latest/download/geoip.dat
+        wget -O geosite_IR.dat  https://github.com/chocolate4u/Iran-v2ray-rules/releases/latest/download/geosite.dat
+}
+
+update_ru_geofiles() {
+        wget -O geoip_RU.dat    https://github.com/runetfreedom/russia-v2ray-rules-dat/releases/latest/download/geoip.dat
+        wget -O geosite_RU.dat  https://github.com/runetfreedom/russia-v2ray-rules-dat/releases/latest/download/geosite.dat
+}
+
 update_geo() {
     echo -e "${green}\t1.${plain} Loyalsoldier (geoip.dat, geosite.dat)"
     echo -e "${green}\t2.${plain} chocolate4u (geoip_IR.dat, geosite_IR.dat)"
     echo -e "${green}\t3.${plain} runetfreedom (geoip_RU.dat, geosite_RU.dat)"
+    echo -e "${green}\t4.${plain} All"
     echo -e "${green}\t0.${plain} Back to Main Menu"
     read -rp "Choose an option: " choice
 
@@ -797,27 +898,23 @@ update_geo() {
         show_menu
         ;;
     1)
-        systemctl stop x-ui
-        rm -f geoip.dat geosite.dat
-        wget -N https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geoip.dat
-        wget -N https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat
+        update_main_geofiles
         echo -e "${green}Loyalsoldier datasets have been updated successfully!${plain}"
         restart
         ;;
     2)
-        systemctl stop x-ui
-        rm -f geoip_IR.dat geosite_IR.dat
-        wget -O geoip_IR.dat -N https://github.com/chocolate4u/Iran-v2ray-rules/releases/latest/download/geoip.dat
-        wget -O geosite_IR.dat -N https://github.com/chocolate4u/Iran-v2ray-rules/releases/latest/download/geosite.dat
+        update_ir_geofiles
         echo -e "${green}chocolate4u datasets have been updated successfully!${plain}"
         restart
         ;;
     3)
-        systemctl stop x-ui
-        rm -f geoip_RU.dat geosite_RU.dat
-        wget -O geoip_RU.dat -N https://github.com/runetfreedom/russia-v2ray-rules-dat/releases/latest/download/geoip.dat
-        wget -O geosite_RU.dat -N https://github.com/runetfreedom/russia-v2ray-rules-dat/releases/latest/download/geosite.dat
+        update_ru_geofiles
         echo -e "${green}runetfreedom datasets have been updated successfully!${plain}"
+        restart
+        ;;
+    4)
+        update_all_geofiles
+        echo -e "${green}All geo files have been updated successfully!${plain}"
         restart
         ;;
     *)
@@ -983,6 +1080,12 @@ ssl_cert_issue() {
         ;;
     arch | manjaro | parch)
         pacman -Sy --noconfirm socat
+        ;;
+	opensuse-tumbleweed | opensuse-leap)
+        zypper refresh && zypper -q install -y socat
+        ;;
+    alpine)
+        apk add socat
         ;;
     *)
         echo -e "${red}Unsupported operating system. Please check the script and install the necessary packages manually.${plain}\n"
@@ -1337,7 +1440,11 @@ iplimit_main() {
         read -rp "Please enter new Ban Duration in Minutes [default 30]: " NUM
         if [[ $NUM =~ ^[0-9]+$ ]]; then
             create_iplimit_jails ${NUM}
-            systemctl restart fail2ban
+            if [[ $release == "alpine" ]]; then
+                rc-service fail2ban restart
+            else
+                systemctl restart fail2ban
+            fi
         else
             echo -e "${red}${NUM} is not a number! Please, try again.${plain}"
         fi
@@ -1390,7 +1497,11 @@ iplimit_main() {
         iplimit_main
         ;;
     9)
-        systemctl restart fail2ban
+        if [[ $release == "alpine" ]]; then
+            rc-service fail2ban restart
+        else
+            systemctl restart fail2ban
+        fi
         iplimit_main
         ;;
     10)
@@ -1438,6 +1549,9 @@ install_iplimit() {
         arch | manjaro | parch)
             pacman -Syu --noconfirm fail2ban
             ;;
+        alpine)
+            apk add fail2ban
+            ;;
         *)
             echo -e "${red}Unsupported operating system. Please check the script and install the necessary packages manually.${plain}\n"
             exit 1
@@ -1474,12 +1588,21 @@ install_iplimit() {
     create_iplimit_jails
 
     # Launching fail2ban
-    if ! systemctl is-active --quiet fail2ban; then
-        systemctl start fail2ban
+    if [[ $release == "alpine" ]]; then
+        if [[ $(rc-service fail2ban status | grep -F 'status: started' -c) == 0 ]]; then
+            rc-service fail2ban start
+        else
+            rc-service fail2ban restart
+        fi
+        rc-update add fail2ban
     else
-        systemctl restart fail2ban
+        if ! systemctl is-active --quiet fail2ban; then
+            systemctl start fail2ban
+        else
+            systemctl restart fail2ban
+        fi
+        systemctl enable fail2ban
     fi
-    systemctl enable fail2ban
 
     echo -e "${green}IP Limit installed and configured successfully!${plain}\n"
     before_show_menu
@@ -1495,13 +1618,21 @@ remove_iplimit() {
         rm -f /etc/fail2ban/filter.d/3x-ipl.conf
         rm -f /etc/fail2ban/action.d/3x-ipl.conf
         rm -f /etc/fail2ban/jail.d/3x-ipl.conf
-        systemctl restart fail2ban
+        if [[ $release == "alpine" ]]; then
+            rc-service fail2ban restart
+        else
+            systemctl restart fail2ban
+        fi
         echo -e "${green}IP Limit removed successfully!${plain}\n"
         before_show_menu
         ;;
     2)
         rm -rf /etc/fail2ban
-        systemctl stop fail2ban
+        if [[ $release == "alpine" ]]; then
+            rc-service fail2ban stop
+        else
+            systemctl stop fail2ban
+        fi
         case "${release}" in
         ubuntu | debian | armbian)
             apt-get remove -y fail2ban
@@ -1518,6 +1649,9 @@ remove_iplimit() {
             ;;
         arch | manjaro | parch)
             pacman -Rns --noconfirm fail2ban
+            ;;
+        alpine)
+            apk del fail2ban
             ;;
         *)
             echo -e "${red}Unsupported operating system. Please uninstall Fail2ban manually.${plain}\n"
@@ -1542,9 +1676,16 @@ show_banlog() {
 
     echo -e "${green}Checking ban logs...${plain}\n"
 
-    if ! systemctl is-active --quiet fail2ban; then
-        echo -e "${red}Fail2ban service is not running!${plain}\n"
-        return 1
+    if [[ $release == "alpine" ]]; then
+        if [[ $(rc-service fail2ban status | grep -F 'status: started' -c) == 0 ]]; then
+            echo -e "${red}Fail2ban service is not running!${plain}\n"
+            return 1
+        fi
+    else
+        if ! systemctl is-active --quiet fail2ban; then
+            echo -e "${red}Fail2ban service is not running!${plain}\n"
+            return 1
+        fi
     fi
 
     if [[ -f "$system_log" ]]; then
@@ -1736,24 +1877,25 @@ SSH_port_forwarding() {
 }
 
 show_usage() {
-    echo -e "┌───────────────────────────────────────────────────────┐
-│  ${blue}x-ui control menu usages (subcommands):${plain}              │
-│                                                       │
-│  ${blue}x-ui${plain}              - Admin Management Script          │
-│  ${blue}x-ui start${plain}        - Start                            │
-│  ${blue}x-ui stop${plain}         - Stop                             │
-│  ${blue}x-ui restart${plain}      - Restart                          │
-│  ${blue}x-ui status${plain}       - Current Status                   │
-│  ${blue}x-ui settings${plain}     - Current Settings                 │
-│  ${blue}x-ui enable${plain}       - Enable Autostart on OS Startup   │
-│  ${blue}x-ui disable${plain}      - Disable Autostart on OS Startup  │
-│  ${blue}x-ui log${plain}          - Check logs                       │
-│  ${blue}x-ui banlog${plain}       - Check Fail2ban ban logs          │
-│  ${blue}x-ui update${plain}       - Update                           │
-│  ${blue}x-ui legacy${plain}       - legacy version                   │
-│  ${blue}x-ui install${plain}      - Install                          │
-│  ${blue}x-ui uninstall${plain}    - Uninstall                        │
-└───────────────────────────────────────────────────────┘"
+    echo -e "┌────────────────────────────────────────────────────────────────┐
+│  ${blue}x-ui control menu usages (subcommands):${plain}                       │
+│                                                                │
+│  ${blue}x-ui${plain}                       - Admin Management Script          │
+│  ${blue}x-ui start${plain}                 - Start                            │
+│  ${blue}x-ui stop${plain}                  - Stop                             │
+│  ${blue}x-ui restart${plain}               - Restart                          │
+│  ${blue}x-ui status${plain}                - Current Status                   │
+│  ${blue}x-ui settings${plain}              - Current Settings                 │
+│  ${blue}x-ui enable${plain}                - Enable Autostart on OS Startup   │
+│  ${blue}x-ui disable${plain}               - Disable Autostart on OS Startup  │
+│  ${blue}x-ui log${plain}                   - Check logs                       │
+│  ${blue}x-ui banlog${plain}                - Check Fail2ban ban logs          │
+│  ${blue}x-ui update${plain}                - Update                           │
+│  ${blue}x-ui update-all-geofiles${plain}   - Update all geo files             │
+│  ${blue}x-ui legacy${plain}                - Legacy version                   │
+│  ${blue}x-ui install${plain}               - Install                          │
+│  ${blue}x-ui uninstall${plain}             - Uninstall                        │
+└────────────────────────────────────────────────────────────────┘"
 }
 
 show_menu() {
@@ -1927,6 +2069,9 @@ if [[ $# > 0 ]]; then
         ;;
     "uninstall")
         check_install 0 && uninstall 0
+        ;;
+    "update-all-geofiles")
+        check_install 0 && update_all_geofiles 0 && restart 0
         ;;
     *) show_usage ;;
     esac
