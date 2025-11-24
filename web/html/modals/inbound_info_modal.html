@@ -578,7 +578,7 @@
         }
       }
       if (app.clientConnLog > 0 && this.clientStats && this.clientStats.email) {
-        HttpUtil.post(`/panel/inbound/clientOnlines/${this.clientStats.email}`).then((msg) => {
+        HttpUtil.post(`/panel/api/inbounds/clientOnlines/${this.clientStats.email}`).then((msg) => {
           if (msg.success) {
             this.connectionLogs = msg.obj;
           }
