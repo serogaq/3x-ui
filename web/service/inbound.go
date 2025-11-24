@@ -36,6 +36,25 @@ func (s *InboundService) GetInbounds(userId int) ([]*model.Inbound, error) {
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, err
 	}
+	// Enrich client stats with UUID/SubId from inbound settings
+	for _, inbound := range inbounds {
+		clients, _ := s.GetClients(inbound)
+		if len(clients) == 0 || len(inbound.ClientStats) == 0 {
+			continue
+		}
+		// Build a map email -> client
+		cMap := make(map[string]model.Client, len(clients))
+		for _, c := range clients {
+			cMap[strings.ToLower(c.Email)] = c
+		}
+		for i := range inbound.ClientStats {
+			email := strings.ToLower(inbound.ClientStats[i].Email)
+			if c, ok := cMap[email]; ok {
+				inbound.ClientStats[i].UUID = c.ID
+				inbound.ClientStats[i].SubId = c.SubID
+			}
+		}
+	}
 	return inbounds, nil
 }
 
@@ -47,6 +66,24 @@ func (s *InboundService) GetAllInbounds() ([]*model.Inbound, error) {
 	err := db.Model(model.Inbound{}).Preload("ClientStats").Find(&inbounds).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, err
+	}
+	// Enrich client stats with UUID/SubId from inbound settings
+	for _, inbound := range inbounds {
+		clients, _ := s.GetClients(inbound)
+		if len(clients) == 0 || len(inbound.ClientStats) == 0 {
+			continue
+		}
+		cMap := make(map[string]model.Client, len(clients))
+		for _, c := range clients {
+			cMap[strings.ToLower(c.Email)] = c
+		}
+		for i := range inbound.ClientStats {
+			email := strings.ToLower(inbound.ClientStats[i].Email)
+			if c, ok := cMap[email]; ok {
+				inbound.ClientStats[i].UUID = c.ID
+				inbound.ClientStats[i].SubId = c.SubID
+			}
+		}
 	}
 	return inbounds, nil
 }
@@ -1533,6 +1570,22 @@ func (s *InboundService) ToggleClientEnableByEmail(clientEmail string) (bool, bo
 	return !clientOldEnabled, needRestart, nil
 }
 
+// SetClientEnableByEmail sets client enable state to desired value; returns (changed, needRestart, error)
+func (s *InboundService) SetClientEnableByEmail(clientEmail string, enable bool) (bool, bool, error) {
+	current, err := s.checkIsEnabledByEmail(clientEmail)
+	if err != nil {
+		return false, false, err
+	}
+	if current == enable {
+		return false, false, nil
+	}
+	newEnabled, needRestart, err := s.ToggleClientEnableByEmail(clientEmail)
+	if err != nil {
+		return false, needRestart, err
+	}
+	return newEnabled == enable, needRestart, nil
+}
+
 func (s *InboundService) ResetClientIpLimitByEmail(clientEmail string, count int) (bool, error) {
 	_, inbound, err := s.GetClientInboundByEmail(clientEmail)
 	if err != nil {
@@ -1960,6 +2013,15 @@ func (s *InboundService) GetClientTrafficTgBot(tgId int64) ([]*xray.ClientTraffi
 		return nil, err
 	}
 
+	// Populate UUID and other client data for each traffic record
+	for i := range traffics {
+		if ct, client, e := s.GetClientByEmail(traffics[i].Email); e == nil && ct != nil && client != nil {
+			traffics[i].Enable = client.Enable
+			traffics[i].UUID = client.ID
+			traffics[i].SubId = client.SubID
+		}
+	}
+
 	return traffics, nil
 }
 
@@ -1972,6 +2034,7 @@ func (s *InboundService) GetClientTrafficByEmail(email string) (traffic *xray.Cl
 	}
 	if t != nil && client != nil {
 		t.Enable = client.Enable
+		t.UUID = client.ID
 		t.SubId = client.SubID
 		return t, nil
 	}
@@ -2013,6 +2076,7 @@ func (s *InboundService) GetClientTrafficByID(id string) ([]xray.ClientTraffic, 
 	for i := range traffics {
 		if ct, client, e := s.GetClientByEmail(traffics[i].Email); e == nil && ct != nil && client != nil {
 			traffics[i].Enable = client.Enable
+			traffics[i].UUID = client.ID
 			traffics[i].SubId = client.SubID
 		}
 	}

@@ -8,7 +8,7 @@ class AllSetting {
         this.webKeyFile = "";
         this.webBasePath = "/";
         this.sessionMaxAge = 360;
-        this.pageSize = 50;
+        this.pageSize = 25;
         this.expireDiff = 0;
         this.trafficDiff = 0;
         this.clientConnLog = 0;
@@ -59,6 +59,28 @@ class AllSetting {
         this.subJsonRules = "";
 
         this.timeLocation = "Local";
+
+        // LDAP settings
+        this.ldapEnable = false;
+        this.ldapHost = "";
+        this.ldapPort = 389;
+        this.ldapUseTLS = false;
+        this.ldapBindDN = "";
+        this.ldapPassword = "";
+        this.ldapBaseDN = "";
+        this.ldapUserFilter = "(objectClass=person)";
+        this.ldapUserAttr = "mail";
+        this.ldapVlessField = "vless_enabled";
+        this.ldapSyncCron = "@every 1m";
+        this.ldapFlagField = "";
+        this.ldapTruthyValues = "true,1,yes,on";
+        this.ldapInvertFlag = false;
+        this.ldapInboundTags = "";
+        this.ldapAutoCreate = false;
+        this.ldapAutoDelete = false;
+        this.ldapDefaultTotalGB = 0;
+        this.ldapDefaultExpiryDays = 0;
+        this.ldapDefaultLimitIP = 0;
 
         if (data == null) {
             return

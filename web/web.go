@@ -97,10 +97,9 @@ type Server struct {
 	httpServer *http.Server
 	listener   net.Listener
 
-	index  *controller.IndexController
-	server *controller.ServerController
-	panel  *controller.XUIController
-	api    *controller.APIController
+	index *controller.IndexController
+	panel *controller.XUIController
+	api   *controller.APIController
 
 	xrayService    service.XrayService
 	settingService service.SettingService
@@ -314,9 +313,18 @@ func (s *Server) initRouter() (*gin.Engine, error) {
 	g := engine.Group(basePath)
 
 	s.index = controller.NewIndexController(g)
-	s.server = controller.NewServerController(g)
 	s.panel = controller.NewXUIController(g)
 	s.api = controller.NewAPIController(g)
+
+	// Chrome DevTools endpoint for debugging web apps
+	engine.GET("/.well-known/appspecific/com.chrome.devtools.json", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{})
+	})
+
+	// Add a catch-all route to handle undefined paths and return 404
+	engine.NoRoute(func(c *gin.Context) {
+		c.AbortWithStatus(http.StatusNotFound)
+	})
 
 	return engine, nil
 }
@@ -371,6 +379,17 @@ func (s *Server) startTask() {
 	s.cron.AddJob("@every 5m", job.NewSaveNetTrafficJob())
 
 	resetByNotify := false
+
+	// LDAP sync scheduling
+	if ldapEnabled, _ := s.settingService.GetLdapEnable(); ldapEnabled {
+		runtime, err := s.settingService.GetLdapSyncCron()
+		if err != nil || runtime == "" {
+			runtime = "@every 1m"
+		}
+		j := job.NewLdapSyncJob()
+		// job has zero-value services with method receivers that read settings on demand
+		s.cron.AddJob(runtime, j)
+	}
 
 	// Make a traffic condition every day, 8:30
 	var entry cron.EntryID

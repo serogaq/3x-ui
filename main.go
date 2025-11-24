@@ -41,7 +41,7 @@ func runWebServer() {
 		logger.InitLogger(logging.INFO)
 	case config.Notice:
 		logger.InitLogger(logging.NOTICE)
-	case config.Warn:
+	case config.Warning:
 		logger.InitLogger(logging.WARNING)
 	case config.Error:
 		logger.InitLogger(logging.ERROR)
@@ -95,6 +95,10 @@ func runWebServer() {
 		case syscall.SIGHUP:
 			logger.Info("Received SIGHUP signal. Restarting servers...")
 
+			// --- FIX FOR TELEGRAM BOT CONFLICT (409): Stop bot before restart ---
+			service.StopBot()
+			// --			
+			
 			err := server.Stop()
 			if err != nil {
 				logger.Debug("Error stopping web server:", err)
@@ -136,6 +140,10 @@ func runWebServer() {
 			log.Println("Cache cleared.")
 
 		default:
+			// --- FIX FOR TELEGRAM BOT CONFLICT (409) on full shutdown ---
+			service.StopBot()
+			// ------------------------------------------------------------
+			
 			server.Stop()
 			subServer.Stop()
 			cacheInstance.Flush()
@@ -351,6 +359,20 @@ func updateCert(publicKey string, privateKey string) {
 			fmt.Println("set certificate private key failed:", err)
 		} else {
 			fmt.Println("set certificate private key success")
+		}
+
+		err = settingService.SetSubCertFile(publicKey)
+		if err != nil {
+			fmt.Println("set certificate for subscription public key failed:", err)
+		} else {
+			fmt.Println("set certificate for subscription public key success")
+		}
+
+		err = settingService.SetSubKeyFile(privateKey)
+		if err != nil {
+			fmt.Println("set certificate for subscription private key failed:", err)
+		} else {
+			fmt.Println("set certificate for subscription private key success")
 		}
 	} else {
 		fmt.Println("both public and private key should be entered.")
