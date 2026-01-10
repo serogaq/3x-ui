@@ -106,7 +106,7 @@
                     <a-button type="primary" icon="plus" @click="openAddInbound">
                       <template v-if="!isMobile">{{ i18n "pages.inbounds.addInbound" }}</template>
                     </a-button>
-                    <a-button icon="plus" @click="openAddExternalInbound">
+                    <a-button type="primary" icon="plus" @click="openAddExternalInbound">
                       <template v-if="!isMobile">{{ i18n "pages.inbounds.addExternalInbound" }}</template>
                     </a-button>
                     <a-dropdown :trigger="['click']">

@@ -8,6 +8,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
+
 	"github.com/mhsanaei/3x-ui/v2/database"
 	"github.com/mhsanaei/3x-ui/v2/database/model"
 )
@@ -95,6 +97,37 @@ func (s *ExternalInboundService) AddExternalInboundClient(id int, settings strin
 	return db.Create(&client).Error
 }
 
+// AddExternalInboundClientToAll adds a client to all external inbounds for a user.
+func (s *ExternalInboundService) AddExternalInboundClientToAll(userId int, settings string) error {
+	clients, err := parseExternalInboundClients(settings)
+	if err != nil {
+		return err
+	}
+	if len(clients) == 0 {
+		return fmt.Errorf("missing external client")
+	}
+	clientTemplate := clients[0]
+	db := database.GetDB()
+	var externalInbounds []*model.ExternalInbound
+	if err := db.Model(model.ExternalInbound{}).Where("user_id = ?", userId).Find(&externalInbounds).Error; err != nil {
+		return err
+	}
+	nowTs := time.Now().Unix() * 1000
+	for _, externalInbound := range externalInbounds {
+		client := mapExternalClient(clientTemplate)
+		client.ExternalInboundId = externalInbound.Id
+		client.ClientID = uuid.New().String()
+		if client.CreatedAt == 0 {
+			client.CreatedAt = nowTs
+		}
+		client.UpdatedAt = nowTs
+		if err := db.Create(&client).Error; err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // UpdateExternalInboundClient replaces a client in an external inbound.
 func (s *ExternalInboundService) UpdateExternalInboundClient(id int, clientId string, settings string) error {
 	clients, err := parseExternalInboundClients(settings)
@@ -137,6 +170,14 @@ func (s *ExternalInboundService) DeleteExternalInboundClient(id int, clientId st
 	db := database.GetDB()
 	return db.Where("external_inbound_id = ?", id).
 		Where("client_id = ? OR email = ?", clientId, clientId).
+		Delete(&model.ExternalInboundClient{}).Error
+}
+
+// DeleteExternalInboundClientsBySubId removes external inbound clients by subscription ID for a user.
+func (s *ExternalInboundService) DeleteExternalInboundClientsBySubId(userId int, subId string) error {
+	db := database.GetDB()
+	return db.Where("sub_id = ?", subId).
+		Where("external_inbound_id IN (SELECT id FROM external_inbounds WHERE user_id = ?)", userId).
 		Delete(&model.ExternalInboundClient{}).Error
 }
 

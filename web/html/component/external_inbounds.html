@@ -22,6 +22,10 @@
           <a-icon type="user-add"></a-icon>
           {{ i18n "pages.client.add"}}
         </a-menu-item>
+        <a-menu-item key="addClientAll">
+          <a-icon type="team"></a-icon>
+          {{ i18n "pages.inbounds.addClientAll" }}
+        </a-menu-item>
         <a-menu-item key="delete" :style="{ color: '#FF4D4F' }">
           <a-icon type="delete"></a-icon>
           {{ i18n "delete" }}
@@ -141,6 +145,9 @@
           case "addClient":
             this.openAddExternalClient(externalInbound.id);
             break;
+          case "addClientAll":
+            this.openAddExternalClientAll();
+            break;
           case "delete":
             this.delExternalInbound(externalInbound.id);
             break;
@@ -234,6 +241,27 @@
           isEdit: false,
         });
       },
+      openAddExternalClientAll() {
+        externalClientModal.show({
+          title: '{{ i18n "pages.inbounds.addClientAll" }}',
+          okText: '{{ i18n "pages.client.submitAdd"}}',
+          externalInboundId: 0,
+          client: {
+            enable: true,
+            email: '',
+            id: RandomUtil.randomUUID(),
+            subId: '',
+            tgId: 0,
+            comment: '',
+            expiryTime: 0,
+            reset: 0,
+          },
+          confirm: async (client) => {
+            await this.addExternalClientAll(client, externalClientModal);
+          },
+          isEdit: false,
+        });
+      },
       openEditExternalClient(externalInboundId, client) {
         const externalInbound = this.externalInbounds.find(row => row.id === externalInboundId);
         if (!externalInbound) return;
@@ -271,6 +299,12 @@
         };
         await this.submitExternal('/panel/api/external-inbounds/addClient', data, modal);
       },
+      async addExternalClientAll(client, modal) {
+        const data = {
+          settings: JSON.stringify({ clients: [client] }),
+        };
+        await this.submitExternal('/panel/api/external-inbounds/addClientAll', data, modal);
+      },
       async updateExternalClient(client, externalInboundId, clientId) {
         const data = {
           id: externalInboundId,
@@ -293,6 +327,20 @@
         } else {
           this.submitExternal(`/panel/api/external-inbounds/${externalInboundId}/delClient/${clientId}`);
         }
+      },
+      delExternalClientAll(client) {
+        const subId = client.subId;
+        if (!subId) {
+          return;
+        }
+        this.$confirm({
+          title: '{{ i18n "pages.inbounds.deleteClientAll" }}',
+          content: '{{ i18n "pages.inbounds.deleteClientAllContent" }}',
+          class: themeSwitcher.currentTheme,
+          okText: '{{ i18n "delete" }}',
+          cancelText: '{{ i18n "cancel" }}',
+          onOk: () => this.submitExternal(`/panel/api/external-inbounds/delClientsBySub/${subId}`),
+        });
       },
       switchExternalEnable(externalInboundId, state) {
         const externalInbound = this.externalInbounds.find(row => row.id === externalInboundId);

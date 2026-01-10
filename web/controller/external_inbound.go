@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/mhsanaei/3x-ui/v2/database/model"
@@ -41,8 +42,10 @@ func (c *ExternalInboundController) initRouter(g *gin.RouterGroup) {
 	g.POST("/update/:id", c.updateExternalInbound)
 	g.POST("/del/:id", c.delExternalInbound)
 	g.POST("/addClient", c.addExternalInboundClient)
+	g.POST("/addClientAll", c.addExternalInboundClientAll)
 	g.POST("/updateClient/:clientId", c.updateExternalInboundClient)
 	g.POST("/:id/delClient/:clientId", c.delExternalInboundClient)
+	g.POST("/delClientsBySub/:subId", c.delExternalInboundClientsBySub)
 }
 
 func (c *ExternalInboundController) getExternalInbounds(ctx *gin.Context) {
@@ -139,6 +142,20 @@ func (c *ExternalInboundController) addExternalInboundClient(ctx *gin.Context) {
 	jsonMsg(ctx, I18nWeb(ctx, "pages.inbounds.toasts.inboundClientAddSuccess"), nil)
 }
 
+func (c *ExternalInboundController) addExternalInboundClientAll(ctx *gin.Context) {
+	payload := &externalInboundClientRequest{}
+	if err := ctx.ShouldBind(payload); err != nil {
+		jsonMsg(ctx, I18nWeb(ctx, "pages.inbounds.toasts.inboundClientAddSuccess"), err)
+		return
+	}
+	user := session.GetLoginUser(ctx)
+	if err := c.externalInboundService.AddExternalInboundClientToAll(user.Id, payload.Settings); err != nil {
+		jsonMsg(ctx, I18nWeb(ctx, "pages.inbounds.toasts.inboundClientAddSuccess"), err)
+		return
+	}
+	jsonMsg(ctx, I18nWeb(ctx, "pages.inbounds.toasts.inboundClientAddSuccess"), nil)
+}
+
 func (c *ExternalInboundController) updateExternalInboundClient(ctx *gin.Context) {
 	clientId := ctx.Param("clientId")
 	payload := &externalInboundClientRequest{}
@@ -161,6 +178,20 @@ func (c *ExternalInboundController) delExternalInboundClient(ctx *gin.Context) {
 	}
 	clientId := ctx.Param("clientId")
 	if err := c.externalInboundService.DeleteExternalInboundClient(id, clientId); err != nil {
+		jsonMsg(ctx, I18nWeb(ctx, "pages.inbounds.toasts.inboundClientDeleteSuccess"), err)
+		return
+	}
+	jsonMsg(ctx, I18nWeb(ctx, "pages.inbounds.toasts.inboundClientDeleteSuccess"), nil)
+}
+
+func (c *ExternalInboundController) delExternalInboundClientsBySub(ctx *gin.Context) {
+	subId := ctx.Param("subId")
+	if subId == "" {
+		jsonMsg(ctx, I18nWeb(ctx, "pages.inbounds.toasts.inboundClientDeleteSuccess"), fmt.Errorf("missing subscription"))
+		return
+	}
+	user := session.GetLoginUser(ctx)
+	if err := c.externalInboundService.DeleteExternalInboundClientsBySubId(user.Id, subId); err != nil {
 		jsonMsg(ctx, I18nWeb(ctx, "pages.inbounds.toasts.inboundClientDeleteSuccess"), err)
 		return
 	}
