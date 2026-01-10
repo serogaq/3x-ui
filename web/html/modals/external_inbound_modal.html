@@ -1,0 +1,70 @@
+{{define "modals/externalInboundModal"}}
+<a-modal id="external-inbound-modal" v-model="externalInboundModal.visible" :title="externalInboundModal.title"
+    @ok="externalInboundModal.ok" :confirm-loading="externalInboundModal.confirmLoading" :closable="true"
+    :mask-closable="false" :class="themeSwitcher.currentTheme" :ok-text="externalInboundModal.okText"
+    cancel-text='{{ i18n "close" }}'>
+    <a-form layout="horizontal" :colon="false" :label-col="{ md: {span:8} }" :wrapper-col="{ md: {span:14} }">
+        <a-form-item label='{{ i18n "pages.inbounds.enable" }}'>
+            <a-switch v-model="externalInboundModal.externalInbound.enable"></a-switch>
+        </a-form-item>
+        <a-form-item label='{{ i18n "pages.inbounds.externalName" }}'>
+            <a-input v-model.trim="externalInboundModal.externalInbound.name"></a-input>
+        </a-form-item>
+        <a-form-item label='{{ i18n "comment" }}'>
+            <a-textarea v-model.trim="externalInboundModal.externalInbound.comment" :auto-size="{ minRows: 3, maxRows: 6 }"></a-textarea>
+        </a-form-item>
+        <a-form-item label='{{ i18n "pages.inbounds.externalUrl" }}'>
+            <a-input v-model.trim="externalInboundModal.externalInbound.url"></a-input>
+        </a-form-item>
+    </a-form>
+</a-modal>
+<script>
+    const externalInboundModal = {
+        title: '',
+        visible: false,
+        confirmLoading: false,
+        okText: '{{ i18n "sure" }}',
+        confirm: null,
+        externalInbound: {
+            id: 0,
+            enable: true,
+            name: '',
+            comment: '',
+            url: '',
+        },
+        ok() {
+            ObjectUtil.execute(externalInboundModal.confirm, externalInboundModal.externalInbound);
+        },
+        show({ title = '', okText = '{{ i18n "sure" }}', externalInbound = null, confirm = () => { }, isEdit = false }) {
+            this.title = title;
+            this.okText = okText;
+            const defaultExternalInbound = {
+                id: 0,
+                enable: true,
+                name: '',
+                comment: '',
+                url: '',
+            };
+            Object.assign(this.externalInbound, defaultExternalInbound, externalInbound || {});
+            this.confirm = confirm;
+            this.visible = true;
+            this.isEdit = isEdit;
+        },
+        close() {
+            externalInboundModal.visible = false;
+            externalInboundModal.loading(false);
+        },
+        loading(loading = true) {
+            externalInboundModal.confirmLoading = loading;
+        },
+    };
+
+    new Vue({
+        delimiters: ['[[', ']]'],
+        el: '#external-inbound-modal',
+        data: {
+            externalInboundModal,
+        },
+    });
+</script>
+{{end}}

@@ -56,6 +56,32 @@ type Inbound struct {
 	Sniffing       string   `json:"sniffing" form:"sniffing"`
 }
 
+// ExternalInbound represents an external inbound link assigned to clients.
+type ExternalInbound struct {
+	Id      int    `json:"id" form:"id" gorm:"primaryKey;autoIncrement"`
+	UserId  int    `json:"-"`
+	Enable  bool   `json:"enable" form:"enable"`
+	Name    string `json:"name" form:"name"`
+	Comment string `json:"comment" form:"comment"`
+	Url     string `json:"url" form:"url"`
+}
+
+// ExternalInboundClient represents clients assigned to external inbounds.
+type ExternalInboundClient struct {
+	Id                int    `json:"-" gorm:"primaryKey;autoIncrement"`
+	ExternalInboundId int    `json:"-" gorm:"index"`
+	Enable            bool   `json:"enable"`
+	ClientID          string `json:"id" gorm:"column:client_id"`
+	Email             string `json:"email"`
+	SubID             string `json:"subId"`
+	TgID              int64  `json:"tgId"`
+	Comment           string `json:"comment"`
+	ExpiryTime        int64  `json:"expiryTime"`
+	Reset             int    `json:"reset"`
+	CreatedAt         int64  `json:"created_at,omitempty"`
+	UpdatedAt         int64  `json:"updated_at,omitempty"`
+}
+
 // OutboundTraffics tracks traffic statistics for Xray outbound connections.
 type OutboundTraffics struct {
 	Id    int    `json:"id" form:"id" gorm:"primaryKey;autoIncrement"`

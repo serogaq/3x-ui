@@ -106,6 +106,9 @@
                     <a-button type="primary" icon="plus" @click="openAddInbound">
                       <template v-if="!isMobile">{{ i18n "pages.inbounds.addInbound" }}</template>
                     </a-button>
+                    <a-button type="primary" icon="plus" @click="openAddExternalInbound">
+                      <template v-if="!isMobile">{{ i18n "pages.inbounds.addExternalInbound" }}</template>
+                    </a-button>
                     <a-dropdown :trigger="['click']">
                       <a-button type="primary" icon="menu">
                         <template v-if="!isMobile">{{ i18n "pages.inbounds.generalActions" }}</template>
@@ -590,6 +593,7 @@
                       </a-table>
                     </template>
                   </a-table>
+                  {{template "component/externalInbounds"}}
                 </a-space>
               </a-card>
             </a-col>
@@ -605,11 +609,13 @@
 <script src="{{ .base_path }}assets/js/model/reality_targets.js?{{ .custom_version }}"></script>
 <script src="{{ .base_path }}assets/js/model/inbound.js?{{ .custom_version }}"></script>
 <script src="{{ .base_path }}assets/js/model/dbinbound.js?{{ .custom_version }}"></script>
+<script src="{{ .base_path }}assets/js/model/external_inbound.js?{{ .custom_version }}"></script>
 {{template "component/aSidebar" .}}
 {{template "component/aThemeSwitch" .}}
 {{template "component/aCustomStatistic" .}}
 {{template "component/aPersianDatepicker" .}}
 {{template "modals/inboundModal"}}
+{{template "modals/externalInboundModal"}}
 {{template "modals/promptModal"}}
 {{template "modals/qrcodeModal"}}
 {{template "modals/textModal"}}
@@ -617,6 +623,7 @@
 {{template "modals/clientsModal"}}
 {{template "modals/clientsBulkModal"}}
 {{template "modals/devicesModal"}}
+{{template "modals/externalClientModal"}}
 <script>
   const columns = [{
     title: "ID",
@@ -713,7 +720,7 @@
   const app = new Vue({
     delimiters: ['[[', ']]'],
     el: '#app',
-    mixins: [MediaQueryMixin],
+    mixins: [MediaQueryMixin, externalInboundMixin],
     data: {
       themeSwitcher,
       persianDatepicker,
@@ -768,6 +775,9 @@
         await this.getOnlineUsers();
 
         this.setInbounds(msg.obj);
+        if (this.getExternalInbounds) {
+          await this.getExternalInbounds();
+        }
         setTimeout(() => {
           this.refreshing = false;
         }, 500);
