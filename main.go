@@ -97,8 +97,8 @@ func runWebServer() {
 
 			// --- FIX FOR TELEGRAM BOT CONFLICT (409): Stop bot before restart ---
 			service.StopBot()
-			// --			
-			
+			// --
+
 			err := server.Stop()
 			if err != nil {
 				logger.Debug("Error stopping web server:", err)
@@ -143,7 +143,7 @@ func runWebServer() {
 			// --- FIX FOR TELEGRAM BOT CONFLICT (409) on full shutdown ---
 			service.StopBot()
 			// ------------------------------------------------------------
-			
+
 			server.Stop()
 			subServer.Stop()
 			cacheInstance.Flush()

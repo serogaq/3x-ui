@@ -542,10 +542,10 @@
       findOutboundTraffic(o) {
         for (const otraffic of this.outboundsTraffic) {
           if (otraffic.tag == o.tag) {
-            return SizeFormatter.sizeFormat(otraffic.up) + ' / ' + SizeFormatter.sizeFormat(otraffic.down);
+            return `↑ ${SizeFormatter.sizeFormat(otraffic.up)} / ${SizeFormatter.sizeFormat(otraffic.down)} ↓`
           }
         }
-        return SizeFormatter.sizeFormat(0) + ' / ' + SizeFormatter.sizeFormat(0);
+        return `${SizeFormatter.sizeFormat(0)} / ${SizeFormatter.sizeFormat(0)}`
       },
       findOutboundAddress(o) {
         serverObj = null;
@@ -983,6 +983,17 @@
       await this.getXraySetting();
       await this.getXrayResult();
       await this.getOutboundsTraffic();
+
+      if (window.wsClient) {
+          window.wsClient.connect();
+          window.wsClient.on('outbounds', (payload) => {
+            if (payload) {
+              this.outboundsTraffic = payload;
+              this.$forceUpdate();
+            }
+          });
+      }
+
       while (true) {
         await PromiseUtil.sleep(800);
         this.saveBtnDisable = this.oldXraySetting === this.xraySetting;
@@ -1330,7 +1341,8 @@
             newTemplateSettings.dns = {
               servers: [],
               queryStrategy: "UseIP",
-              tag: "dns_inbound"
+              tag: "dns_inbound",
+              enableParallelQuery: false
             };
             newTemplateSettings.fakedns = null;
           } else {
@@ -1402,6 +1414,20 @@
             newTemplateSettings.dns.disableFallbackIfMatch = newValue;
           } else {
             delete newTemplateSettings.dns.disableFallbackIfMatch
+          }
+          this.templateSettings = newTemplateSettings;
+        }
+      },
+      dnsEnableParallelQuery: {
+        get: function () {
+          return this.enableDNS ? (this.templateSettings.dns.enableParallelQuery || false) : false;
+        },
+        set: function (newValue) {
+          newTemplateSettings = this.templateSettings;
+          if (newValue) {
+            newTemplateSettings.dns.enableParallelQuery = newValue;
+          } else {
+            delete newTemplateSettings.dns.enableParallelQuery
           }
           this.templateSettings = newTemplateSettings;
         }
