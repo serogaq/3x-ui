@@ -4,7 +4,7 @@ set -euo pipefail
 TARGETARCH=${TARGETARCH:-$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')}
 BUILD_WITH_ANTIZAPRET=${BUILD_WITH_ANTIZAPRET:-0}
 WORK_DIR=${WORK_DIR:-$(pwd)}
-GO_VERSION=${GO_VERSION:-1.25.4}
+GO_VERSION=${GO_VERSION:-1.25.5}
 TOOLCHAIN_DIR=$(find "$WORK_DIR" -maxdepth 1 -type d -name "*-native" | head -n1)
 TOOLCHAIN_DIR=$(realpath "$TOOLCHAIN_DIR")
 export DEBIAN_FRONTEND=noninteractive
@@ -23,7 +23,7 @@ echo "Using CC=$CC"
 go build -ldflags "-w -s -linkmode external -extldflags '-static'" -o xui-build -v main.go
 
 mv xui-build x-ui/
-cp x-ui.service x-ui/
+cp x-ui.service.debian x-ui/
 cp x-ui.sh x-ui/
 mv x-ui/xui-build x-ui/x-ui
 chmod +x x-ui/x-ui
