@@ -1,0 +1,87 @@
+{{define "modals/externalClientModal"}}
+<a-modal id="external-client-modal" v-model="externalClientModal.visible" :title="externalClientModal.title" @ok="externalClientModal.ok"
+         :confirm-loading="externalClientModal.confirmLoading" :closable="true" :mask-closable="false"
+         :class="themeSwitcher.currentTheme"
+         :ok-text="externalClientModal.okText" cancel-text='{{ i18n "close" }}'>
+    {{template "form/externalClient"}}
+</a-modal>
+<script>
+    const externalClientModal = {
+        visible: false,
+        confirmLoading: false,
+        title: '',
+        okText: '',
+        isEdit: false,
+        externalInboundId: 0,
+        clientId: '',
+        client: null,
+        delayedStart: false,
+        ok() {
+            if (externalClientModal.isEdit) {
+                ObjectUtil.execute(externalClientModal.confirm, externalClientModalApp.client, externalClientModal.externalInboundId, externalClientModal.clientId);
+            } else {
+                ObjectUtil.execute(externalClientModal.confirm, externalClientModalApp.client, externalClientModal.externalInboundId);
+            }
+        },
+        show({ title = '', okText = '{{ i18n "sure" }}', externalInboundId = 0, client = null, confirm = () => { }, isEdit = false, clientId = '' }) {
+            this.visible = true;
+            this.title = title;
+            this.okText = okText;
+            this.isEdit = isEdit;
+            this.externalInboundId = externalInboundId;
+            this.clientId = clientId;
+            this.client = client || {
+                enable: true,
+                email: '',
+                id: RandomUtil.randomUUID(),
+                subId: '',
+                tgId: 0,
+                comment: '',
+                expiryTime: 0,
+                reset: 0,
+            };
+            this.delayedStart = this.client.expiryTime < 0;
+            this.confirm = confirm;
+        },
+        close() {
+            externalClientModal.visible = false;
+            externalClientModal.loading(false);
+        },
+        loading(loading=true) {
+            externalClientModal.confirmLoading = loading;
+        },
+    };
+
+    const externalClientModalApp = new Vue({
+        delimiters: ['[[', ']]'],
+        el: '#external-client-modal',
+        data: {
+            externalClientModal,
+            get client() {
+                return this.externalClientModal.client;
+            },
+            get isEdit() {
+                return this.externalClientModal.isEdit;
+            },
+            get datepicker() {
+                return app.datepicker;
+            },
+            get delayedStart() {
+                return this.externalClientModal.delayedStart;
+            },
+            set delayedStart(value) {
+                this.externalClientModal.delayedStart = value;
+            },
+            get delayedExpireDays() {
+                return this.client && this.client.expiryTime < 0 ? this.client.expiryTime / -86400000 : 0;
+            },
+            set delayedExpireDays(days) {
+                this.client.expiryTime = -86400000 * days;
+            },
+            get isExpiry() {
+                return this.externalClientModal.isEdit && this.client.expiryTime > 0 ? (this.client.expiryTime < new Date().getTime()) : false;
+            },
+        },
+    });
+</script>
+{{end}}

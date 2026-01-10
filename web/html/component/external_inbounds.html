@@ -1,0 +1,328 @@
+{{define "component/externalInbounds"}}
+<a-divider v-if="externalInbounds.length" orientation="left">{{ i18n "pages.inbounds.externalInbounds" }}</a-divider>
+<a-table v-if="externalInbounds.length" :columns="isMobile ? externalMobileColumns : externalColumns"
+  :row-key="externalInbound => externalInbound.id" :data-source="externalInbounds"
+  :scroll="isMobile ? {} : { x: 800 }" :pagination=pagination(externalInbounds)
+  :expand-icon-as-cell="false" :expand-row-by-click="false" :expand-icon-column-index="0"
+  :indent-size="0"
+  :row-class-name="externalInbound => (getExternalInboundClients(externalInbound).length ? '' : 'hideExpandIcon')"
+  :style="{ marginTop: '10px' }"
+  :locale='{ filterConfirm: `{{ i18n "confirm" }}`, filterReset: `{{ i18n "reset" }}`, emptyText: `{{ i18n "noData" }}` }'>
+  <template slot="externalAction" slot-scope="text, externalInbound">
+    <a-dropdown :trigger="['click']">
+      <a-icon @click="e => e.preventDefault()" type="more"
+        :style="{ fontSize: '20px', textDecoration: 'solid' }"></a-icon>
+      <a-menu slot="overlay" @click="a => clickExternalAction(a, externalInbound)"
+        :theme="themeSwitcher.currentTheme">
+        <a-menu-item key="edit">
+          <a-icon type="edit"></a-icon>
+          {{ i18n "edit" }}
+        </a-menu-item>
+        <a-menu-item key="addClient">
+          <a-icon type="user-add"></a-icon>
+          {{ i18n "pages.client.add"}}
+        </a-menu-item>
+        <a-menu-item key="delete" :style="{ color: '#FF4D4F' }">
+          <a-icon type="delete"></a-icon>
+          {{ i18n "delete" }}
+        </a-menu-item>
+      </a-menu>
+    </a-dropdown>
+  </template>
+  <template slot="externalEnable" slot-scope="text, externalInbound">
+    <a-switch v-model="externalInbound.enable" @change="state => switchExternalEnable(externalInbound.id, state)"></a-switch>
+  </template>
+  <template slot="externalClients" slot-scope="text, externalInbound">
+    <a-tag color="blue">[[ getExternalInboundClients(externalInbound).length ]]</a-tag>
+  </template>
+  <template slot="expandedRowRender" slot-scope="record">
+    <a-table :row-key="client => client.id || client.email" :columns="isMobile ? externalInnerMobileColumns : externalInnerColumns"
+      :data-source="getExternalInboundClients(record)" :pagination=pagination(getExternalInboundClients(record))
+      :style="{ margin: `-10px ${isMobile ? '2px' : '22px'} -11px` }">
+      {{template "component/aExternalClientTable"}}
+    </a-table>
+  </template>
+</a-table>
+<script>
+  const externalColumns = [{
+    title: "ID",
+    align: 'right',
+    dataIndex: "id",
+    width: 30,
+    responsive: ["xs"],
+  }, {
+    title: '{{ i18n "pages.inbounds.operate" }}',
+    align: 'center',
+    width: 30,
+    scopedSlots: { customRender: 'externalAction' },
+  }, {
+    title: '{{ i18n "pages.inbounds.enable" }}',
+    align: 'center',
+    width: 35,
+    scopedSlots: { customRender: 'externalEnable' },
+  }, {
+    title: '{{ i18n "pages.inbounds.externalName" }}',
+    align: 'center',
+    width: 80,
+    dataIndex: "name",
+  }, {
+    title: '{{ i18n "comment" }}',
+    align: 'center',
+    width: 120,
+    dataIndex: "comment",
+    ellipsis: true,
+  }, {
+    title: '{{ i18n "clients" }}',
+    align: 'center',
+    width: 40,
+    scopedSlots: { customRender: 'externalClients' },
+  }];
+
+  const externalMobileColumns = [{
+    title: "ID",
+    align: 'right',
+    dataIndex: "id",
+    width: 10,
+    responsive: ["s"],
+  }, {
+    title: '{{ i18n "pages.inbounds.operate" }}',
+    align: 'center',
+    width: 25,
+    scopedSlots: { customRender: 'externalAction' },
+  }, {
+    title: '{{ i18n "pages.inbounds.externalName" }}',
+    align: 'left',
+    width: 70,
+    dataIndex: "name",
+  }];
+
+  const externalInnerColumns = [
+    { title: '{{ i18n "pages.inbounds.operate" }}', width: 70, scopedSlots: { customRender: 'externalClientActions' } },
+    { title: '{{ i18n "pages.inbounds.enable" }}', width: 30, scopedSlots: { customRender: 'externalClientEnable' } },
+    { title: '{{ i18n "pages.inbounds.client" }}', width: 120, scopedSlots: { customRender: 'externalClientInfo' } },
+    { title: '{{ i18n "pages.inbounds.expireDate" }}', width: 80, align: 'center', scopedSlots: { customRender: 'externalClientExpiry' } },
+  ];
+
+  const externalInnerMobileColumns = [
+    { title: '{{ i18n "pages.inbounds.operate" }}', width: 10, align: 'center', scopedSlots: { customRender: 'externalClientActionMenu' } },
+    { title: '{{ i18n "pages.inbounds.client" }}', width: 90, align: 'left', scopedSlots: { customRender: 'externalClientInfo' } },
+    { title: '{{ i18n "pages.inbounds.expireDate" }}', width: 10, align: 'center', scopedSlots: { customRender: 'externalClientExpiry' } },
+  ];
+
+  const externalInboundMixin = {
+    data() {
+      return {
+        externalInbounds: [],
+      };
+    },
+    methods: {
+      async getExternalInbounds() {
+        const msg = await HttpUtil.get('/panel/api/external-inbounds/list');
+        if (!msg.success) {
+          return;
+        }
+        this.setExternalInbounds(msg.obj);
+      },
+      setExternalInbounds(externalInbounds) {
+        this.externalInbounds.splice(0);
+        for (const inbound of externalInbounds) {
+          const externalInbound = new DBExternalInbound(inbound);
+          if (!Array.isArray(externalInbound.clients)) {
+            externalInbound.clients = [];
+          }
+          this.externalInbounds.push(externalInbound);
+        }
+      },
+      clickExternalAction(action, externalInbound) {
+        switch (action.key) {
+          case "edit":
+            this.openEditExternalInbound(externalInbound.id);
+            break;
+          case "addClient":
+            this.openAddExternalClient(externalInbound.id);
+            break;
+          case "delete":
+            this.delExternalInbound(externalInbound.id);
+            break;
+        }
+      },
+      openAddExternalInbound() {
+        externalInboundModal.show({
+          title: '{{ i18n "pages.inbounds.addExternalInbound"}}',
+          okText: '{{ i18n "create"}}',
+          cancelText: '{{ i18n "close" }}',
+          externalInbound: {
+            enable: true,
+            name: '',
+            comment: '',
+            url: '',
+          },
+          confirm: async (externalInbound) => {
+            await this.addExternalInbound(externalInbound, externalInboundModal);
+          },
+          isEdit: false,
+        });
+      },
+      openEditExternalInbound(externalInboundId) {
+        const externalInbound = this.externalInbounds.find(row => row.id === externalInboundId);
+        if (!externalInbound) return;
+        externalInboundModal.show({
+          title: '{{ i18n "pages.inbounds.modifyExternalInbound"}}',
+          okText: '{{ i18n "update"}}',
+          cancelText: '{{ i18n "close" }}',
+          externalInbound: {
+            id: externalInbound.id,
+            enable: externalInbound.enable,
+            name: externalInbound.name,
+            comment: externalInbound.comment,
+            url: externalInbound.url,
+          },
+          confirm: async (payload) => {
+            await this.updateExternalInbound(payload, externalInboundModal);
+          },
+          isEdit: true,
+        });
+      },
+      async addExternalInbound(externalInbound, modal) {
+        const data = {
+          enable: externalInbound.enable,
+          name: externalInbound.name,
+          comment: externalInbound.comment,
+          url: externalInbound.url,
+        };
+        await this.submitExternal('/panel/api/external-inbounds/add', data, modal);
+      },
+      async updateExternalInbound(externalInbound, modal) {
+        const data = {
+          enable: externalInbound.enable,
+          name: externalInbound.name,
+          comment: externalInbound.comment,
+          url: externalInbound.url,
+        };
+        await this.submitExternal(`/panel/api/external-inbounds/update/${externalInbound.id}`, data, modal);
+      },
+      delExternalInbound(externalInboundId) {
+        this.$confirm({
+          title: '{{ i18n "pages.inbounds.deleteExternalInbound"}}' + ' #' + externalInboundId,
+          content: '{{ i18n "pages.inbounds.deleteExternalInboundContent"}}',
+          class: themeSwitcher.currentTheme,
+          okText: '{{ i18n "delete"}}',
+          cancelText: '{{ i18n "cancel"}}',
+          onOk: () => this.submitExternal('/panel/api/external-inbounds/del/' + externalInboundId),
+        });
+      },
+      openAddExternalClient(externalInboundId) {
+        const externalInbound = this.externalInbounds.find(row => row.id === externalInboundId);
+        if (!externalInbound) return;
+        externalClientModal.show({
+          title: '{{ i18n "pages.client.add"}}',
+          okText: '{{ i18n "pages.client.submitAdd"}}',
+          externalInboundId: externalInbound.id,
+          client: {
+            enable: true,
+            email: '',
+            id: RandomUtil.randomUUID(),
+            subId: '',
+            tgId: 0,
+            comment: '',
+            expiryTime: 0,
+            reset: 0,
+          },
+          confirm: async (client, inboundId) => {
+            await this.addExternalClient(client, inboundId, externalClientModal);
+          },
+          isEdit: false,
+        });
+      },
+      openEditExternalClient(externalInboundId, client) {
+        const externalInbound = this.externalInbounds.find(row => row.id === externalInboundId);
+        if (!externalInbound) return;
+        const clients = this.getExternalInboundClients(externalInbound);
+        const index = this.findIndexOfExternalClient(clients, client);
+        if (index < 0) return;
+        externalClientModal.show({
+          title: '{{ i18n "pages.client.edit"}}',
+          okText: '{{ i18n "pages.client.submitEdit"}}',
+          externalInboundId: externalInbound.id,
+          client: JSON.parse(JSON.stringify(clients[index])),
+          confirm: async (updatedClient, inboundId, clientId) => {
+            externalClientModal.loading();
+            await this.updateExternalClient(updatedClient, inboundId, clientId);
+            externalClientModal.close();
+          },
+          isEdit: true,
+          clientId: this.getExternalClientId(clients[index]),
+        });
+      },
+      findIndexOfExternalClient(clients, client) {
+        if (!clients || !Array.isArray(clients) || !client) {
+          return -1;
+        }
+        return clients.findIndex(item => item && (item.id === client.id || item.email === client.email));
+      },
+      getExternalClientId(client) {
+        if (!client) return '';
+        return client.id || client.email || '';
+      },
+      async addExternalClient(client, externalInboundId, modal) {
+        const data = {
+          id: externalInboundId,
+          settings: JSON.stringify({ clients: [client] }),
+        };
+        await this.submitExternal('/panel/api/external-inbounds/addClient', data, modal);
+      },
+      async updateExternalClient(client, externalInboundId, clientId) {
+        const data = {
+          id: externalInboundId,
+          settings: JSON.stringify({ clients: [client] }),
+        };
+        await this.submitExternal(`/panel/api/external-inbounds/updateClient/${clientId}`, data, externalClientModal);
+      },
+      delExternalClient(externalInboundId, client, confirmation = true) {
+        const clientId = this.getExternalClientId(client);
+        if (!clientId) return;
+        if (confirmation) {
+          this.$confirm({
+            title: '{{ i18n "pages.inbounds.deleteClient"}}' + ' ' + client.email,
+            content: '{{ i18n "pages.inbounds.deleteClientContent"}}',
+            class: themeSwitcher.currentTheme,
+            okText: '{{ i18n "delete"}}',
+            cancelText: '{{ i18n "cancel"}}',
+            onOk: () => this.submitExternal(`/panel/api/external-inbounds/${externalInboundId}/delClient/${clientId}`),
+          });
+        } else {
+          this.submitExternal(`/panel/api/external-inbounds/${externalInboundId}/delClient/${clientId}`);
+        }
+      },
+      switchExternalEnable(externalInboundId, state) {
+        const externalInbound = this.externalInbounds.find(row => row.id === externalInboundId);
+        if (!externalInbound) return;
+        externalInbound.enable = state;
+        this.submitExternal(`/panel/api/external-inbounds/update/${externalInboundId}`, externalInbound);
+      },
+      async switchEnableExternalClient(externalInboundId, client) {
+        this.loading();
+        const externalInbound = this.externalInbounds.find(row => row.id === externalInboundId);
+        if (!externalInbound) return;
+        const clients = this.getExternalInboundClients(externalInbound);
+        const index = this.findIndexOfExternalClient(clients, client);
+        if (index < 0 || !clients[index]) return;
+        clients[index].enable = !clients[index].enable;
+        const clientId = this.getExternalClientId(clients[index]);
+        await this.updateExternalClient(clients[index], externalInboundId, clientId);
+        this.loading(false);
+      },
+      async submitExternal(url, data, modal) {
+        const msg = await HttpUtil.postWithModal(url, data, modal);
+        if (msg.success) {
+          await this.getExternalInbounds();
+        }
+      },
+      getExternalInboundClients(externalInbound) {
+        if (!externalInbound) return [];
+        return Array.isArray(externalInbound.clients) ? externalInbound.clients : [];
+      },
+    },
+  };
+</script>
+{{end}}

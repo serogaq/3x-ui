@@ -87,6 +87,25 @@ func (s *SubService) GetSubs(subId string, host string) ([]string, int64, xray.C
 		}
 	}
 
+	externalInbounds, err := s.getExternalInboundsBySubId(subId)
+	if err == nil {
+		for _, externalInbound := range externalInbounds {
+			clients, err := s.getExternalInboundClients(externalInbound.Id, subId)
+			if err != nil {
+				logger.Error("SubService - GetExternalInboundClients: Unable to get clients from external inbound")
+				continue
+			}
+			for _, client := range clients {
+				if client.Enable && client.SubID == subId {
+					link := s.appendExternalInboundName(externalInbound.Url, externalInbound.Name)
+					if link != "" {
+						result = append(result, link)
+					}
+				}
+			}
+		}
+	}
+
 	// Prepare statistics
 	for index, clientTraffic := range clientTraffics {
 		if index == 0 {
@@ -145,6 +164,44 @@ func (s *SubService) getInboundsBySubId(subId string) ([]*model.Inbound, error) 
 		return nil, err
 	}
 	return inbounds, nil
+}
+
+func (s *SubService) getExternalInboundsBySubId(subId string) ([]*model.ExternalInbound, error) {
+	db := database.GetDB()
+	var externalInbounds []*model.ExternalInbound
+	err := db.Model(model.ExternalInbound{}).
+		Select("external_inbounds.*").
+		Joins("JOIN external_inbound_clients ON external_inbounds.id = external_inbound_clients.external_inbound_id").
+		Where("external_inbound_clients.sub_id = ? AND external_inbounds.enable = ? AND external_inbound_clients.enable = ?", subId, true, true).
+		Group("external_inbounds.id").
+		Find(&externalInbounds).Error
+	if err != nil {
+		return nil, err
+	}
+	return externalInbounds, nil
+}
+
+func (s *SubService) getExternalInboundClients(externalInboundId int, subId string) ([]model.ExternalInboundClient, error) {
+	db := database.GetDB()
+	var clients []model.ExternalInboundClient
+	err := db.Model(model.ExternalInboundClient{}).
+		Where("external_inbound_id = ? AND sub_id = ? AND enable = ?", externalInboundId, subId, true).
+		Find(&clients).Error
+	if err != nil {
+		return nil, err
+	}
+	return clients, nil
+}
+
+func (s *SubService) appendExternalInboundName(rawURL string, name string) string {
+	if strings.TrimSpace(rawURL) == "" {
+		return ""
+	}
+	base := strings.SplitN(rawURL, "#", 2)[0]
+	if strings.TrimSpace(name) == "" {
+		return base
+	}
+	return fmt.Sprintf("%s#%s", base, url.PathEscape(name))
 }
 
 func (s *SubService) getClientTraffics(traffics []xray.ClientTraffic, email string) xray.ClientTraffic {
