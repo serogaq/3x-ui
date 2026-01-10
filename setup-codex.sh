@@ -3,7 +3,7 @@ set -euo pipefail
 
 TARGETARCH=${TARGETARCH:-$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')}
 BUILD_WITH_ANTIZAPRET=${BUILD_WITH_ANTIZAPRET:-0}
-GO_VERSION=${GO_VERSION:-1.25.1}
+GO_VERSION=${GO_VERSION:-1.25.5}
 export DEBIAN_FRONTEND=noninteractive
 export CGO_ENABLED=1
 export GOOS=linux
@@ -44,7 +44,7 @@ echo "Using CC=$CC"
 mkdir -p x-ui/bin
 cd x-ui/bin
 
-Xray_URL="https://github.com/XTLS/Xray-core/releases/download/v25.10.15/"
+Xray_URL="https://github.com/XTLS/Xray-core/releases/download/v25.12.8/"
 if [ "$TARGETARCH" == "amd64" ]; then
   wget -q ${Xray_URL}Xray-linux-64.zip
   unzip Xray-linux-64.zip
