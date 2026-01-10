@@ -12,8 +12,9 @@
       <template slot="content">
         <div>{{ i18n "pages.inbounds.deleteClientContent" }}</div>
         <a-space :style="{ marginTop: '8px' }">
-          <a-button size="small" type="primary" @click="delExternalClient(record.id,client,false)">{{ i18n "delete" }}</a-button>
-          <a-button size="small" type="default" @click="delExternalClientAll(client)">{{ i18n "pages.inbounds.deleteClientAll" }}</a-button>
+          <a-button size="small" type="default">{{ i18n "cancel" }}</a-button>
+          <a-button size="small" type="danger" @click="delExternalClient(record.id,client,false)">{{ i18n "delete" }}</a-button>
+          <a-button size="small" type="danger" @click="delExternalClientAll(client)">{{ i18n "pages.inbounds.deleteClientAll" }}</a-button>
         </a-space>
       </template>
       <a-icon :style="{ fontSize: '22px', cursor: 'pointer' }" class="delete-icon" type="delete"></a-icon>
